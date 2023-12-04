@@ -1,0 +1,30 @@
+﻿Game 1: 1 red, 10 blue, 5 green; 11 blue, 6 green; 6 green; 1 green, 1 red, 12 blue; 3 blue; 3 blue, 4 green, 1 red
+Game 2: 3 red, 5 green; 5 green, 7 red; 1 blue, 7 red, 3 green; 3 red, 2 blue; 5 green, 4 red
+Game 3: 4 blue, 4 green; 2 green, 2 blue; 8 green, 2 red, 3 blue
+Game 4: 3 blue, 15 green; 16 green; 2 red, 7 green; 2 blue, 14 green
+Game 5: 8 green, 6 red, 16 blue; 8 red, 12 green; 1 red, 9 green, 16 blue; 8 red, 3 green; 2 blue, 5 red, 10 green; 15 red, 4 blue, 8 green
+Game 6: 5 blue, 2 green; 6 red, 3 green; 4 green, 4 blue, 2 red; 14 blue, 2 red
+Game 7: 2 green, 6 blue, 1 red; 2 blue, 1 red; 8 blue; 5 blue, 1 green; 6 blue, 1 red; 2 blue
+Game 8: 1 red, 10 blue, 1 green; 6 blue, 1 red; 3 blue, 2 green; 1 red, 1 blue, 3 green; 13 blue; 10 blue, 3 green, 3 red
+Game 9: 2 blue; 8 green, 3 blue; 4 green; 14 green, 1 red, 2 blue; 3 blue, 1 red, 12 green
+Game 10: 1 blue, 7 green; 1 red, 3 green, 5 blue; 1 blue, 5 green, 1 red; 13 green, 5 blue, 2 red
+Game 11: 1 green, 10 red, 6 blue; 15 red, 12 blue; 18 red, 1 green, 1 blue
+Game 12: 16 red, 8 blue, 1 green; 15 red, 3 blue, 1 green; 5 red
+Game 13: 6 red, 7 blue, 7 green; 3 blue, 4 red, 13 green; 1 blue, 6 red, 11 green; 2 red, 1 blue, 14 green; 8 green, 5 blue, 2 red; 4 blue, 18 green, 4 red
+Game 14: 16 red, 3 blue, 1 green; 7 green, 3 red; 16 red, 15 green, 3 blue; 3 blue, 13 red, 10 green
+Game 15: 1 blue, 1 red; 3 blue, 2 green; 1 red; 2 red, 2 green, 3 blue; 3 blue, 1 red, 3 green
+Game 16: 9 red, 3 blue; 13 red, 9 blue; 9 blue, 10 red; 5 red, 10 blue, 1 green; 2 red, 6 green, 8 blue; 6 green, 13 red, 5 blue
+Game 17: 15 red, 17 green, 8 blue; 18 red, 16 blue, 15 green; 8 blue, 17 green, 10 red; 5 green, 3 red, 12 blue
+Game 18: 2 blue, 11 red, 2 green; 1 green, 11 red, 11 blue; 1 red, 4 blue; 10 blue, 9 red; 1 blue, 7 red
+Game 19: 2 blue, 3 green, 5 red; 8 blue, 16 green; 12 red, 7 blue, 8 green; 9 green, 1 blue; 3 red, 16 green, 10 blue
+Game 20: 3 blue, 5 green, 6 red; 2 red, 8 blue, 7 green; 7 green, 3 blue; 2 red, 11 blue; 1 green, 6 red, 3 blue
+Game 21: 16 red, 3 blue, 8 green; 10 red, 15 blue, 3 green; 6 green, 13 red, 15 blue; 11 green, 13 blue, 10 red
+Game 22: 8 green, 1 blue; 2 blue, 9 green, 3 red; 2 red, 2 blue; 1 red, 3 blue, 8 green; 2 blue, 1 green; 1 green, 2 blue
+Game 23: 2 blue, 8 red, 5 green; 9 green, 2 blue; 10 red, 2 green; 12 red, 1 blue; 11 green, 2 blue, 13 red; 7 green
+Game 24: 6 red; 13 green, 7 red, 10 blue; 7 green, 9 red, 1 blue; 3 blue, 2 green, 2 red
+Game 25: 7 green, 1 red, 2 blue; 8 green, 2 blue, 5 red; 5 blue, 8 green, 4 red; 5 blue, 2 green, 1 red; 5 green, 3 red, 7 blue; 3 blue, 6 green, 1 red
+Game 26: 6 green, 3 red; 1 blue, 2 green, 2 red; 2 green, 2 red, 3 blue; 4 blue, 8 red, 2 green; 1 red, 1 green, 1 blue; 6 red, 5 blue
+Game 27: 4 green, 13 blue, 2 red; 2 red, 7 green, 10 blue; 14 blue, 11 green, 1 red; 10 blue, 15 green
+Game 28: 4 green, 13 red, 7 blue; 2 red, 5 blue; 5 blue, 4 green
+Game 29: 6 green, 15 red; 1 blue, 6 red, 8 green; 6 green, 1 blue; 12 red; 1 green, 7 red, 1 blue
+Game 30: 4 blue, 4 green, 2 red; 6 blue, 9 red, 20 green; 9 blue, 4 red, 2 green; 8 red, 8 blue, 1 green; 6 green, 12 blue, 2 red; 8 green, 8 red
