@@ -1,12 +1,26 @@
 ﻿using AdventOfCode2023.Day1;
 using AdventOfCode2023.Day2;
 using AdventOfCode2023.Day3;
+using AdventOfCode2023.Day4;
+using System.Diagnostics;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day3\\input.txt");
-var result = GearRatios.GearRatio(input);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day4\\input.txt");
+var result = Scratchcards.PileUp_Fast(input);
 Console.WriteLine(result);
 
 return;
+
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day4\\input.txt");
+//var result = Scratchcards.CalculatePoints(input);
+//Console.WriteLine(result);
+
+//return;
+
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day3\\input.txt");
+//var result = GearRatios.GearRatio(input);
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day3\\input.txt");
 //var result = GearRatios.PartNumbers(input);
