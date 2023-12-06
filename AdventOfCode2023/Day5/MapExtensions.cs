@@ -45,7 +45,7 @@ internal static class MapExtensions
         {
             var (mapped, toMap) = map.Map(range);
 
-            if (mapped != Range.Empty()) rangesMapped.Add(mapped);
+            if (mapped != Range.Empty) rangesMapped.Add(mapped);
 
             rangesToMap.AddRange(toMap);
         }
@@ -108,7 +108,7 @@ internal static class MapExtensions
         }
     
 
-        return (Range.Empty(), new Range[] { range });
+        return (Range.Empty, new Range[] { range });
     }
 
 

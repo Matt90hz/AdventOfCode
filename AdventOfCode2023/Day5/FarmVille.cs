@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.Contracts;
+using System.Dynamic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -26,7 +27,7 @@ record Range(long Start, long End)
 
     public static Range Create(long Start, long Count) => new(Start, Start + Count - 1);
 
-    public static Range Empty() => new(-1, -1);
+    public static Range Empty { get; } = new(-1, -1);
 
 };
 
