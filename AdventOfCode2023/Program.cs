@@ -4,13 +4,21 @@ using AdventOfCode2023.Day3;
 using AdventOfCode2023.Day4;
 using AdventOfCode2023.Day5;
 using AdventOfCode2023.Day6;
+using AdventOfCode2023.Day7;
 using System.Diagnostics;
 
-var (time, distance) = SailCompetition.Inputs2;
-var result = SailCompetition.WaysToWinSeriusSeries(time, distance);
+
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day7\\input.txt");
+var result = CamelCards.Winnings(input, useJolly: true);
 Console.WriteLine(result);
 
 return;
+
+//var (time, distance) = SailCompetition.Inputs2;
+//var result = SailCompetition.WaysToWinSeriusSeries(time, distance);
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day5\\input.txt");
 //var result = FarmVille.NearestLocationWithRangeSeeds(input);

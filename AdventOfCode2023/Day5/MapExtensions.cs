@@ -36,7 +36,7 @@ internal static class MapExtensions
         return rangesMapped.ToArray();
     }
 
-    public static (Range[] Mapped, Range[] ToMap) Map(this Map map, Range[] ranges)
+    static (Range[] Mapped, Range[] ToMap) Map(this Map map, Range[] ranges)
     {
         var rangesMapped = new List<Range>();
         var rangesToMap = new List<Range>();
@@ -53,7 +53,7 @@ internal static class MapExtensions
         return (rangesMapped.ToArray(), rangesToMap.ToArray());
     }
 
-    public static (Range Mapped, Range[] ToMap) Map(this Map map, Range range)
+    static (Range Mapped, Range[] ToMap) Map(this Map map, Range range)
     {
         var source = Range.Create(map.Source, map.Range);
         var destination = Range.Create(map.Destination, map.Range);
@@ -64,8 +64,8 @@ internal static class MapExtensions
             //s 10 11 12 13 14 15
             //d 20 21 22 23 24 25
             //     21 22 23 24 25 17 18
-            var innerSection = new Range(destination.Start + range.Start - source.Start, destination.End);
-            var rightSection = new Range(range.Start + innerSection.Gap, range.End);
+            var innerSection = new Range(map.Map(range.Start), map.Map(source.End));
+            var rightSection = new Range(source.End + 1, range.End);
 
             return (innerSection, new[] { rightSection });
         }
@@ -90,7 +90,7 @@ internal static class MapExtensions
             //d          20 21 22 23 24 25
             //  7  8  9  20 21 22 23
             var leftSection = new Range(range.Start, source.Start - 1);
-            var innerSection = new Range(destination.Start, destination.Start - source.Start + range.End);
+            var innerSection = new Range(map.Map(source.Start), map.Map(range.End));
 
             return (innerSection, new[] { leftSection });
         }
@@ -109,6 +109,18 @@ internal static class MapExtensions
     
 
         return (Range.Empty, new Range[] { range });
+    }
+
+    static long Map(this Map map, long value)
+    {
+        var sourceRange = Range.Create(map.Source, map.Range);
+        var destinationRange = Range.Create(map.Destination, map.Range);          
+
+        var mapped = value >= sourceRange.Start && value <= destinationRange.Start
+            ? value + (map.Destination - map.Source)
+            : value;
+
+        return mapped;
     }
 
 

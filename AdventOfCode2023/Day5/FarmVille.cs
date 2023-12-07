@@ -21,7 +21,7 @@ record Almanac(
     Map[] TemperatureToHumidity,
     Map[] HumidityToLocation);
 
-record Range(long Start, long End)
+readonly record struct Range(long Start, long End)
 {
     public long Gap => End - Start + 1;
 
