@@ -1,6 +1,7 @@
 ﻿using AdventOfCode2023.Day5;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -21,8 +22,10 @@ internal static class CamelCards
         var hands = lines.Select(GetHand);
 
         Func<Hand, HandType> handType = useJolly
-            ? HandExtensions.GetHandTypeWithJolly
-            : HandExtensions.GetHandType;
+            ? HandExtensions.GetHandTypeWithJollyListPattern
+            : HandExtensions.GetHandTypeListPattern;
+            //? HandExtensions.GetHandTypeWithJolly
+            //: HandExtensions.GetHandType;
 
         var cardComparer = useJolly
             ? CardComparer.WithJolly
@@ -70,6 +73,29 @@ internal static class HandExtensions
         return type;
     }
 
+    public static HandType GetHandTypeListPattern(this Hand hand)
+    {
+        var cards = hand.Cards;
+        var groupCards = cards            
+            .GroupBy(x => x)
+            .Select(x => x.Count())
+            .OrderByDescending(x => x)
+            .ToArray();
+
+        var type = groupCards switch
+        {
+            [5] => HandType.FiveOAK,
+            [4, ..] => HandType.FourOAK,
+            [3, 2] => HandType.FullHouse,
+            [3, ..] => HandType.ThreeOAK,
+            [2, 2, ..] => HandType.TwoPair,
+            [2, ..] => HandType.OnePair,
+            _ => HandType.HighCard,
+        };     
+
+        return type;
+    }
+
     public static HandType GetHandTypeWithJolly(this Hand hand)
     {
         var cards = hand.Cards;
@@ -91,6 +117,30 @@ internal static class HandExtensions
                 _ => anyCardsGroupNoJollyOfSizeOne ? HandType.FourOAK : HandType.FullHouse,
             }, 
             4 => HandType.ThreeOAK,
+            _ => HandType.OnePair
+        };
+
+        return type;
+    }
+
+    public static HandType GetHandTypeWithJollyListPattern(this Hand hand)
+    {
+        var cards = hand.Cards;
+
+        if (!cards.Contains('J')) return GetHandType(hand);
+
+        var groupCards = cards
+            .OrderBy(x => CardComparer.CardValuesWithJolly[x])
+            .GroupBy(x => x)
+            .Select(x => x.Count())
+            .ToArray();
+
+        var type = groupCards switch
+        {
+            [_] or [_, _] => HandType.FiveOAK,
+            [1, 2, 2] => HandType.FullHouse,
+            [_, _, _] => HandType.FourOAK,
+            [_, _, _, _] => HandType.ThreeOAK,
             _ => HandType.OnePair
         };
 
@@ -173,6 +223,8 @@ internal class CardComparer : IComparer<string>
     public static CardComparer NoJolly { get; } = new CardComparer(_cardValueNoJolly);
 
     public static CardComparer WithJolly { get; } = new CardComparer(_cardValueWithJolly);
+
+    public static IImmutableDictionary<char, byte> CardValuesWithJolly { get; } = ImmutableDictionary.CreateRange(_cardValueWithJolly);
 
     private CardComparer(IDictionary<char, byte> cardValue)
     {

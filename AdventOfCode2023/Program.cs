@@ -5,14 +5,23 @@ using AdventOfCode2023.Day4;
 using AdventOfCode2023.Day5;
 using AdventOfCode2023.Day6;
 using AdventOfCode2023.Day7;
+using AdventOfCode2023.Day8;
 using System.Diagnostics;
 
-
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day7\\input.txt");
-var result = CamelCards.Winnings(input, useJolly: true);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day8\\input.txt");
+var result = HauntedWasteland.HowFarTheExitForGhosts(input);
 Console.WriteLine(result);
 
 return;
+
+
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day7\\input.txt");
+//var result = CamelCards.Winnings(input, useJolly: true);
+//var result1 = CamelCards.Winnings(input, useJolly: false);
+//Console.WriteLine(result);
+//Console.WriteLine(result1);
+
+//return;
 
 //var (time, distance) = SailCompetition.Inputs2;
 //var result = SailCompetition.WaysToWinSeriusSeries(time, distance);
