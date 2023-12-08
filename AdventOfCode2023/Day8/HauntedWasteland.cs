@@ -56,11 +56,11 @@ internal static class HauntedWasteland
             .Where(x => x.Key[^1] == 'A')
             .Select(x => CountGhostStep(x.Key, direction, nodes));
 
-        var aggregate = nodesAtoZ
+        var leastCommonMutiple = nodesAtoZ
             .Skip(1)
             .Aggregate(nodesAtoZ.First(), LeastCommonMultiple);
 
-        return aggregate;
+        return leastCommonMutiple;
 
     }
 
