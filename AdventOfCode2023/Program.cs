@@ -6,14 +6,20 @@ using AdventOfCode2023.Day5;
 using AdventOfCode2023.Day6;
 using AdventOfCode2023.Day7;
 using AdventOfCode2023.Day8;
+using AdventOfCode2023.Day9;
 using System.Diagnostics;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day8\\input.txt");
-var result = HauntedWasteland.HowFarTheExitForGhosts(input);
+var input = File.ReadAllLines("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day9\\input.txt");
+var result = MirageMaintenance.OasisBackwardAnalisys(input);
 Console.WriteLine(result);
 
 return;
 
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day8\\input.txt");
+//var result = HauntedWasteland.HowFarTheExitForGhosts(input);
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day7\\input.txt");
 //var result = CamelCards.Winnings(input, useJolly: true);
