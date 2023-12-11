@@ -35,7 +35,7 @@ internal record In(Pipe Pipe) : Pipe(Pipe.Row, Pipe.Col);
 
 internal static class PipeExtensions
 {
-    public static Pipe[,] ToPipeSquare(this Pipe pipe)
+    public static Pipe[,] ToPipeSquare(this Pipe pipe, Pipe[,] maze)
     {
         var pipeSquare = pipe switch
         {
@@ -45,12 +45,7 @@ internal static class PipeExtensions
                 { new Bound(1,0), new Bound(1,1), new Bound(1,2), },
                 { new Bound(2,0), new Bound(2,1), new Bound(2,2), },
             },
-            Start => new Pipe[3, 3]
-            {
-                { new Soil(0,0), new BeenHere(new Vertical(0,1)), new Soil(0,2), },
-                { new BeenHere(new Horizontal(1,0)), new Start(1,1), new BeenHere(new Horizontal(1,2)), },
-                { new Soil(2,0), new BeenHere(new Vertical(2,1)), new Soil(2,2), },
-            },
+            Start => ((Start)pipe).StartToPipeSquare(maze),
             Vertical => new Pipe[3, 3]
             {
                 { new Soil(0,0), new Vertical(0,1), new Soil(0,2), },
@@ -87,7 +82,7 @@ internal static class PipeExtensions
                 { new Horizontal(1,0), new LeftToBottom(1,1), new Soil(1,2), },
                 { new Soil(2,0), new Vertical(2,1), new Soil(2,2), },
             },
-            BeenHere => ((BeenHere)pipe).Pipe.ToPipeSquare().Select(x => x is not Soil ? new BeenHere(x) : x),
+            BeenHere => ((BeenHere)pipe).Pipe.ToPipeSquare(maze).Select(x => x is not Soil && x is not Start ? new BeenHere(x) : x),
             _ => new Pipe[3, 3]
             {
                 { new Soil(0,0), new Soil(0,1), new Soil(0,2), },
@@ -97,6 +92,57 @@ internal static class PipeExtensions
         } ;
 
         return pipeSquare;
+    }
+
+    static Pipe[,] StartToPipeSquare(this Start start, Pipe[,] maze)
+    {
+        var startNeighbours = start.Neighbours(maze).Where(start.IsConnectedTo);
+
+        var first = startNeighbours.First();
+        var second = startNeighbours.Last();
+
+        var startSquare = (start.GetDirection(first), start.GetDirection(second)) switch
+        {
+            (Direction.Up or Direction.Down, Direction.Down or Direction.Up) => new Pipe[3, 3]
+            {
+                { new Soil(0,0), new Vertical(0,1), new Soil(0,2), },
+                { new Soil(1,0), new Start(1,1), new Soil(1,2), },
+                { new Soil(2,0), new Vertical(2,1), new Soil(2,2), },
+            },
+            (Direction.Left or Direction.Right, Direction.Right or Direction.Left) => new Pipe[3, 3]
+            {
+                { new Soil(0,0), new Soil(0,1), new Soil(0,2), },
+                { new Horizontal(1,0), new Start(1,1), new Horizontal(1,2), },
+                { new Soil(2,0), new Soil(2,1), new Soil(2,2), },
+            },
+            (Direction.Up or Direction.Right, Direction.Right or Direction.Up) => new Pipe[3, 3]
+            {
+                { new Soil(0,0), new Vertical(0,1), new Soil(0,2), },
+                { new Soil(1,0), new Start(1,1), new Horizontal(1,2), },
+                { new Soil(2,0), new Soil(2,1), new Soil(2,2), },
+            },
+            (Direction.Up or Direction.Left, Direction.Left or Direction.Up) => new Pipe[3, 3]
+            {
+                { new Soil(0,0), new Vertical(0,1), new Soil(0,2), },
+                { new Horizontal(1,0), new Start(1,1), new Soil(1,2), },
+                { new Soil(2,0), new Soil(2,1), new Soil(2,2), },
+            },
+            (Direction.Down or Direction.Right, Direction.Right or Direction.Down) => new Pipe[3, 3]
+            {
+                { new Soil(0,0), new Soil(0,1), new Soil(0,2), },
+                { new Soil(1,0), new Start(1,1), new Horizontal(1,2), },
+                { new Soil(2,0), new Vertical(2,1), new Soil(2,2), },
+            },
+            (Direction.Down or Direction.Left, Direction.Left or Direction.Down) => new Pipe[3, 3]
+            {
+                { new Soil(0,0), new Soil(0,1), new Soil(0,2), },
+                { new Horizontal(1,0), new Start(1,1), new Soil(1,2), },
+                { new Soil(2,0), new Vertical(2,1), new Soil(2,2), },
+            },
+            _ => throw new NotImplementedException()
+        };
+
+        return startSquare;
     }
 
     public static bool IsDen(this Pipe pipe, Pipe[,] maze)
@@ -245,7 +291,7 @@ internal static class PipeExtensions
     public static string ToFriendlyString(this Pipe pipe) => pipe switch
     {
         In => "i",
-        Out => "O",
+        Out => "+",
         Bound => "@",
         Soil => ".",
         BeenHere => ((BeenHere)pipe).Pipe switch
@@ -258,7 +304,7 @@ internal static class PipeExtensions
             LeftToBottom => "┐",
             _ => "X",
         },
-        Start => "S",
+        Start => "U",
         Den => "_",
         _ => ","
         //─│┐┌└┘

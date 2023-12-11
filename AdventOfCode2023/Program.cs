@@ -10,7 +10,7 @@ using AdventOfCode2023.Day9;
 using AdventOfCode2023.Dayz10;
 using System.Diagnostics;
 
-var input = File.ReadAllLines("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz10\\input.txt");
+var input = File.ReadAllLines("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz10\\input_test3.txt");
 var result = PipeMaze.AnimalDens(input);
 Console.WriteLine(result);
 

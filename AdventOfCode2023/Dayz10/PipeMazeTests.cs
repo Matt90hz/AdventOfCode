@@ -48,6 +48,14 @@ public static class PipeMazeTests
     }
 
     [Fact]
+    public static void Part2Test3()
+    {
+        var input = File.ReadAllLines("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz10\\input_test5.txt");
+        var result = PipeMaze.AnimalDens(input);
+        Assert.Equal(8, result);
+    }
+
+    [Fact]
     public static void Part2Solution()
     {
         var input = File.ReadAllLines("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz10\\input.txt");

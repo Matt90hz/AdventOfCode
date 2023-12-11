@@ -6,31 +6,36 @@ internal static class PipeMaze
 {
     public static int AnimalDens(string[] input)
     {
-        var maze = Solve(Create(input));
-
-        //clear useless data
-        var clearedMeze = maze.Select(x => x is BeenHere or Start or Bound ? x : new Soil(x.Row, x.Col));
+        var maze = Create(input);
 
         //enlarge the maze
-        var enlargedMaze = clearedMeze.Select(x => x.ToPipeSquare()).Normalize();
+        var enlargedMaze = maze.Select(x => x.ToPipeSquare(maze)).Normalize();
+
+        //solve maze
+        var solvedMaze = Solve(enlargedMaze);
+
+        //clear useless data
+        var clearedMeze = solvedMaze.Select(x => x is BeenHere or Bound or Start ? x : new Soil(x.Row, x.Col));
 
         //eplore the outbounds
-        var curr = enlargedMaze[3, 3];
-        enlargedMaze[3, 3] = new Out(curr);
+        var curr = clearedMeze[3, 3];
+
         var neighbour = curr
-            .AllNeighbours(enlargedMaze)
-            .Where(x => x is Soil);
+            .AllNeighbours(clearedMeze)
+            .Where(x => x is Soil)
+            .ToArray();
+
         var toExplore = new List<Pipe>(neighbour);
 
         while(toExplore.Count > 0)
         {
             foreach(var thing in toExplore)
             {
-                enlargedMaze[thing.Row, thing.Col] = new Out(thing);
+                clearedMeze[thing.Row, thing.Col] = new Out(thing);
             }
 
             var nextToExplore = toExplore
-                .SelectMany(x => x.AllNeighbours(enlargedMaze).Where(x => x is Soil))
+                .SelectMany(x => x.AllNeighbours(clearedMeze).Where(x => x is Soil))
                 .Distinct()
                 .ToArray();
 
@@ -38,17 +43,16 @@ internal static class PipeMaze
             toExplore.AddRange(nextToExplore);
 
             //Task.Delay(25).Wait();
-
             //Console.Clear();
-            //Console.Write(enlargedMaze.ToFriendlyString());
+            //Console.Write(clearedMeze.ToFriendlyString());
         }
 
         //count inside
         int inside = 0;
 
-        foreach (var thing in enlargedMaze)
+        foreach (var thing in clearedMeze)
         {
-            if (thing is Soil soil && thing.AllNeighbours(enlargedMaze).All(x => x is Soil)) inside++;
+            if (thing is Soil soil && thing.AllNeighbours(clearedMeze).All(x => x is Soil)) inside++;
         }
 
         return inside/9;
@@ -84,6 +88,7 @@ internal static class PipeMaze
     public static Pipe[,] Solve(Pipe[,] maze)
     {
         var start = maze.FindStart();
+
         var neighbours = start.Neighbours(maze).Where(start.IsConnectedTo);
         var path1 = neighbours.First();
         var path2 = neighbours.Last();
@@ -100,15 +105,11 @@ internal static class PipeMaze
             path2 = nextpath2;
 
             //Task.Delay(25).Wait();
-
             //Console.Clear();
             //Console.Write(maze.ToFriendlyString());
         }
 
         maze[path1.Row, path1.Col] = new BeenHere(path1);
-
-        //Console.Clear();
-        //Console.Write(maze.ToFriendlyString());
 
         var x = maze.ToFriendlyString();
 
@@ -196,7 +197,7 @@ internal static class PipeMaze
         return null;
     }
 
-    public static Start FindStart(this Pipe[,] maze) => maze.Find(x => x is Start) as Start
+    static Start FindStart(this Pipe[,] maze) => maze.Find(x => x is Start) as Start
         ?? throw new Exception("Start not found! Maze must have a start.");
 
     static string[] SurroundWith(string[] lines, char c)
@@ -213,4 +214,5 @@ internal static class PipeMaze
 
         return surrounded;
     }
+
 }
