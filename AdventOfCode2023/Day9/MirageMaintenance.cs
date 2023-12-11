@@ -18,8 +18,6 @@ internal static class MirageMaintenance
         return analisys;
     }
 
-    
-
     public static int OasisAnalisys(string[] lines)
     {
         var predictions = lines
