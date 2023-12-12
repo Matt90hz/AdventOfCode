@@ -8,13 +8,20 @@ using AdventOfCode2023.Day7;
 using AdventOfCode2023.Day8;
 using AdventOfCode2023.Day9;
 using AdventOfCode2023.Dayz10;
+using AdventOfCode2023.Dayz11;
 using System.Diagnostics;
 
-var input = File.ReadAllLines("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz10\\input_test3.txt");
-var result = PipeMaze.AnimalDens(input);
+var input = File.ReadAllLines("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz11\\input_test1.txt");
+var result = CosmicExpansion.MegaCosmicDistances(input, 10);
 Console.WriteLine(result);
 
 return;
+
+//var input = File.ReadAllLines("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz10\\input_test3.txt");
+//var result = PipeMaze.AnimalDens(input);
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllLines("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day9\\input.txt");
 //var result = MirageMaintenance.OasisBackwardAnalisys(input);

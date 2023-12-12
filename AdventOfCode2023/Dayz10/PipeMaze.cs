@@ -8,8 +8,13 @@ internal static class PipeMaze
     {
         var maze = Create(input);
 
+        Console.WriteLine(maze.ToFriendlyString());
+
         //enlarge the maze
         var enlargedMaze = maze.Select(x => x.ToPipeSquare(maze)).Normalize();
+
+        Console.WriteLine(enlargedMaze.ToFriendlyString());
+
 
         //solve maze
         var solvedMaze = Solve(enlargedMaze);

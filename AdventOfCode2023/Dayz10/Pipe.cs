@@ -306,7 +306,16 @@ internal static class PipeExtensions
         },
         Start => "U",
         Den => "_",
-        _ => ","
+        _ => pipe switch
+        {
+            Vertical => "│",
+            Horizontal => "─",
+            TopToLeft => "┘",
+            TopToRight => "└",
+            RightToBottom => "┌",
+            LeftToBottom => "┐",
+            _ => "X",
+        }
         //─│┐┌└┘
     };
 }

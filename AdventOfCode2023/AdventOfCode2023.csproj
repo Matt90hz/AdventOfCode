@@ -17,7 +17,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\IncaTechnologies.Collection.Extensions\IncaTechnologies.Collection.Extensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Dayz12\" />
   </ItemGroup>
 
 </Project>
