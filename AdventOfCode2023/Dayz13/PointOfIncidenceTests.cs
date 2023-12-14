@@ -30,4 +30,20 @@ public static class PointOfIncidenceTests
         var result = PointOfIncidence.Summarize(input);
         Assert.Equal(43614, result);
     }
+
+    [Fact]
+    public static void Part2Test1()
+    {
+        var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz13\input_test3.txt");
+        var result = PointOfIncidence.SummarizeSmudge(input);
+        Assert.Equal(400, result);
+    }
+
+    [Fact]
+    public static void Part2Solution()
+    {
+        var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz13\input.txt");
+        var result = PointOfIncidence.SummarizeSmudge(input);
+        Assert.Equal(36771, result);
+    }
 }

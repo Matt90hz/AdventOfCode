@@ -14,7 +14,7 @@ using AdventOfCode2023.Dayz13;
 using System.Diagnostics;
 
 var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz13\input.txt");
-var result = PointOfIncidence.Summarize(input);
+var result = PointOfIncidence.SummarizeSmudge(input);
 Console.WriteLine(result);
 
 return;
