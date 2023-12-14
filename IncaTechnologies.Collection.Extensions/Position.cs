@@ -43,7 +43,7 @@ namespace IncaTechnologies.Collection.Extensions
             return new Position<T>(@this, row, column);
         }
 
-        public static Position<T>? GetPosition<T>(this T @this, T[,] source) where T : class
+        public static Position<T>? FindPosition<T>(this T @this, T[,] source) where T : class
         {
             if (@this is null) return null;
 

@@ -1,11 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace IncaTechnologies.Collection.Extensions
 {
-    internal static class Stuff
+    public static class Stuff
     {
+        public static IEnumerable<IEnumerable<T>> SplitOn<T>(this IEnumerable<T> source, Func<T, bool> condition)
+        {
+            var splitted = new List<IEnumerable<T>>();
+            var split = new List<T>();
+
+            foreach (var item in source)
+            {
+                if (condition(item) is false)
+                {
+                    split.Add(item);
+                    continue;
+                }
+
+                if (split.Any() is false) continue;
+
+                splitted.Add(split.ToArray());
+                split.Clear();
+            }
+
+            if (split.Any()) splitted.Add(split.ToArray());
+
+            return splitted;
+        }
+
         public static U[,] Select<T, U>(T[,] @this, Func<T, U> selector)
         {
             var matrix = new U[@this.GetLength(0), @this.GetLength(1)];
