@@ -11,13 +11,20 @@ using AdventOfCode2023.Dayz10;
 using AdventOfCode2023.Dayz11;
 using AdventOfCode2023.Dayz12;
 using AdventOfCode2023.Dayz13;
+using AdventOfCode2023.Dayz14;
 using System.Diagnostics;
 
-var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz13\input.txt");
-var result = PointOfIncidence.SummarizeSmudge(input);
+var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz14\input.txt");
+var result = ParabolicReflectorDish.LoadOnNorthSupportBeamsAfterAnInsaneAmountOfCycles(input);
 Console.WriteLine(result);
 
 return;
+
+//var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz13\input.txt");
+//var result = PointOfIncidence.SummarizeSmudge(input);
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllLines("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz12\\input.txt");
 //var result = HotSprings.ConditionRecordsCombinationsUnfolded(input);

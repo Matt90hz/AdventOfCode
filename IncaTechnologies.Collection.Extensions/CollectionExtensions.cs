@@ -59,6 +59,28 @@ namespace IncaTechnologies.Collection.Extensions
             }
         }
 
+        public static T[,] RotateCounterClockwise<T>(this T[,] @this)
+        {
+            var reverse = @this
+                .GetRows()
+                .Select(x => x.Reverse())
+                .ToMultidimensionalArray();
+
+            var turn = reverse.GetColumns().ToMultidimensionalArray();
+
+            return turn;
+        }
+
+        public static T[,] RotateClockwise<T>(this T[,] @this)
+        {
+            var turn = @this
+                .GetColumns()
+                .Select(x => x.Reverse())
+                .ToMultidimensionalArray();
+
+            return turn;
+        }
+
         public static T[,] AddRow<T>(this T[,] @this, IEnumerable<T> row, int? index = null)
         {
             var r = index ?? @this.GetLongLength(0) + 1;
@@ -130,7 +152,7 @@ namespace IncaTechnologies.Collection.Extensions
         public static T[,] ToMultidimensionalArray<T>(this IEnumerable<IEnumerable<T>> enumerable)
         {
             //the transformation in jagged is to preserve long indexes
-            var jagged = enumerable.ToJaggedArray();
+            var jagged = enumerable as T[][] ?? enumerable.ToJaggedArray();
             var rows = jagged.LongLength;
             var coloumns = jagged.Select(x => x.LongLength).Max();
 
