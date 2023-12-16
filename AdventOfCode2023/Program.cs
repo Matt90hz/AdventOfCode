@@ -12,13 +12,20 @@ using AdventOfCode2023.Dayz11;
 using AdventOfCode2023.Dayz12;
 using AdventOfCode2023.Dayz13;
 using AdventOfCode2023.Dayz14;
+using AdventOfCode2023.Dayz15;
 using System.Diagnostics;
 
-var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz14\input.txt");
-var result = ParabolicReflectorDish.LoadOnNorthSupportBeamsAfterAnInsaneAmountOfCycles(input);
+var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz15\input.txt");
+var result = LensLibrary.FocusingPower(input);
 Console.WriteLine(result);
 
 return;
+
+//var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz14\input.txt");
+//var result = ParabolicReflectorDish.LoadOnNorthSupportBeamsAfterAnInsaneAmountOfCycles(input);
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz13\input.txt");
 //var result = PointOfIncidence.SummarizeSmudge(input);
