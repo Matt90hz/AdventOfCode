@@ -115,7 +115,7 @@ internal static class LensLibrary
         var steps = input.Split(',').Select(x => 
         {
             var label = x[..x.IndexOfAny(new[] { '=', '-' })];
-            var operation = x.EndsWith('-') || x.EndsWith('=') ? x[^1] : x[^2];
+            var operation = x.EndsWith('-') ? '-' : '=';
             var focusLenght = char.IsDigit(x[^1]) ? x.Last() - '0' : 0;
 
             return new Step(label, operation, focusLenght);

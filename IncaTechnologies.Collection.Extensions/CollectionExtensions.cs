@@ -59,6 +59,23 @@ namespace IncaTechnologies.Collection.Extensions
             }
         }
 
+        public static U[,] Select<T, U>(this T[,] @this, Func<T,(long Row, long Column), U> selector)
+        {
+            var matrix = new U[@this.GetLength(0), @this.GetLength(1)];
+
+            for (long i = 0; i < @this.GetLongLength(0); i++)
+            {
+                for (long j = 0; j < @this.GetLongLength(1); j++)
+                {
+                    matrix[i, j] = selector(@this[i, j], (i, j));
+                }
+            }
+
+            return matrix;
+        }
+
+        public static U[,] Select<T, U>(this T[,] @this, Func<T, U> selector) => @this.Select((x, _) => selector(x));
+
         public static T[,] RotateCounterClockwise<T>(this T[,] @this)
         {
             var reverse = @this
@@ -140,6 +157,34 @@ namespace IncaTechnologies.Collection.Extensions
             }
 
             return matrix;
+        }
+
+        public static T[,] SurroundWith<T>(this T[,] @this, T item)
+        {
+            var rows = @this.GetRows();
+
+            var extra = Enumerable
+                .Range(1, @this.GetLength(0))
+                .Select(x => item);
+
+            var surrounded = rows
+                .Prepend(extra)
+                .Append(extra)
+                .Select(x => x.Prepend(item).Append(item))
+                .ToMultidimensionalArray();
+
+            return surrounded;
+        }
+
+        public static IEnumerable<T> AsEnumerable<T>(this T[,] @this)
+        {
+            for (long i = 0; i < @this.GetLongLength(0); i++)
+            {
+                for (long j = 0; j < @this.GetLongLength(1); j++)
+                {
+                    yield return @this[i, j];
+                }
+            }
         }
 
         public static T[][] ToJaggedArray<T>(this IEnumerable<IEnumerable<T>> enumerable)

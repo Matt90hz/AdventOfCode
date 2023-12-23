@@ -13,13 +13,28 @@ using AdventOfCode2023.Dayz12;
 using AdventOfCode2023.Dayz13;
 using AdventOfCode2023.Dayz14;
 using AdventOfCode2023.Dayz15;
+using AdventOfCode2023.Dayz16;
+using AdventOfCode2023.Dayz17;
 using System.Diagnostics;
 
-var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz15\input.txt");
-var result = LensLibrary.FocusingPower(input);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz17\\input.txt");
+var result = ClumsyCrucible.HeatLoss(input);
+
 Console.WriteLine(result);
 
 return;
+
+//var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz16\input.txt");
+//var result = TheFloorWillBeLava.MaxEnergized(input);
+//Console.WriteLine(result);
+
+//return;
+
+//var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz15\input.txt");
+//var result = LensLibrary.FocusingPower(input);
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz14\input.txt");
 //var result = ParabolicReflectorDish.LoadOnNorthSupportBeamsAfterAnInsaneAmountOfCycles(input);

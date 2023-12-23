@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace IncaTechnologies.Collection.Extensions
 {
-    public class Position<T>
+    public class Position<T> : IEquatable<Position<T>>
     {
         public T[,] Array { get; }
 
@@ -22,6 +22,25 @@ namespace IncaTechnologies.Collection.Extensions
             Array = array;
             Row = row;
             Column = column;
+        }
+
+        public bool Equals(Position<T> other)
+        {
+            return Row == other.Row && Column == other.Column;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as Position<T>;
+
+            if(other is null) return false;
+
+            return Equals(other);
+        }
+
+        public override string ToString()
+        {
+            return $"[{Row}, {Column}] {Value}";
         }
     }
 
@@ -61,10 +80,10 @@ namespace IncaTechnologies.Collection.Extensions
         }
 
         public static Position<T> MoveUp<T>(this Position<T> position)
-            => new Position<T>(position.Array, position.Row + 1, position.Column);
+            => new Position<T>(position.Array, position.Row - 1, position.Column);
 
         public static Position<T> MoveDown<T>(this Position<T> position)
-            => new Position<T>(position.Array, position.Row - 1, position.Column);
+            => new Position<T>(position.Array, position.Row + 1, position.Column);
 
         public static Position<T> MoveLeft<T>(this Position<T> position)
             => new Position<T>(position.Array, position.Row, position.Column - 1);
@@ -80,6 +99,15 @@ namespace IncaTechnologies.Collection.Extensions
             yield return position.MoveDown().MoveRight();
             yield return position.MoveDown();
             yield return position.MoveDown().MoveLeft();
+        }
+
+        public static IEnumerable<Position<T>> GetAdjecents<T>(this Position<T> position)
+        {
+            yield return position.MoveUp();
+            yield return position.MoveRight();
+            yield return position.MoveDown();
+            yield return position.MoveLeft();
+
         }
     }
 }

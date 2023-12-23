@@ -31,20 +31,7 @@ namespace IncaTechnologies.Collection.Extensions
             return splitted;
         }
 
-        public static U[,] Select<T, U>(T[,] @this, Func<T, U> selector)
-        {
-            var matrix = new U[@this.GetLength(0), @this.GetLength(1)];
 
-            for (long i = 0; i < @this.GetLongLength(0); i++)
-            {
-                for (long j = 0; j < @this.GetLongLength(1); j++)
-                {
-                    matrix[i, j] = selector(@this[i, j]);
-                }
-            }
-
-            return matrix;
-        }
 
         public static U[,] Select<T, U>(T[,] @this, Func<T, (long Row, long Column), U> selector)
         {
