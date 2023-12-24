@@ -164,7 +164,7 @@ namespace IncaTechnologies.Collection.Extensions
             var rows = @this.GetRows();
 
             var extra = Enumerable
-                .Range(1, @this.GetLength(0))
+                .Range(1, @this.GetLength(1))
                 .Select(x => item);
 
             var surrounded = rows

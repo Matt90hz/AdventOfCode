@@ -18,7 +18,7 @@ using AdventOfCode2023.Dayz17;
 using System.Diagnostics;
 
 var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz17\\input.txt");
-var result = ClumsyCrucible.HeatLoss(input);
+var result = ClumsyCrucible.UltraHeatLoss(input);
 
 Console.WriteLine(result);
 

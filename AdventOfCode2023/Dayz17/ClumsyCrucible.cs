@@ -33,12 +33,99 @@ internal static class ClumsyCrucible
             .Select(line => line.AsEnumerable())
             .Select(GetBlocks);
 
-        var heatLoss = CalculateHeatLoss3(bloks);
+        var heatLoss = CalculateHeatLoss(bloks);
 
         return heatLoss;
     }
 
-    static int CalculateHeatLoss3(IEnumerable<IEnumerable<Block>> blocks)
+    public static int UltraHeatLoss(string input)
+    {
+        var lines = input.Split(Environment.NewLine);
+        var bloks = lines
+            .Select(line => line.AsEnumerable())
+            .Select(GetBlocks);
+
+        var heatLoss = CalculateUltraHeatLoss(bloks);
+
+        return heatLoss;
+    }
+
+    static int CalculateUltraHeatLoss(IEnumerable<IEnumerable<Block>> blocks)
+    {
+        var blocksArray = blocks
+            .ToMultidimensionalArray()
+            .SurroundWith(new Block(int.MaxValue));
+
+        var start = blocksArray.GetPosition(1, 1);
+        var end = blocksArray.GetPosition(blocksArray.GetLength(0) - 2, blocksArray.GetLength(1) - 2);
+
+        var queue = new PriorityQueue<Path, int>();
+        var seen = new List<Path>();
+        var startPath = new Path(start, Direction.None, 0, null);
+
+        queue.Enqueue(startPath, startPath.HeatLoss);
+
+        while (queue.UnorderedItems.Any())
+        {
+            var curr = queue.Dequeue();
+            var (pos, _, heat, _) = curr;
+
+            //Console.WriteLine(curr.ToFriendlyString());
+
+            if (pos.Equals(end) && curr.CountContinuousSteps() >= 4)
+                return heat;
+
+            if (curr.IsAmong(seen))
+                continue;
+
+            seen.Add(curr);
+
+            var reachables = curr.GetUltraReachables();
+
+            foreach (var path in reachables)
+            {
+                queue.Enqueue(path, path.HeatLoss);
+            }
+        }
+
+        throw new Exception("notfound");
+    }
+
+    static IEnumerable<Path> GetUltraReachables(this Path from)
+    {
+        var reachable = from.Position
+                .GetAdjecents()
+                .Where(from.CanUltraReach)
+                .Select(next => new Path(next, GetDirection(from.Position, next), from.HeatLoss + next.Value.HeatLoss, from));
+
+        return reachable;
+    }
+
+    static bool CanUltraReach(this Path from, Position<Block> to)
+    {
+        //border
+        if (to.Value.HeatLoss > 9) return false;
+
+        //backwards
+        if (from.From is not null && from.From.Position.Equals(to)) return false;
+
+        //correct number of steps
+        if(from.Direction == Direction.None) return true;
+
+        var dir = GetDirection(from.Position, to);
+        var lastStepsCount = from.CountContinuousSteps();
+
+        if (dir == from.Direction && lastStepsCount > 9) return false;
+
+        if (dir != from.Direction && lastStepsCount < 4) return false;
+
+        //legal next position
+        return true;
+
+    }
+
+
+    static int CalculateHeatLoss(IEnumerable<IEnumerable<Block>> blocks)
     {
         var blocksArray = blocks
             .ToMultidimensionalArray()
@@ -103,6 +190,13 @@ internal static class ClumsyCrucible
             path.Direction,
             path.From?.Direction ?? Direction.None,
             path.From?.From?.Direction ?? Direction.None,
+            path.From?.From?.From?.Direction ?? Direction.None,
+            path.From?.From?.From?.From?.Direction ?? Direction.None,
+            path.From?.From?.From?.From?.From?.Direction ?? Direction.None,
+            path.From?.From?.From?.From?.From?.From?.Direction ?? Direction.None,
+            path.From?.From?.From?.From?.From?.From?.From?.Direction ?? Direction.None,
+            path.From?.From?.From?.From?.From?.From?.From?.From?.Direction ?? Direction.None,
+            path.From?.From?.From?.From?.From?.From?.From?.From?.From?.Direction ?? Direction.None,
         };
 
         var count = lastDirections.TakeWhile(x => x == lastDirections[0]).Count();
@@ -151,141 +245,6 @@ internal static class ClumsyCrucible
             path = path.From;
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    static bool IsBestPath(IEnumerable<Position<Block>> path, IEnumerable<IEnumerable<Position<Block>>> otherPaths, Position<Block> end)
-    {
-        var pathsToCompare = otherPaths
-            .Where(x => x.SequenceEqual(path) is false)
-            .ToArray();
-
-        var pos = path.Last();
-        var heatLoss = path.GetHeatLoss();
-
-        if (pos.Equals(end))
-        {
-            var pathsToEnd = pathsToCompare.Where(x => x.Last().Equals(end));
-
-            var isTheShortest = pathsToEnd.Any(x => x.GetHeatLoss() < heatLoss) is false;
-
-            return isTheShortest;
-        }
-
-        if (pathsToCompare.FirstOrDefault(x => x.Last().Equals(end)) is { } pathToEnd)
-        {
-            var hasBetterHeatloss = heatLoss <= pathToEnd.GetHeatLoss();
-
-            if (hasBetterHeatloss is false) return false;
-        }
-
-        var isBest = pathsToCompare.Any(other =>
-        {
-            var samePos = other.Last().Equals(pos);
-
-            var directionOther = other.TakeLast(2).GetDirections().First();
-            var directionPath = path.TakeLast(2).GetDirections().First();
-
-            var sameDirection = directionOther.Equals(directionPath);
-
-            var otherLastDirections = other.TakeLast(4).GetDirections();
-            var thisLastDirections = path.TakeLast(4).GetDirections();
-
-            var otherContDirections = otherLastDirections.Reverse().TakeWhile(x => x.Equals(directionOther)).Count();
-            var thisContDirections = thisLastDirections.Reverse().TakeWhile(x => x.Equals(directionPath)).Count();
-
-            var betterIntensity = thisContDirections <= otherContDirections;
-
-            var betterHeatLoss = other.GetHeatLoss() <= heatLoss;
-
-            return samePos
-                && sameDirection
-                && betterIntensity
-                && betterHeatLoss;
-
-        }) is false;
-
-        return isBest;
-    }
-
-    static IEnumerable<IEnumerable<Position<Block>>> Explore(this IEnumerable<Position<Block>> path, Position<Block> end)
-    {
-        if (path.Last().Equals(end))
-        {
-            return Enumerable.Repeat(path, 1).ToArray();
-        }
-
-
-        var start = path.Last();
-
-        var adjecents = start
-            .GetAdjecents()
-            .Select(pos => (Position: pos, Direction: GetDirection(start, pos)));
-
-        var lastDirections = path
-            .TakeLast(4)
-            .GetDirections()
-            .ToArray();
-
-        var nextPositions = adjecents.Where(x =>
-        {
-            var (pos, dir) = x;
-
-            //border
-            if (pos.Value.HeatLoss > 9) return false;
-
-            //loop
-            if (path.Contains(pos)) return false;
-
-            //backward
-            var previous = path.SkipLast(1).LastOrDefault();
-
-            if (previous?.Equals(pos) ?? false) return false;
-
-            //too many in the same direction
-            if (lastDirections.Count() < 3) return true;
-
-            var lastDirection = GetDirection(start, pos);
-
-            var consecutive = lastDirections.Reverse().TakeWhile(x => x.Equals(lastDirection)).Count();
-
-            if (lastDirection == dir && consecutive == 3) return false;
-
-            //legal next position
-            return true;
-
-        });
-
-        var nextPaths = nextPositions
-            .Select(x => path.Append(x.Position).ToArray())
-            .ToArray();
-
-        return nextPaths;
-    }
-
-    static int GetHeatLoss(this IEnumerable<Position<Block>> path) => path
-        .Skip(1)
-        .Sum(pos => pos.Value.HeatLoss);
 
     //make it generic
     static IEnumerable<Direction> GetDirections(this IEnumerable<Position<Block>> path) => path
@@ -382,6 +341,30 @@ public static class ClumsyCrucibleTests
     {
         var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz17\\input.txt");
         var result = ClumsyCrucible.HeatLoss(input);
-        Assert.Equal(0, result);
+        Assert.Equal(771, result);
+    }
+
+    [Fact]
+    public static void Part2Test1()
+    {
+        var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz17\\input_test1.txt");
+        var result = ClumsyCrucible.UltraHeatLoss(input);
+        Assert.Equal(94, result);
+    }
+
+    [Fact]
+    public static void Part2Test2()
+    {
+        var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz17\\input_test2.txt");
+        var result = ClumsyCrucible.UltraHeatLoss(input);
+        Assert.Equal(71, result);
+    }
+
+    [Fact]
+    public static void Part2Solution()
+    {
+        var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz17\\input.txt");
+        var result = ClumsyCrucible.UltraHeatLoss(input);
+        Assert.Equal(930, result);
     }
 }
