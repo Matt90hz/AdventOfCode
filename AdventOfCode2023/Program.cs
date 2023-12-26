@@ -15,14 +15,22 @@ using AdventOfCode2023.Dayz14;
 using AdventOfCode2023.Dayz15;
 using AdventOfCode2023.Dayz16;
 using AdventOfCode2023.Dayz17;
+using AdventOfCode2023.Dayz18;
 using System.Diagnostics;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz17\\input.txt");
-var result = ClumsyCrucible.UltraHeatLoss(input);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz18\\input.txt");
+var result = LavaductLagoon.CorrectCapacity(input);
 
 Console.WriteLine(result);
 
 return;
+
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz17\\input.txt");
+//var result = ClumsyCrucible.UltraHeatLoss(input);
+
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllText(@"D:\VisualStudio\AdventOfCode\AdventOfCode2023\Dayz16\input.txt");
 //var result = TheFloorWillBeLava.MaxEnergized(input);
