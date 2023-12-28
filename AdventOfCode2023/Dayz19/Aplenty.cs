@@ -42,13 +42,11 @@ internal static class Aplenty
         //the rule is a final rule and has a result
         if (part == 't' && dest == "R") return Array.Empty<(int XMin, int XMax, int MMin, int MMax, int AMin, int AMax, int SMin, int SMax)>();
 
-        if (part == 't' && dest == "A")
-            //return new[] { (1, 4000, 1, 4000, 1, 4000, 1, 4000) };
-            return new[] { (0, 4001, 0, 4001, 0, 4001, 0, 4001) };
+        if (part == 't' && dest == "A") return new[] { (0, 4001, 0, 4001, 0, 4001, 0, 4001) };
 
+        //the rule is final but do not have a result
         if (part == 't')
         {
-
             var nextWorkflow1 = AllPossibleAccepted(workflows.First(x => x.Code == dest), workflows);
             var nextRule1 = AllPossibleAccepted(workflow with { Rules = workflow.Rules.Skip(1).ToArray() }, workflows);
 
@@ -59,7 +57,6 @@ internal static class Aplenty
         if (dest == "A")
         {
             var result = RestrictRange((part, comp, cond), (0, 4001, 0, 4001, 0, 4001, 0, 4001));
-            //var result = RestrictRange((part, comp, cond), (1, 4000, 1, 4000, 1, 4000, 1, 4000));
 
             var nextRule1 = AllPossibleAccepted(workflow with { Rules = workflow.Rules.Skip(1).ToArray() }, workflows)
                 .Select(x => RestrictRange(ReverseCondition((part, comp, cond)), x))
@@ -86,7 +83,6 @@ internal static class Aplenty
             .Select(x => RestrictRange(ReverseCondition((part, comp, cond)), x))
             .ToArray();
 
-        // remove the 0 and add this rule
         var allComb = nextWorkflow
             .Concat(nextRule)
             .ToArray();
@@ -111,27 +107,6 @@ internal static class Aplenty
         (int XMin, int XMax, int MMin, int MMax, int AMin, int AMax, int SMin, int SMax) range)
     {
         var (part, comp, cond) = condition;
-
-        //var restrictRange = comp switch
-        //{
-        //    '<' => part switch
-        //    {
-        //        'x' => (1, cond - 1, 1, 4000, 1, 4000, 1, 4000),
-        //        'm' => (1, 4000, 1, cond - 1, 1, 4000, 1, 4000),
-        //        'a' => (1, 4000, 1, 4000, 1, cond - 1, 1, 4000),
-        //        's' => (1, 4000, 1, 4000, 1, 4000, 1, cond - 1),
-        //        _ => throw new ArgumentException($"[{part}] is an invalid part category.")
-        //    },
-        //    '>' => part switch
-        //    {
-        //        'x' => (cond + 1, 4000, 1, 4000, 1, 4000, 1, 4000),
-        //        'm' => (1, 4000, cond + 1, 4000, 1, 4000, 1, 4000),
-        //        'a' => (1, 4000, 1, 4000, cond + 1, 4000, 1, 4000),
-        //        's' => (1, 4000, 1, 4000, 1, 4000, cond + 1, 4000),
-        //        _ => throw new ArgumentException($"[{part}] is an invalid part category.")
-        //    },
-        //    _ => throw new ArgumentException($"[{comp}] is an invalid comparison operator.")
-        //};
 
         var restrictRange = comp switch
         {
