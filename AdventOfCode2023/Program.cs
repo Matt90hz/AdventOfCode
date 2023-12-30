@@ -17,14 +17,22 @@ using AdventOfCode2023.Dayz16;
 using AdventOfCode2023.Dayz17;
 using AdventOfCode2023.Dayz18;
 using AdventOfCode2023.Dayz19;
+using AdventOfCode2023.Dayz20;
 using System.Diagnostics;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz19\\input_test1.txt");
-var result = Aplenty.AllPossibleAccepted(input);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz20\\input_test2.txt");
+var result = PulsePropagation.HighLowPulses(input);
 
 Console.WriteLine(result);
 
 return;
+
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz19\\input_test1.txt");
+//var result = Aplenty.AllPossibleAccepted(input);
+
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz18\\input.txt");
 //var result = LavaductLagoon.CorrectCapacity(input);
