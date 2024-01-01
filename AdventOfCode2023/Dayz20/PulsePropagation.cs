@@ -98,45 +98,6 @@ internal static class PulsePropagation
 
     }
 
-    static (Module From, Module To, IPulse Signal) Print((Module From, Module To, IPulse Signal) toProcess)
-    {
-        var (from, to, signal) = toProcess;
-
-        Console.WriteLine($"{from.Code}\t{signal.GetType().Name} ->\t{to.Code}");
-
-        return toProcess;
-    }
-
-    static (Module From, Module To, IPulse Signal)[] ComputeSignals(
-        (Module From, Module To, IPulse Signal)[] toProcess, 
-        IDictionary<string, Module> modules)
-    {
-        var nextToProcess = toProcess
-            .SelectMany(item => ComputeSignal(item, modules))
-            .Where(item => item.Signal is not NoPulse)
-            .ToArray();
-
-        return nextToProcess;
-    }
-
-    static IEnumerable<(Module From, Module To, IPulse Signal)> ComputeSignal(
-        (Module From, Module To, IPulse Signal) tuple,
-        IDictionary<string, Module> modules)
-    {
-        var (from, to, signal) = tuple;
-
-        var nextSignal = to.ProcessOutput(from, signal);
-
-        //Print(tuple);
-
-        var nextSignals = to.Connections
-            .Select(modulekey => GetModuleByKey(modulekey, modules))
-            .Select(module => (to, module, nextSignal))
-            .ToArray();
-
-        return nextSignals;
-    }
-
     static Module GetModuleByKey(string moduleKey, IDictionary<string, Module> modules)
     {
         var found = modules.TryGetValue(moduleKey, out var module);
@@ -162,23 +123,75 @@ internal static class PulsePropagation
     {
         var modules = GetModules(input);
 
-        int high = 0;
-        int low = 0;
+        var start = (From: Button.Instance, To: modules["broad"], Signal: Pulser.LowPulse);
 
-        for (int i = 0; i < 1000; i++)
-        {
-            var toProcess = new[] { (From: Button.Instance, To: modules["broad"], Signal: Pulser.LowPulse) }; 
-
-            while (toProcess.Any())
-            {
-                low += toProcess.Count(item => item.Signal is LowPulse);
-                high += toProcess.Count(item => item.Signal is HighPulse);
-
-                toProcess = ComputeSignals(toProcess, modules);
-            }
-        }
+        var (high, low) = Enumerable
+            .Repeat(start, 1000)
+            .Select(start => CountHighLowSent(start, modules))
+            .Aggregate(ProductOfHigLow);
 
         return high * low;
+    }
+
+    static (int High, int Low) ProductOfHigLow((int High, int Low) agg, (int High, int Low) element) => (agg.High += element.High, agg.Low += element.Low);
+
+    static (int High, int Low) CountHighLowSent((Module From, Module To, IPulse Signal) start, IDictionary<string, Module> modules)
+    {
+        var (high, low, _) = CountHighLowSent(new[] { start }, (0, 1), modules);
+
+        return (high, low);
+    }
+
+    static (int High, int Low, (Module From, Module To, IPulse Signal)[] ToProcess) CountHighLowSent(
+        (Module From, Module To, IPulse Signal)[] toProcess, 
+        (int High, int Low) count, 
+        IDictionary<string, Module> modules)
+    {
+        if (toProcess.Any() is false) return (count.High, count.Low, toProcess);
+
+        var nextToProcess = ComputeSignals(toProcess, modules);
+       
+        var high = count.High += nextToProcess.Count(item => item.Signal is HighPulse);
+        var low = count.Low += nextToProcess.Count(item => item.Signal is LowPulse);
+
+        return CountHighLowSent(nextToProcess, (high, low), modules);
+    }
+
+    static (Module From, Module To, IPulse Signal) Print((Module From, Module To, IPulse Signal) toProcess)
+    {
+        var (from, to, signal) = toProcess;
+
+        Console.WriteLine($"{from.Code}\t{signal.GetType().Name} ->\t{to.Code}");
+
+        return toProcess;
+    }
+
+    static (Module From, Module To, IPulse Signal)[] ComputeSignals(
+        (Module From, Module To, IPulse Signal)[] toProcess,
+        IDictionary<string, Module> modules)
+    {
+        var nextToProcess = toProcess
+            .SelectMany(item => ComputeSignal(item, modules))
+            .Where(item => item.Signal is not NoPulse)
+            .ToArray();
+
+        return nextToProcess;
+    }
+
+    static IEnumerable<(Module From, Module To, IPulse Signal)> ComputeSignal(
+        (Module From, Module To, IPulse Signal) tuple,
+        IDictionary<string, Module> modules)
+    {
+        var (from, to, signal) = tuple;
+
+        var nextSignal = to.ProcessOutput(from, signal);
+
+        var nextSignals = to.Connections
+            .Select(modulekey => GetModuleByKey(modulekey, modules))
+            .Select(module => (to, module, nextSignal))
+            .ToArray();
+
+        return nextSignals;
     }
 
     static IPulse ProcessOutput(this Module module, Module from, IPulse signal)
