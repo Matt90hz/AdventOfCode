@@ -45,24 +45,6 @@ internal static class PulsePropagation
 
         var (xf, xn, zl, qn) = FindCyclesNeededToCreateTheConditionForRxLowGivenMyInput(modules);
 
-        //var toProcess = new[] { (From: Button.Instance, To: modules["broad"], Signal: Pulser.LowPulse) };
-
-        //int press = 1;
-
-        //while (toProcess.Any(DbModuleSendsHigh) is false)
-        //{
-        //    if (toProcess.Any() is false)
-        //    {
-        //        toProcess = new[] { (From: Button.Instance, To: modules["broad"], Signal: Pulser.LowPulse) };
-        //        press++;
-        //    }
-
-        //    toProcess = ComputeSignals(toProcess, modules);
-
-        //    //_ = toProcess.Select(Print).ToArray();
-        //    //Console.WriteLine("----------------------");
-        //}
-
         return xf * xn * zl * qn;
     }
 
