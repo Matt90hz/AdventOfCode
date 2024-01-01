@@ -20,8 +20,8 @@ using AdventOfCode2023.Dayz19;
 using AdventOfCode2023.Dayz20;
 using System.Diagnostics;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz20\\input_test2.txt");
-var result = PulsePropagation.HighLowPulses(input);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz20\\input.txt");
+var result = PulsePropagation.LowToRx(input);
 
 Console.WriteLine(result);
 
