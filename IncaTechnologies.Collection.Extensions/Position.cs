@@ -42,6 +42,11 @@ namespace IncaTechnologies.Collection.Extensions
         {
             return $"[{Row}, {Column}] {Value}";
         }
+
+        public override int GetHashCode() //to do
+        {
+            return base.GetHashCode();
+        }
     }
 
     public static class PositionExtensions
@@ -107,7 +112,6 @@ namespace IncaTechnologies.Collection.Extensions
             yield return position.MoveRight();
             yield return position.MoveDown();
             yield return position.MoveLeft();
-
         }
     }
 }

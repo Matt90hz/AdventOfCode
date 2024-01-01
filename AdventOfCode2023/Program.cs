@@ -18,14 +18,21 @@ using AdventOfCode2023.Dayz17;
 using AdventOfCode2023.Dayz18;
 using AdventOfCode2023.Dayz19;
 using AdventOfCode2023.Dayz20;
-using System.Diagnostics;
+using AdventOfCode2023.Dayz21;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz20\\input.txt");
-var result = PulsePropagation.LowToRx(input);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz21\\input_test1.txt");
+var result = StepCounter.PlotsReachable(input, 1000);
 
 Console.WriteLine(result);
 
 return;
+
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz20\\input.txt");
+//var result = PulsePropagation.LowToRx(input);
+
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz19\\input_test1.txt");
 //var result = Aplenty.AllPossibleAccepted(input);
