@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -30,7 +31,7 @@ record Test(string Code) : Module(Code, Array.Empty<string>());
 
 record Broadcaster(string Code, string[] Connections) : Module(Code, Connections);
 
-record Button() : Module("btn", new[] { "broad" }) 
+record Button() : Module("btn", new[] { "broad" })
 {
     public static Module Instance { get; } = new Button();
 }
@@ -38,64 +39,72 @@ record Button() : Module("btn", new[] { "broad" })
 
 internal static class PulsePropagation
 {
-    public static int LowToRx(string input)
+    public static long LowToRx(string input)
     {
         var modules = GetModules(input);
+
+        var (xf, xn, zl, qn) = FindCyclesNeededToCreateTheConditionForRxLowGivenMyInput(modules);
 
         //var toProcess = new[] { (From: Button.Instance, To: modules["broad"], Signal: Pulser.LowPulse) };
-        int press = 1;
-        int high = 0;
-        int low = 0;
 
-        for (int i = 0; i < 1000; i++)
-        {
-            var toProcess = new[] { (From: Button.Instance, To: modules["broad"], Signal: Pulser.LowPulse) };
+        //int press = 1;
 
-            while (toProcess.Any())
-            {
-                low += toProcess.Count(item => item.Signal is LowPulse);
-                high += toProcess.Count(item => item.Signal is HighPulse);
+        //while (toProcess.Any(DbModuleSendsHigh) is false)
+        //{
+        //    if (toProcess.Any() is false)
+        //    {
+        //        toProcess = new[] { (From: Button.Instance, To: modules["broad"], Signal: Pulser.LowPulse) };
+        //        press++;
+        //    }
 
-                toProcess = ComputeSignals(toProcess, modules);
+        //    toProcess = ComputeSignals(toProcess, modules);
 
-                if (toProcess.Any() is false)
-                {
-                    //Console.WriteLine("-----------------------");
-                    press++;
-                }
-            } 
-        }
+        //    //_ = toProcess.Select(Print).ToArray();
+        //    //Console.WriteLine("----------------------");
+        //}
 
-        return high * low;
-        throw new Exception("rx not found!");
+        return xf * xn * zl * qn;
     }
 
-    public static int DbAllTrue(string input)
+    static (long XF_High, long XN_High, long ZL_High, long QN_High) FindCyclesNeededToCreateTheConditionForRxLowGivenMyInput(IDictionary<string, Module> modules)
     {
-        var modules = GetModules(input);
+        /*
+        * I know that th must send low to rx.
+        * To do that xf, xn, zl, qn must send high to th one after the other.
+        * So I must find after how many pushes all of these modules send high.
+        * After that the number of pushes for rx to receive low will be the LCM.
+        * Actually I found that the for my inputs all of these number are prime so I have just to multiply them togheter.
+        */
 
-        var toProcess = new[] { (From: modules["pl"], To: modules["db"], Signal: Pulser.LowPulse) };
-        int count = 0;
+        var toProcess = new[] { (From: Button.Instance, To: modules["broad"], Signal: Pulser.LowPulse) };
 
-        while (true)
+        long press = 1;
+        long xf = 0, xn = 0, zl = 0, qn = 0;
+
+        while (xf == default || xn == default || zl == default || qn == default)
         {
-            count++;
-
-            toProcess = ComputeSignals(toProcess, modules);
-
-            if (toProcess.Any(item => item.To.Code == "xf" && item.Signal == Pulser.LowPulse))
-            {
-                return count;
-            }
-
             if (toProcess.Any() is false)
             {
-                toProcess = new[] { (From: modules["pl"], To: modules["db"], Signal: Pulser.LowPulse) };
+                toProcess = new[] { (From: Button.Instance, To: modules["broad"], Signal: Pulser.LowPulse) };
+                press++;
             }
+
+            if (toProcess.Any(item => item.ModuleSendsHigh("xf"))) xf = press;
+            if (toProcess.Any(item => item.ModuleSendsHigh("xn"))) xn = press;
+            if (toProcess.Any(item => item.ModuleSendsHigh("zl"))) zl = press;
+            if (toProcess.Any(item => item.ModuleSendsHigh("qn"))) qn = press;
+
+            toProcess = ComputeSignals(toProcess, modules);
         }
 
-        throw new Exception("rx not found!");
+        return (xf, xn, zl, qn);
+    }
 
+    static bool ModuleSendsHigh(this (Module From, Module To, IPulse Signal) tuple, string moduleKey)
+    {
+        var (from, _, signal) = tuple;
+
+        return from.Code == moduleKey && signal is HighPulse;
     }
 
     static Module GetModuleByKey(string moduleKey, IDictionary<string, Module> modules)
@@ -103,20 +112,6 @@ internal static class PulsePropagation
         var found = modules.TryGetValue(moduleKey, out var module);
 
         return found ? module! : new Test(moduleKey);
-    }
-
-    static bool SignalToRx((Module From, Module To, IPulse Signal) tuple)
-    {
-        var (_, to, _) = tuple;
-
-        return to.Code == "rx";
-    }
-
-    static bool SignalLowToRx((Module From, Module To, IPulse Signal) tuple)
-    {
-        var (_, to, signal) = tuple;
-
-        return to.Code == "rx" && signal is LowPulse;
     }
 
     public static int HighLowPulses(string input)
@@ -137,20 +132,32 @@ internal static class PulsePropagation
 
     static (int High, int Low) CountHighLowSent((Module From, Module To, IPulse Signal) start, IDictionary<string, Module> modules)
     {
-        var (high, low, _) = CountHighLowSent(new[] { start }, (0, 1), modules);
+        var toProcess = new[] { start };
+        int high = 0;
+        int low = 0;
+
+        while (toProcess.Any())
+        {
+            high += toProcess.Count(item => item.Signal is HighPulse);
+            low += toProcess.Count(item => item.Signal is LowPulse);
+
+            toProcess = ComputeSignals(toProcess, modules);
+        }
+
+        //var (high, low, _) = CountHighLowSent(new[] { start }, (0, 1), modules);
 
         return (high, low);
     }
 
     static (int High, int Low, (Module From, Module To, IPulse Signal)[] ToProcess) CountHighLowSent(
-        (Module From, Module To, IPulse Signal)[] toProcess, 
-        (int High, int Low) count, 
+        (Module From, Module To, IPulse Signal)[] toProcess,
+        (int High, int Low) count,
         IDictionary<string, Module> modules)
     {
         if (toProcess.Any() is false) return (count.High, count.Low, toProcess);
 
         var nextToProcess = ComputeSignals(toProcess, modules);
-       
+
         var high = count.High += nextToProcess.Count(item => item.Signal is HighPulse);
         var low = count.Low += nextToProcess.Count(item => item.Signal is LowPulse);
 

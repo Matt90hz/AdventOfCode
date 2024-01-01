@@ -25,4 +25,12 @@ public static class PulsePropagationTests
         var result = PulsePropagation.HighLowPulses(input);
         Assert.Equal(856482136, result);
     }
+
+    [Fact]
+    public static void Part2Solution()
+    {
+        var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz20\\input.txt");
+        var result = PulsePropagation.LowToRx(input);
+        Assert.Equal(224046542165867, result);
+    }
 }
