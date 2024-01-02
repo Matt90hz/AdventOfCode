@@ -89,6 +89,6 @@ public static class StepCounterTests
         var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz21\\input.txt");
         var result = StepCounter.InfiniteGardenPlotReachable(input, 26501365);
 
-        Assert.Equal(0, result);
+        Assert.Equal(600336060511101, result);
     }
 }

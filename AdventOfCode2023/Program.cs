@@ -20,8 +20,9 @@ using AdventOfCode2023.Dayz19;
 using AdventOfCode2023.Dayz20;
 using AdventOfCode2023.Dayz21;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz21\\input_test1.txt");
-var result = StepCounter.PlotsReachable(input, 1000);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz21\\input.txt");
+var result = StepCounter.InfiniteGardenPlotReachable(input, 26501365);
+
 
 Console.WriteLine(result);
 
