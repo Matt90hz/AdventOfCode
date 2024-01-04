@@ -19,14 +19,21 @@ using AdventOfCode2023.Dayz18;
 using AdventOfCode2023.Dayz19;
 using AdventOfCode2023.Dayz20;
 using AdventOfCode2023.Dayz21;
+using AdventOfCode2023.Dayz22;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz21\\input.txt");
-var result = StepCounter.InfiniteGardenPlotReachable(input, 26501365);
-
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz22\\input_test1.txt");
+var result = SandSlabs.BricksSafelyDisintegrable(input);
 
 Console.WriteLine(result);
 
 return;
+
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz21\\input.txt");
+//var result = StepCounter.InfiniteGardenPlotReachable(input, 26501365);
+
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz20\\input.txt");
 //var result = PulsePropagation.LowToRx(input);
