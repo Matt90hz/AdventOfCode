@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AdventOfCode2023.Dayz17;
+using AdventOfCode2023.Dayz18;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +15,70 @@ record Brick(Pos A, Pos B);
 
 internal static class SandSlabs
 {
+    public static int ChainReaction(string input)
+    {
+        var bricks = GetBricks(input).LetBricksFall();
+
+        var chainRaction = bricks.Select(toRemove => HowManyWouldFall(toRemove, bricks));
+
+        return chainRaction.Sum();
+    }
+
+    static int HowManyWouldFall(Brick toRemove, IEnumerable<Brick> bricks)
+    {
+        if (bricks.Any() is false) return 0;
+
+        var bricksAbove = bricks
+            .Where(brick => brick.A.Z > toRemove.B.Z)
+            .OrderBy(brick => brick.A.Z)
+            .ToArray();
+
+        var bottomBricks = bricks
+            .Where(brick => brick.A.Z <= toRemove.B.Z && brick.B.Z >= toRemove.B.Z && brick != toRemove)
+            .ToArray();
+
+        if (bricksAbove.Any() is false) return 0;
+
+        var bricksLayers = bricksAbove
+            .GroupBy(brik => brik.A.Z)
+            .ToArray();
+
+        var howManyFall = CountCrumbledBricks(bottomBricks, bricksLayers);
+
+        return howManyFall;
+    }
+
+    static int CountCrumbledBricks(IEnumerable<Brick> bottomBricks, IEnumerable<IEnumerable<Brick>> bricksLayers)
+    {
+        var bricksAbove = bricksLayers.FirstOrDefault();
+
+        if (bricksAbove is null) return 0;
+
+        var fallen = bricksAbove
+            .Where(brick => brick.FallsThrough(bottomBricks))
+            .ToArray();
+
+        var notFallen = bricksAbove
+            .Except(fallen)
+            .ToArray();
+
+        var nextLayers = bricksLayers
+            .Skip(1)
+            .ToArray();
+
+        var nextLayer = nextLayers
+            .FirstOrDefault()?
+            .FirstOrDefault()?
+            .A.Z ?? 0;
+
+        var nextBottom = notFallen
+            .Concat(bottomBricks)
+            .Where(brick => brick.B.Z >= nextLayer - 1)
+            .ToArray();
+
+        return fallen.Length + CountCrumbledBricks(nextBottom, nextLayers);
+    }
+
     public static int BricksSafelyDisintegrable(string input)
     {
         var bricks = GetBricks(input);
@@ -24,12 +90,17 @@ internal static class SandSlabs
         return disintegrableBricks.Count();
     }
 
-    static bool CanBeDisintegrated(Brick brick, IEnumerable<Brick> settledBricks)
+    static bool CanBeDisintegrated(this Brick brick, IEnumerable<Brick> settledBricks)
     {
         if (settledBricks.Any() is false) return true;
 
-        var bricksBelow = settledBricks.Where(sb => sb.B.Z == brick.B.Z && sb != brick).ToArray();
-        var bricksAbove = settledBricks.Where(sb => sb.A.Z == brick.B.Z + 1);
+        var bricksBelow = settledBricks
+            .Where(sb => sb.B.Z == brick.B.Z && sb != brick)
+            .ToArray();
+
+        var bricksAbove = settledBricks
+            .Where(sb => sb.A.Z == brick.B.Z + 1)
+            .ToArray();
 
         if (bricksAbove.Any() is false) return true;
         if (bricksBelow.Any() is false) return false;
@@ -37,39 +108,40 @@ internal static class SandSlabs
         return bricksAbove.Any(ba => ba.FallsThrough(bricksBelow)) is false;
     }
 
-    static bool FallsThrough(this Brick ba, IEnumerable<Brick> bricksBelow) =>
-        bricksBelow.Any(ba.IsInTheWayOf) is false;
+    static bool FallsThrough(this Brick brickAbove, IEnumerable<Brick> bricksBelow) => bricksBelow.Any(brickAbove.WillFallOn) is false;
 
-    static IEnumerable<Brick> LetBricksFall(IEnumerable<Brick> bricks)
+    static IEnumerable<Brick> LetBricksFall(this IEnumerable<Brick> bricks)
     {
         if (bricks.Any() is false) return bricks;
 
-        var toFall = new Queue<Brick>(bricks.OrderBy(brick => brick.A.Z));
-        var fallen = new List<Brick>();
+        var orderedBricks = bricks.OrderBy(brick => brick.A.Z);
 
-        while (toFall.Any())
+        Queue<Brick> toDrop = new(orderedBricks);
+        List<Brick> dropped = new();
+
+        while (toDrop.Any())
         {
-            var brick = toFall.Dequeue();
-            var fallenBrick = brick.FallOn(fallen);
+            var brickToDrop = toDrop.Dequeue();
+            var brickDroppped = brickToDrop.DropOn(dropped);
 
-            fallen.Add(fallenBrick);
+            dropped.Add(brickDroppped);
         }
 
-        return fallen;
+        return dropped;
     }
 
-    static Brick FallOn(this Brick brick, IEnumerable<Brick> fallens)
+    static Brick DropOn(this Brick brick, IEnumerable<Brick> fallens)
     {
-        var bottomPiece = fallens
+        var brickBelow = fallens
             .OrderBy(x => x.B.Z)
-            .LastOrDefault(brick.IsInTheWayOf);
+            .LastOrDefault(brick.WillFallOn);
 
-        return bottomPiece is not null
-            ? brick.FallTo(bottomPiece.B.Z + 1)
+        return brickBelow is not null
+            ? brick.FallTo(brickBelow.B.Z + 1)
             : brick.FallTo(1);
     }
 
-    static bool IsInTheWayOf(this Brick brick, Brick fallen)
+    static bool WillFallOn(this Brick brick, Brick fallen)
     {
         var brickBlocks = brick.GetXYSpan();
         var fallenBlocks = fallen.GetXYSpan().ToArray();
@@ -83,7 +155,7 @@ internal static class SandSlabs
     {
         (var xa, _, var xb, _) when xa == xb => Enumerable.Range(brick.A.Y, brick.B.Y - brick.A.Y + 1).Select(x => (xa, x)),
         (_, var ya, _, var yb) when ya == yb => Enumerable.Range(brick.A.X, brick.B.X - brick.A.X + 1).Select(x => (x, ya)),
-        _ => throw new ArgumentException($"{brick} is not as expexted.")
+        _ => throw new ArgumentException($"{brick} is not as expected.")
     };
 
     static Brick FallTo(this Brick brick, int z)
@@ -119,14 +191,4 @@ internal static class SandSlabs
         return new Pos(values[0], values[1], values[2]);
     }
 
-    static IEnumerable<(int X, int Y, int Z)> GetCubes(Brick brick) => (brick.A.X, brick.A.Y, brick.A.Z, brick.B.X, brick.B.Y, brick.B.Z) switch
-    {
-        (_, _, var za, _, _, var zb) when za == zb => (brick.A.X, brick.A.Y, brick.B.X, brick.B.Y) switch
-        {
-            (var xa, _, var xb, _) when xa == xb => Enumerable.Range(brick.A.Y, brick.B.Y - brick.A.Y + 1).Select(x => (xa, x, za)),
-            (_, var ya, _, var yb) when ya == yb => Enumerable.Range(brick.A.X, brick.B.X - brick.A.X + 1).Select(x => (x, ya, za)),
-            _ => throw new ArgumentException($"{brick} is not as expexted.")
-        },
-        _ => Enumerable.Range(brick.A.Z, brick.B.Z - brick.A.Z + 1).Select(x => (brick.A.X, brick.A.Y, x)),
-    };
 }
