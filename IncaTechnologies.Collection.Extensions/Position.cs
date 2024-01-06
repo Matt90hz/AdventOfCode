@@ -3,7 +3,22 @@ using System.Collections.Generic;
 
 namespace IncaTechnologies.Collection.Extensions
 {
-    public class Position<T> : IEquatable<Position<T>>
+    public interface IPosition<T>: IEquatable<IPosition<T>>
+    {
+        T[,] Array { get; }
+
+        long Row { get; }
+
+        long Column { get; }
+
+        T Value
+        {
+            get => Array[Row, Column];
+            set => Array[Row, Column] = value;
+        }
+    }
+
+    public class Position<T> : IPosition<T>, IEquatable<Position<T>>
     {
         public T[,] Array { get; }
 
@@ -22,6 +37,11 @@ namespace IncaTechnologies.Collection.Extensions
             Array = array;
             Row = row;
             Column = column;
+        }
+
+        public bool Equals(IPosition<T> other)
+        {
+            return Row == other.Row && Column == other.Column;
         }
 
         public bool Equals(Position<T> other)
@@ -47,11 +67,13 @@ namespace IncaTechnologies.Collection.Extensions
         {
             return base.GetHashCode();
         }
+
+        
     }
 
     public static class PositionExtensions
     {
-        public static IEnumerable<Position<T>> GetPositions<T>(this T[,] @this)
+        public static IEnumerable<IPosition<T>> GetPositions<T>(this T[,] @this)
         {
             for (long i = 0; i < @this.GetLongLength(0); i++)
             {
@@ -62,12 +84,12 @@ namespace IncaTechnologies.Collection.Extensions
             }
         }
 
-        public static Position<T> GetPosition<T>(this T[,] @this, long row, long column)
+        public static IPosition<T> GetPosition<T>(this T[,] @this, long row, long column)
         {
             return new Position<T>(@this, row, column);
         }
 
-        public static Position<T>? FindPosition<T>(this T @this, T[,] source) where T : class
+        public static IPosition<T>? FindPosition<T>(this T @this, T[,] source) where T : class
         {
             if (@this is null) return null;
 
@@ -84,19 +106,19 @@ namespace IncaTechnologies.Collection.Extensions
             return null;
         }
 
-        public static Position<T> MoveUp<T>(this Position<T> position)
+        public static IPosition<T> MoveUp<T>(this IPosition<T> position)
             => new Position<T>(position.Array, position.Row - 1, position.Column);
 
-        public static Position<T> MoveDown<T>(this Position<T> position)
+        public static IPosition<T> MoveDown<T>(this IPosition<T> position)
             => new Position<T>(position.Array, position.Row + 1, position.Column);
 
-        public static Position<T> MoveLeft<T>(this Position<T> position)
+        public static IPosition<T> MoveLeft<T>(this IPosition<T> position)
             => new Position<T>(position.Array, position.Row, position.Column - 1);
 
-        public static Position<T> MoveRight<T>(this Position<T> position)
+        public static IPosition<T> MoveRight<T>(this IPosition<T> position)
             => new Position<T>(position.Array, position.Row, position.Column + 1);
 
-        public static IEnumerable<Position<T>> GetNeighbours<T>(this Position<T> position)
+        public static IEnumerable<IPosition<T>> GetNeighbours<T>(this IPosition<T> position)
         {
             yield return position.MoveUp().MoveLeft();
             yield return position.MoveUp();

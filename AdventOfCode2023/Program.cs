@@ -20,13 +20,21 @@ using AdventOfCode2023.Dayz19;
 using AdventOfCode2023.Dayz20;
 using AdventOfCode2023.Dayz21;
 using AdventOfCode2023.Dayz22;
+using AdventOfCode2023.Dayz23;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz22\\input_test3.txt");
-var result = SandSlabs.ChainReaction(input);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz23\\input_test1.txt");
+var result = LongWalk.LongestHike(input);
 
 Console.WriteLine(result);
 
 return;
+
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz22\\input_test3.txt");
+//var result = SandSlabs.ChainReaction(input);
+
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz21\\input.txt");
 //var result = StepCounter.InfiniteGardenPlotReachable(input, 26501365);
