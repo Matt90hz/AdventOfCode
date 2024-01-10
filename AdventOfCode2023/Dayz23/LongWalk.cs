@@ -19,8 +19,8 @@ internal static class LongWalk
 
         var start = graph[(0, 0)];
 
-        var toExplore = new Stack<(int Row, int Col, int Len)[]>(); toExplore.Push(start);
-        var explored = new List<(int Row, int Col, int Len)[]>();
+        Stack<(int Row, int Col, int Len)[]> toExplore = new(); toExplore.Push(start);
+        List<(int Row, int Col, int Len)[]> explored = new();
 
         while (toExplore.Any())
         {
@@ -35,7 +35,7 @@ internal static class LongWalk
             var (row, col, _) = path.Last();
 
             var nextsToExplore = graph[(row, col)]
-                .Where(x => NodeIsNotAlreadySeen(x, path))
+                .Where(path.NodeIsNotAlreadySeen)
                 .Select(x => path.Append(x).ToArray());
 
             foreach (var next in nextsToExplore)
@@ -44,20 +44,18 @@ internal static class LongWalk
             }
         }
 
-        var x = explored.Select(x => x.Sum(node => node.Len)).ToArray();
-
         return explored.Max(path => path.Sum(node => node.Len));
-
-        static bool NodeIsNotAlreadySeen((int Row, int Col, int Len) step, (int Row, int Col, int Len)[] path)
-        {
-            var (row, col, _) = step;
-
-            var isIt = path.Any(x => (x.Row, x.Col) == (row, col));
-
-            return isIt is false;
-        }
+     
     }
 
+    static bool NodeIsNotAlreadySeen(this (int Row, int Col, int Len)[] path, (int Row, int Col, int Len) node)
+    {
+        var (row, col, _) = node;
+
+        var isAreadySeen = path.Any(x => (x.Row, x.Col) == (row, col));
+
+        return isAreadySeen is false;
+    }
 
     static IDictionary<(int Row, int Col), (int Row, int Col, int Len)[]> GetGraph(char[,] island)
     {
