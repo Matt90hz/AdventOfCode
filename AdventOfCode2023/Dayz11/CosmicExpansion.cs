@@ -46,10 +46,10 @@ internal static class CosmicExpansion
         return distance;
     }
 
-    static IEnumerable<long> DistancesFrom(this Position<char> @this, IEnumerable<Position<char>> otherGalaxies, long expansion) =>
+    static IEnumerable<long> DistancesFrom(this IPosition<char> @this, IEnumerable<IPosition<char>> otherGalaxies, long expansion) =>
         otherGalaxies.Select(x => x.DistanceFrom(@this, expansion));
 
-    static long DistanceFrom(this Position<char> @this, Position<char> otherGalaxy, long expansion)
+    static long DistanceFrom(this IPosition<char> @this, IPosition<char> otherGalaxy, long expansion)
     {
         var (rowStart, rowEnd) = @this.Row <= otherGalaxy.Row 
             ? (@this.Row, otherGalaxy.Row) 
@@ -80,7 +80,7 @@ internal static class CosmicExpansion
         return distance;
     }
 
-    static long DistanceFrom(this Position<char> @this, Position<char> otherGalaxy)
+    static long DistanceFrom(this IPosition<char> @this, IPosition<char> otherGalaxy)
     {
         var dRow = Math.Abs(@this.Row - otherGalaxy.Row);
         var dCol = Math.Abs(@this.Column - otherGalaxy.Column);

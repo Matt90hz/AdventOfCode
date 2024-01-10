@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace IncaTechnologies.Collection.Extensions
 {
+    public enum Direction { Up, Down, Left, Right, None }
+
     public interface IPosition<T>: IEquatable<IPosition<T>>
     {
         T[,] Array { get; }
@@ -16,9 +19,10 @@ namespace IncaTechnologies.Collection.Extensions
             get => Array[Row, Column];
             set => Array[Row, Column] = value;
         }
+
     }
 
-    public class Position<T> : IPosition<T>, IEquatable<Position<T>>
+    public class Position<T> : IPosition<T>, IEquatable<IPosition<T>>
     {
         public T[,] Array { get; }
 
@@ -51,7 +55,7 @@ namespace IncaTechnologies.Collection.Extensions
 
         public override bool Equals(object obj)
         {
-            var other = obj as Position<T>;
+            var other = obj as IPosition<T>;
 
             if(other is null) return false;
 
@@ -68,7 +72,16 @@ namespace IncaTechnologies.Collection.Extensions
             return base.GetHashCode();
         }
 
-        
+        public static bool operator ==(Position<T> x, Position<T> y)
+        {
+            return x.Equals(y);
+        }
+
+        public static bool operator !=(Position<T> x, Position<T> y)
+        {
+            return !x.Equals(y);
+        }
+
     }
 
     public static class PositionExtensions
@@ -128,12 +141,30 @@ namespace IncaTechnologies.Collection.Extensions
             yield return position.MoveDown().MoveLeft();
         }
 
-        public static IEnumerable<Position<T>> GetAdjecents<T>(this Position<T> position)
+        public static IEnumerable<IPosition<T>> GetAdjecents<T>(this IPosition<T> position)
         {
             yield return position.MoveUp();
             yield return position.MoveRight();
             yield return position.MoveDown();
             yield return position.MoveLeft();
         }
+
+        public static Direction GetLastDirection<T>(this IEnumerable<IPosition<T>> path)
+        {
+            var last = path.Last();
+            var beforeLast = path.SkipLast(1).LastOrDefault();
+
+            if(beforeLast is null) return Direction.None;
+
+            return GetDirection(beforeLast, last);
+        }
+
+        public static Direction GetDirection<T>(IPosition<T> first, IPosition<T> next) => (first.Row, first.Column, next.Row, next.Column) switch
+        {
+            (var fr, var fc, var nr, var nc) when fr == nr && fc != nc => fc < nc ? Direction.Left : Direction.Right,
+            (var fr, var fc, var nr, var nc) when fc == nc && fr != nr => fr < nr ? Direction.Down : Direction.Up,
+            _ => Direction.None
+        };
+
     }
 }

@@ -28,7 +28,7 @@ record MinusFortyFive : Mirror;
 record Vertical : Splitter;
 record Horizontal : Splitter;
 
-record Beam(Position<ContraptionObject> Position, Direction Direction);
+record Beam(IPosition<ContraptionObject> Position, Direction Direction);
 
 internal static class TheFloorWillBeLava
 {
@@ -179,7 +179,7 @@ internal static class TheFloorWillBeLava
         return layout;
     }
 
-    static bool IsMovementAllowed(Beam curr, Position<ContraptionObject> next)
+    static bool IsMovementAllowed(Beam curr, IPosition<ContraptionObject> next)
     {
         if (next.Value is Bound) return false;
 

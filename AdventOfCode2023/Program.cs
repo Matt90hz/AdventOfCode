@@ -23,7 +23,7 @@ using AdventOfCode2023.Dayz22;
 using AdventOfCode2023.Dayz23;
 
 var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz23\\input_test1.txt");
-var result = LongWalk.LongestHike(input);
+var result = LongWalk.LongestHikeNoSlopeFast(input);
 
 Console.WriteLine(result);
 

@@ -214,12 +214,12 @@ namespace IncaTechnologies.Collection.Extensions
             return matrix;
         }
 
-        public static T[][] ToJaggedArray<T>(this IEnumerable<IEnumerable<Position<T>>> enumerable)
+        public static T[][] ToJaggedArray<T>(this IEnumerable<IEnumerable<IPosition<T>>> enumerable)
         {
             return enumerable.Select(x => x.Select(x => x.Value)).ToJaggedArray();
         }
 
-        public static T[,] ToMultidimensionalArray<T>(this IEnumerable<IEnumerable<Position<T>>> enumerable)
+        public static T[,] ToMultidimensionalArray<T>(this IEnumerable<IEnumerable<IPosition<T>>> enumerable)
         {
             return enumerable.Select(x => x.Select(x => x.Value)).ToMultidimensionalArray();
         }
