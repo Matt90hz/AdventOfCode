@@ -6,14 +6,17 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AdventOfCode2023.Dayz23;
 
 internal static class LongWalk
 {
+    //PART 2 TAKE 2
     public static int LongestHikeNoSlopeFast(string input)
     {
         var island = GetIsland(input);
+        var lastRow = island.GetLength(1) - 2;
 
         var graph = GetGraph(island);
 
@@ -25,36 +28,35 @@ internal static class LongWalk
         while (toExplore.Any())
         {
             var path = toExplore.Pop();
+            var (row, col, _) = path.Last();
 
-            if (path.Last().Row == island.GetLength(1) - 2)
+            if (row == lastRow)
             {
                 explored.Add(path);
                 continue;
             }
 
-            var (row, col, _) = path.Last();
+            var connectedNodes = graph[(row, col)];
 
-            var nextsToExplore = graph[(row, col)]
-                .Where(path.NodeIsNotAlreadySeen)
-                .Select(x => path.Append(x).ToArray());
-
-            foreach (var next in nextsToExplore)
+            foreach (var node in connectedNodes)
             {
-                toExplore.Push(next);
+                if (path.IsAlreadySeen(node)) continue;
+
+                toExplore.Push(path.Append(node).ToArray());
             }
         }
 
         return explored.Max(path => path.Sum(node => node.Len));
-     
+
     }
 
-    static bool NodeIsNotAlreadySeen(this (int Row, int Col, int Len)[] path, (int Row, int Col, int Len) node)
+    static bool IsAlreadySeen(this (int Row, int Col, int Len)[] path, (int Row, int Col, int Len) node)
     {
         var (row, col, _) = node;
 
-        var isAreadySeen = path.Any(x => (x.Row, x.Col) == (row, col));
+        var isAreadySeen = path.Any(x => x.Row == row && x.Col == col);
 
-        return isAreadySeen is false;
+        return isAreadySeen;
     }
 
     static IDictionary<(int Row, int Col), (int Row, int Col, int Len)[]> GetGraph(char[,] island)
@@ -64,26 +66,23 @@ internal static class LongWalk
             { (0, 0), new[]{ (1, 2, 0) } }
         };
 
-        Stack<(int Row, int Col)> positions = new();
+        Stack<(int Row, int Col)> positions = new(); positions.Push((1, 2));
 
-        positions.Push((1, 2));
-
-        while(positions.Any())
+        while (positions.Any())
         {
             var position = positions.Pop();
+
+            if (graph.ContainsKey(position)) continue;
+
             var connNodes = FindConnectedNodes(position, island);
 
             graph.Add(position, connNodes);
 
-            var positionToChek = connNodes.Where(x => 
-                graph.ContainsKey((x.Row, x.Col)) is false
-                && positions.Contains((x.Row, x.Col)) is false);
-
-            foreach (var (row, col, _) in positionToChek)
+            foreach (var (row, col, _) in connNodes)
             {
                 positions.Push((row, col));
             }
-        }    
+        }
 
         return graph;
     }
@@ -92,12 +91,12 @@ internal static class LongWalk
     {
         var (row, col) = position;
 
-        var islandPosition = island.GetPosition(row, col);
+        var current = island.GetPosition(row, col);
 
-        var connectedNodes = islandPosition
+        var connectedNodes = current
             .GetAdjecents()
             .Where(IsPath)
-            .Select(x => FindConnectedNode(islandPosition, x))
+            .Select(adjecent => FindConnectedNode(current, adjecent))
             .ToArray();
 
         return connectedNodes;
@@ -107,28 +106,32 @@ internal static class LongWalk
     {
         int len = 1;
 
-        var adjecents = next
-            .GetAdjecents()
-            .Where(x => x.IsPath() && x.Equals(position) is false)
-            .ToArray();
+        var nextPossibleSteps = NextPossibleSteps(next, position).ToArray();
 
-        while (adjecents.Length == 1)
+        while (nextPossibleSteps.Length == 1)
         {
             position = next;
-            next = adjecents.First();
+            next = nextPossibleSteps.First();
             len++;
 
-            adjecents = next
-                .GetAdjecents()
-                .Where(x => x.IsPath() && x.Equals(position) is false)
-                .ToArray();
+            nextPossibleSteps = NextPossibleSteps(next, position).ToArray();
         }
 
         return ((int)next.Row, (int)next.Column, len);
     }
 
+    static IEnumerable<IPosition<char>> NextPossibleSteps(IPosition<char> position, IPosition<char> previous)
+    {
+        var nextPossibleSteps = position
+            .GetAdjecents()
+            .Where(adjecent => adjecent.IsPath() && adjecent.Equals(previous) is false);
+
+        return nextPossibleSteps;
+    }
+
     static bool IsPath(this IPosition<char> pos) => pos.Value != '#' && pos.Value != '@';
 
+    //PART 2 TAKE 1
     public static int LongestHikeNoSlope(string input)
     {
         char[,] island = GetIsland(input);
@@ -178,6 +181,7 @@ internal static class LongWalk
         return longestPath - 1;
     }
 
+    //PART 1
     static IEnumerable<IEnumerable<IPosition<char>>> GetHikingPaths(char[,] island)
     {
         var startPosition = island.GetPosition(1, 2);
