@@ -35,6 +35,6 @@ public static class NeverTellMeTheOddsTests
         var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz24\\input.txt");
         var result = NeverTellMeTheOdds.DwayneTheRockJohnson(input);
 
-        Assert.Equal(0, result);
+        Assert.Equal(888708704663413, result);
     }
 }
