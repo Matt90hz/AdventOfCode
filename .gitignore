@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/AdventOfCode2023/Dayz24/input.txt
+/AdventOfCode2023/Dayz23/input.txt
