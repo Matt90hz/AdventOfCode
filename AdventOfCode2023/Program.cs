@@ -22,13 +22,21 @@ using AdventOfCode2023.Dayz21;
 using AdventOfCode2023.Dayz22;
 using AdventOfCode2023.Dayz23;
 using AdventOfCode2023.Dayz24;
+using AdventOfCode2023.Dayz25;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz24\\input_test1.txt");
-var result = NeverTellMeTheOdds.DwayneTheRockJohnson(input);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input.txt");
+var result = Snowverload.GroupSize(input);
 
 Console.WriteLine(result);
 
 return;
+
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz24\\input_test1.txt");
+//var result = NeverTellMeTheOdds.DwayneTheRockJohnson(input);
+
+//Console.WriteLine(result);
+
+//return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz23\\input_test1.txt");
 //var result = LongWalk.LongestHikeNoSlopeFast(input);
