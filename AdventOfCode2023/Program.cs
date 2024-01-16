@@ -25,7 +25,7 @@ using AdventOfCode2023.Dayz24;
 using AdventOfCode2023.Dayz25;
 
 var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input.txt");
-var result = Snowverload.GroupSize(input);
+var result = Snowverload.GroupSizeNoCheat(input);
 
 Console.WriteLine(result);
 
