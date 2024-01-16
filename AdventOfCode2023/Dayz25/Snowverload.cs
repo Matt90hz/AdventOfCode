@@ -34,6 +34,25 @@ internal static class Snowverload
         return connections.Count < 1000 ? 54 : 614655;
     }
 
+    public static int GroupSizeNoCheatFast(string input)
+    {
+
+        var connections = GetConnections(input);
+
+        var vertices = connections.GetVeritces();
+        var edges = connections.GetEdges();
+
+        var graph = vertices.Select(v => (Key: v, Values: edges
+            .Where(edge => edge.Target == v || edge.Source == v)
+            .Select(edge => edge.Source == v ? edge.Target : edge.Source)
+            .ToArray()))
+            .ToDictionary(kv => kv.Key, kv => kv.Values);
+
+        var (left, right) = graph.MinimumCut();
+
+        return 0;
+    }
+
     public static int GroupSizeNoCheat(string input)
     {
 
@@ -63,15 +82,18 @@ internal static class Snowverload
         {
             Console.WriteLine(cloneG.Count);
 
-            var (S, T, nG) = cloneG.MinimumCutPhase();
+            var (S, T) = cloneG.MinimumCutPhase();
 
-            cloneG = nG;
             cuts.Add((S, T));
         }
 
         var minimumCut = cuts
             .Select(cut => (Partition: cut, Weight: Weight(cut)))
             .MinBy(cut => cut.Weight);
+
+        var x = cuts
+            .Select(cut => (Partition: cut, Weight: Weight(cut)))
+            .ToArray();
 
         var (partition, _) = minimumCut;
 
@@ -95,14 +117,17 @@ internal static class Snowverload
         }
     }
 
-    static (string[] S, string[] T, IDictionary<string, string[]> G) MinimumCutPhase(this IDictionary<string, string[]> G)
+    static (string[] S, string[] T) MinimumCutPhase(this IDictionary<string, string[]> G)
     {
-        List<string> A = new() { G.Keys.First(key => key.Length == 3) };
-        List<string> V = G.Keys.Except(A).ToList();
+        //List<string> A = new() { G.Keys.First() };
+        //List<string> V = G.Keys.Except(A).ToList();
+
+        List<string> A = G.Keys.Take(1).ToList();
+        List<string> V = G.Keys.Skip(1).ToList();
 
         while (V.Any())
         {
-            var v = G.FindMaximumAdjacency(A, V);
+            var v = G.FindMaximumAdjacency(A);
 
             V.Remove(v);
             A.Add(v);
@@ -111,7 +136,7 @@ internal static class Snowverload
         var s = A.SkipLast(1).Last();
         var t = A.Last();
 
-        var mergedG = G.MergeVertices(s, t);
+        G.MergeVertices(s, t);
 
         var S = A
             .SkipLast(1)
@@ -124,63 +149,49 @@ internal static class Snowverload
             .Select(c => new string(c))
             .ToArray();
 
-        return (S, T, mergedG);
+        return (S, T);
     }
 
-    static IDictionary<string, string[]> MergeVertices(this IDictionary<string, string[]> graph, string s, string t)
+    static void MergeVertices(this IDictionary<string, string[]> graph, string s, string t)
     {
         var merged = s + t;
         var edges = graph[s]
             .Concat(graph[t])
             .Distinct()
-            .Where(edge => edge != s && edge != t);
+            .Where(edge => edge != s && edge != t)
+            .ToArray();
 
-        Dictionary<string, string[]> newGraph = new()
-        {
-            { merged, edges.ToArray() }
-        };
+        graph.Add(merged, edges);
+        graph.Remove(s);
+        graph.Remove(t);
 
         foreach (var (v, e) in graph)
         {
-            if (v == s || v == t) continue;
-
             if (e.Contains(s) || e.Contains(t))
             {
                 var newEdges = e.Where(edge => edge != s && edge != t).Append(merged).ToArray();
 
-                newGraph.Add(v, newEdges);
-
+                graph[v] = newEdges;
+                
                 continue;
             }
-
-            newGraph.Add(v, e);
         }
-
-        return newGraph;
-
     }
 
-    static string FindMaximumAdjacency(this IDictionary<string, string[]> graph, IEnumerable<string> A, IEnumerable<string> V)
+    static string FindMaximumAdjacency(this IDictionary<string, string[]> graph, IEnumerable<string> A)
     {
+        //Console.WriteLine(graph.Keys.Aggregate(string.Empty, (x, acc) => acc + " " + x));
+
         var edges = A
-            .SelectMany(a => graph[a].Select(v => (Source: a, Target: v)))
-            .Where(edge => A.Contains(edge.Target) is false)
-            .Select(edge => (Vertex: edge.Target, Weight: CalcWeight(edge)))
-            .GroupBy(conn => conn.Vertex, conn => conn.Weight, (key, values) => (Vertex: key, Weight: values.Sum()));
+            .SelectMany(a => graph[a])
+            .Where(v => A.Contains(v) is false)
+            .GroupBy(v => v)
+            .Select(group => (Vertex: group.Key, Weight: group.Count()));
 
         var (vertex, _) = edges.MaxBy(edge => edge.Weight);
 
         return vertex;
 
-        static int CalcWeight((string Source, string Target) edge)
-        {
-            var (s, t) = edge;
-
-            var sw = s.Length / 3;
-            var tw = s.Length / 3;
-
-            return Math.Max(sw, tw);
-        }
     }
 
     static string[] GetVeritces(this IDictionary<string, string[]> connections)
@@ -197,8 +208,7 @@ internal static class Snowverload
 
     static (string Source, string Target)[] GetEdges(this IDictionary<string, string[]> connections)
     {
-        var edges = connections
-            .SelectMany(kv => kv.Value.Select(val => (kv.Key, val)));
+        var edges = connections.SelectMany(kv => kv.Value.Select(val => (kv.Key, val)));
 
         return edges.ToArray();
     }
