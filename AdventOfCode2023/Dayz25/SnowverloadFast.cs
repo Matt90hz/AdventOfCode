@@ -33,7 +33,8 @@ internal static class SnowverloadFast
 
         while (graph.Vertices.Length > 2)
         {
-            Console.WriteLine(graph.Vertices.Length);
+            //PROGRESS
+            //Console.WriteLine(graph.Vertices.Length);
 
             (partition, graph) = MinimumCutPhase(graph);
 

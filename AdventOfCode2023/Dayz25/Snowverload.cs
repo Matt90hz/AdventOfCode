@@ -62,7 +62,8 @@ internal static class Snowverload
 
         while (cloneG.Count > 2)
         {
-            Console.WriteLine(cloneG.Count);
+            //progress
+            //Console.WriteLine(cloneG.Count);
 
             var (S, T) = cloneG.MinimumCutPhase();
 
@@ -101,9 +102,6 @@ internal static class Snowverload
 
     static (string[] S, string[] T) MinimumCutPhase(this IDictionary<string, string[]> G)
     {
-        //List<string> A = new() { G.Keys.First() };
-        //List<string> V = G.Keys.Except(A).ToList();
-
         List<string> A = G.Keys.Take(1).ToList();
         List<string> V = G.Keys.Skip(1).ToList();
 
