@@ -42,7 +42,7 @@ public static class SnowverloadTests
     public static void Part1Test1NoCheatFast()
     {
         var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input_test1.txt");
-        var result = Snowverload.GroupSizeNoCheatFast(input);
+        var result = SnowverloadFast.GroupSize(input);
 
         Assert.Equal(54, result);
     }
@@ -51,7 +51,7 @@ public static class SnowverloadTests
     public static void Part1SolutionNoCheatFast()
     {
         var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input.txt");
-        var result = Snowverload.GroupSizeNoCheatFast(input);
+        var result = SnowverloadFast.GroupSize(input);
 
         Assert.Equal(614655, result);
     }

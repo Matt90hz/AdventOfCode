@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using AdventOfCode2023.Dayz10;
+using Newtonsoft.Json.Linq;
 using QuikGraph;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Markup;
 
 namespace AdventOfCode2023.Dayz25;
+
 internal static class Snowverload
 {
     public static int GroupSize(string input)
@@ -34,28 +36,8 @@ internal static class Snowverload
         return connections.Count < 1000 ? 54 : 614655;
     }
 
-    public static int GroupSizeNoCheatFast(string input)
-    {
-
-        var connections = GetConnections(input);
-
-        var vertices = connections.GetVeritces();
-        var edges = connections.GetEdges();
-
-        var graph = vertices.Select(v => (Key: v, Values: edges
-            .Where(edge => edge.Target == v || edge.Source == v)
-            .Select(edge => edge.Source == v ? edge.Target : edge.Source)
-            .ToArray()))
-            .ToDictionary(kv => kv.Key, kv => kv.Values);
-
-        var (left, right) = graph.MinimumCut();
-
-        return 0;
-    }
-
     public static int GroupSizeNoCheat(string input)
     {
-
         var connections = GetConnections(input);
 
         var vertices = connections.GetVeritces();
@@ -172,7 +154,7 @@ internal static class Snowverload
                 var newEdges = e.Where(edge => edge != s && edge != t).Append(merged).ToArray();
 
                 graph[v] = newEdges;
-                
+
                 continue;
             }
         }
@@ -194,7 +176,7 @@ internal static class Snowverload
 
     }
 
-    static string[] GetVeritces(this IDictionary<string, string[]> connections)
+    internal static string[] GetVeritces(this IDictionary<string, string[]> connections)
     {
         var vertices = connections.Keys;
 
@@ -206,14 +188,14 @@ internal static class Snowverload
         return vertices.Concat(missingVertices).ToArray();
     }
 
-    static (string Source, string Target)[] GetEdges(this IDictionary<string, string[]> connections)
+    internal static (string Source, string Target)[] GetEdges(this IDictionary<string, string[]> connections)
     {
         var edges = connections.SelectMany(kv => kv.Value.Select(val => (kv.Key, val)));
 
         return edges.ToArray();
     }
 
-    static IDictionary<string, string[]> AddMissingConnections(this IDictionary<string, string[]> connections)
+    internal static IDictionary<string, string[]> AddMissingConnections(this IDictionary<string, string[]> connections)
     {
         var missingKeys = connections.Values
             .SelectMany(val => val)
@@ -240,7 +222,7 @@ internal static class Snowverload
         }
     }
 
-    static IDictionary<string, string[]> GetConnections(string input)
+    internal static IDictionary<string, string[]> GetConnections(string input)
     {
         var lines = input.Split(Environment.NewLine);
 
