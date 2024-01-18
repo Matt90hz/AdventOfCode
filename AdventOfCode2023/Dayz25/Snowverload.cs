@@ -1,12 +1,5 @@
 ﻿using AdventOfCode2023.Dayz10;
-using Newtonsoft.Json.Linq;
-using QuikGraph;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Markup;
 
 namespace AdventOfCode2023.Dayz25;
 

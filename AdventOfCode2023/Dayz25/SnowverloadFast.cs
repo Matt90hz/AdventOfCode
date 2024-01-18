@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using QuikGraph;
+﻿using System.Diagnostics;
 using System.Text;
 
 namespace AdventOfCode2023.Dayz25;
@@ -18,9 +17,6 @@ internal static class SnowverloadFast
     {
         var graph = GetGraph(input);
 
-        //TEST
-        //var x = graph.ToFriendlyString();
-
         var partition = MinimumGlobalCut(graph);
 
         return partition.Left.Vertices.Sum(vertex => vertex.Value.Length) * partition.Right.Vertices.Sum(vertex => vertex.Value.Length);
@@ -34,22 +30,15 @@ internal static class SnowverloadFast
         while (graph.Vertices.Length > 2)
         {
             //PROGRESS
-            //Console.WriteLine(graph.Vertices.Length);
+            //Console.WriteLine("STEP {0}", graph.Vertices.Length);
 
             (partition, graph) = MinimumCutPhase(graph);
 
             partitions.Add(partition);
 
-            //TEST
-            //var x = partition.Left.ToFriendlyString();
-            //var y = partition.Right.ToFriendlyString();
-            //var z = graph.ToFriendlyString();
         }
 
         var min = partitions.MinBy(Weight);
-
-        //TEST
-        //var w = partitions.Select(p => (p.Left.ToFriendlyString(), p.Right.ToFriendlyString(), Weight(p))).ToArray();
 
         return min ?? throw new Exception("No partitions found!");
 
@@ -99,17 +88,16 @@ internal static class SnowverloadFast
     {
         var inVertex = A.Select(a => a.Id).ToArray();
 
-        var maxAdjecent = A
+        var maxAdjecentId = A
             .SelectMany(a => a.Edges)
+            .Where(edge => inVertex.Contains(edge.Target) is false)
             .GroupBy(edge => edge.Target)
-            .MaxBy(group => inVertex.Contains(group.Key) ? 0 : group.Sum(edge => edge.Weight))!
+            .MaxBy(group => group.Sum(edge => edge.Weight))!
             .Key;
-            //.MaxBy(edge => inVertex.Contains(edge.Target) ? 0 : edge.Weight);
 
-        //TEST
-        //var x = A.SelectMany(a => a.Edges).ToArray();
+        var maxAdjecent = graph.Vertices.First(v => v.Id == maxAdjecentId);
 
-        return graph.Vertices.First(v => v.Id == maxAdjecent);
+        return maxAdjecent;
     }
 
     static Graph<T> MergeVertex<T>(Vertex<T> source, Vertex<T> target, Graph<T> graph)
@@ -131,36 +119,23 @@ internal static class SnowverloadFast
 
         var newVertex = new Vertex<T>(newGuid, newValue, newEdges);
 
-        var oppositeVertices = newEdges
-            .Select(edge => (edge.Target, edge.Weight))
+        var oppositeVertices = newEdges.ToDictionary(edge => edge.Target, edge => edge.Weight);
+
+        var newVertices = graph.Vertices
+            .Where(vertex => vertex.Id != source.Id && vertex.Id != target.Id)
+            .Select(vertex => oppositeVertices.ContainsKey(vertex.Id) ? FixEdges(vertex) : vertex)
+            .Append(newVertex)
             .ToArray();
 
-        List<Vertex<T>> newVertices = new() { newVertex };
+        return new(newVertices);
 
-        foreach(var vertex in graph.Vertices) 
+        Vertex<T> FixEdges(Vertex<T> vertex) => vertex with
         {
-            if (vertex.Id == source.Id || vertex.Id == target.Id) continue;
-
-            if (oppositeVertices.FirstOrDefault(ov => ov.Target == vertex.Id) is { } oppositeVertex 
-                && oppositeVertex.Target != Guid.Empty)
-            {
-                var y = vertex with
-                {
-                    Edges = vertex.Edges
-                     .Where(edge => edge.Target != source.Id && edge.Target != target.Id)
-                     .Append(new(vertex.Id, newGuid, oppositeVertex.Weight))
-                     .ToArray()
-                };
-
-                newVertices.Add(y);
-                continue;
-            }
-
-            newVertices.Add(vertex);
-        }
-
-        return new(newVertices.ToArray());
-
+            Edges = vertex.Edges
+                .Where(edge => edge.Target != source.Id && edge.Target != target.Id)
+                .Append(new(vertex.Id, newGuid, oppositeVertices[vertex.Id]))
+                .ToArray()
+        };
     } 
 
     static Graph<string> GetGraph(string input)
