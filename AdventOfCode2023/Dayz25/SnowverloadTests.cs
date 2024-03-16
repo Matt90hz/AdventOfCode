@@ -55,4 +55,22 @@ public static class SnowverloadTests
 
         Assert.Equal(614655, result);
     }
+
+    [Fact]
+    public static void Part1Test1NoCheatFastest()
+    {
+        var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input_test1.txt");
+        var result = SnowverloadFastest.GroupSize(input);
+
+        Assert.Equal(54, result);
+    }
+
+    [Fact]
+    public static void Part1SolutionNoCheatFastest()
+    {
+        var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input.txt");
+        var result = SnowverloadFastest.GroupSize(input);
+
+        Assert.Equal(614655, result);
+    }
 }
