@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdventOfCode2022.Day1;
+namespace AdventOfCode2022.Day01;
 static class CalorieCounting
 {
     public static int MaxCalorie(string input) => input

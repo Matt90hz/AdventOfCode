@@ -3,12 +3,9 @@ module Trebuchet
 
 open System
 
+let firstDigit (line: string) = line |> Seq.find Char.IsDigit
 
-let isDigit (c: char) = Char.IsDigit(c) 
-
-let firstDigit (line: string) = line |> Seq.find isDigit
-
-let lastDigit (line: string) = line |> Seq.findBack isDigit
+let lastDigit (line: string) = line |> Seq.findBack Char.IsDigit
 
 let trebuchetCoordinate (line: string) = int $"{firstDigit line}{lastDigit line}"
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdventOfCode2022.Day2;
+namespace AdventOfCode2022.Day02;
 
 public enum Hand { Rock = 1, Paper = 2, Scissors = 3 }
 
