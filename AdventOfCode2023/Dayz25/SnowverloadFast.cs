@@ -16,8 +16,6 @@ readonly record struct Edge<T>(Guid Source, Guid Target, int Weight) : IComparab
     }
 }
 
-
-
 readonly record struct Vertex<T>(Guid Id, T[] Value, Edge<T>[] Edges);
 
 record Graph<T>(Vertex<T>[] Vertices);
