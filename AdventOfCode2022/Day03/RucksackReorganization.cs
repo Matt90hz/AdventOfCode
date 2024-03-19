@@ -27,4 +27,5 @@ static class RucksackReorganization
     static int GetPriority(char c) => char.IsUpper(c) 
         ? c - 64 + 26
         : c - 96;
+
 }
