@@ -17,4 +17,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\IncaTechnologies.Collection.Extensions\IncaTechnologies.Collection.Extensions.csproj" />
+  </ItemGroup>
+
 </Project>

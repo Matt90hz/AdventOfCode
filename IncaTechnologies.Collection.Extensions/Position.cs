@@ -131,6 +131,65 @@ namespace IncaTechnologies.Collection.Extensions
         public static IPosition<T> MoveRight<T>(this IPosition<T> position)
             => new Position<T>(position.Array, position.Row, position.Column + 1);
 
+        public static bool TryMoveUp<T>(this IPosition<T> position, out IPosition<T> @out)
+        {
+            @out = position;
+
+            if (position.TryGetValue(out _)) return false;
+
+            @out = position.MoveUp();
+
+            return true;
+        }
+
+        public static bool TryMoveDown<T>(this IPosition<T> position, out IPosition<T> @out)
+        {
+            @out = position;
+
+            if (position.TryGetValue(out _)) return false;
+
+            @out = position.MoveDown();
+
+            return true;
+        }
+
+        public static bool TryMoveLeft<T>(this IPosition<T> position, out IPosition<T> @out)
+        {
+            @out = position;
+
+            if (position.TryGetValue(out _)) return false;
+
+            @out = position.MoveLeft();
+
+            return true;
+        }
+
+        public static bool TryMoveRight<T>(this IPosition<T> position, out IPosition<T> @out)
+        {
+            @out = position;
+
+            if (position.TryGetValue(out _)) return false;
+
+            @out = position.MoveRight();
+
+            return true;
+        }
+
+        public static bool TryGetValue<T>(this IPosition<T> position, out T @out)
+        {
+            @out = default!;
+
+            if(position.Row <= 0 
+                || position.Row >= position.Array.GetLongLength(0) - 1 
+                || position.Column <= 0 
+                || position.Column >= position.Array.GetLongLength(1) - 1) return false;
+            
+
+            @out = position.Value;
+
+            return true;
+        }
+
         public static IEnumerable<IPosition<T>> GetNeighbours<T>(this IPosition<T> position)
         {
             yield return position.MoveUp().MoveLeft();
@@ -147,6 +206,38 @@ namespace IncaTechnologies.Collection.Extensions
             yield return position.MoveRight();
             yield return position.MoveDown();
             yield return position.MoveLeft();
+        }
+
+        public static IEnumerable<IPosition<T>> GetNorth<T>(this IPosition<T> position)
+        {
+            for (long i = 0; i < position.Row; i++)
+            {
+                yield return position.Array.GetPosition(i, position.Column);
+            }        
+        }
+
+        public static IEnumerable<IPosition<T>> GetSouth<T>(this IPosition<T> position)
+        {
+            for (long i = position.Row + 1; i < position.Array.GetLongLength(0); i++)
+            {
+                yield return position.Array.GetPosition(i, position.Column);
+            }
+        }
+
+        public static IEnumerable<IPosition<T>> GetEast<T>(this IPosition<T> position)
+        {
+            for (long i = position.Column + 1; i < position.Array.GetLongLength(1); i++)
+            {
+                yield return position.Array.GetPosition(position.Row, i);
+            }
+        }
+
+        public static IEnumerable<IPosition<T>> GetWest<T>(this IPosition<T> position)
+        {
+            for (long i = 0; i < position.Column; i++)
+            {
+                yield return position.Array.GetPosition(position.Row, i);
+            }
         }
 
         public static Direction GetLastDirection<T>(this IEnumerable<IPosition<T>> path)
