@@ -55,9 +55,7 @@ namespace IncaTechnologies.Collection.Extensions
 
         public override bool Equals(object obj)
         {
-            var other = obj as IPosition<T>;
-
-            if(other is null) return false;
+            if (!(obj is IPosition<T> other)) return false;
 
             return Equals(other);
         }
@@ -210,7 +208,7 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static IEnumerable<IPosition<T>> GetNorth<T>(this IPosition<T> position)
         {
-            for (long i = 0; i < position.Row; i++)
+            for (long i = position.Row - 1; i >= 0; i--)
             {
                 yield return position.Array.GetPosition(i, position.Column);
             }        
@@ -234,7 +232,7 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static IEnumerable<IPosition<T>> GetWest<T>(this IPosition<T> position)
         {
-            for (long i = 0; i < position.Column; i++)
+            for (long i = position.Column - 1; i >= 0; i--)
             {
                 yield return position.Array.GetPosition(position.Row, i);
             }
@@ -256,6 +254,12 @@ namespace IncaTechnologies.Collection.Extensions
             (var fr, var fc, var nr, var nc) when fc == nc && fr != nr => fr < nr ? Direction.Down : Direction.Up,
             _ => Direction.None
         };
+
+        public static bool IsBorder<T>(this IPosition<T> position) =>
+            position.Row == 0
+            || position.Column == 0
+            || position.Row == position.Array.GetLongLength(0) - 1
+            || position.Column == position.Array.GetLongLength(1) - 1;
 
     }
 }
