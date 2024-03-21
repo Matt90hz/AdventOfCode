@@ -36,7 +36,7 @@ static class RopeBridge
         .Aggregate(new List<(int Row, int Col)>() { (Row: 0, Col: 0) },
         (path, step) =>
         {
-            var last = path.Last();
+            var last = path[^1];
 
             var next = step switch
             {
@@ -56,7 +56,7 @@ static class RopeBridge
         .Aggregate(new List<(int Row, int Col)>() { (Row: 0, Col: 0) },
         (tailPath, headPos) =>
         {
-            var tailPos = tailPath.Last();
+            var tailPos = tailPath[^1];
 
             (int Row, int Col) nextTailPos = (tailPos.Row - headPos.Row, tailPos.Col - headPos.Col) switch
             {
