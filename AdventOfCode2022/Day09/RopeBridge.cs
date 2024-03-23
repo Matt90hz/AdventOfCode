@@ -16,21 +16,18 @@ static class RopeBridge
         .Distinct()
         .Count();
 
-    public static int CountTailVisitedPositionsOfLastKnot(string input) => input
-        .Split(Environment.NewLine)
-        .SelectMany(line => Enumerable.Repeat(line[0], int.Parse(line[2..])))
-        .FollowPath()
-        .FollowPath()
-        .FollowPath()
-        .FollowPath()
-        .FollowPath()
-        .FollowPath()
-        .FollowPath()
-        .FollowPath()
-        .FollowPath()
-        .FollowPath()
-        .Distinct()
-        .Count();
+    public static int CountTailVisitedPositionsOfLastKnot(string input)
+    {
+        var headPath = input
+            .Split(Environment.NewLine)
+            .SelectMany(line => Enumerable.Repeat(line[0], int.Parse(line[2..])))
+            .FollowPath();
+
+        return Enumerable.Range(1, 9)
+            .Aggregate(headPath, (nextPath, _) => nextPath.FollowPath())
+            .Distinct()
+            .Count();
+    }
 
     static List<(int Row, int Col)> FollowPath(this IEnumerable<char> steps) => steps
         .Aggregate(new List<(int Row, int Col)>() { (Row: 0, Col: 0) },
