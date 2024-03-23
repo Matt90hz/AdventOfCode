@@ -10,16 +10,15 @@ static class CalorieCounting
     public static int MaxCalorie(string input) => input
         .Split(Environment.NewLine)
         .Select(x => int.TryParse(x, out int v) ? v : 0)
-        .Aggregate(Enumerable.Empty<(int Index, int Value)>(),
+        .Aggregate(new List<(int Index, int Value)> { (0, 0) },
         (acc, item) =>
         {
-            int index = acc.Any()
-                ? acc.Last().Index
-                : 1;
+            var (index, value) = acc[^1];
 
-            return item == 0
-                ? acc.Append((++index, item))
-                : acc.Append((index, item));
+            if (item == 0) acc.Add((++index, item));
+            else acc.Add((index, item));
+
+            return acc;
         })
         .GroupBy(x => x.Index, v => v.Value)
         .Select(x => x.Sum())
@@ -28,16 +27,15 @@ static class CalorieCounting
     public static int MaxCalorieTop3(string input) => input
         .Split(Environment.NewLine)
         .Select(x => int.TryParse(x, out int v) ? v : 0)
-        .Aggregate(Enumerable.Empty<(int Index, int Value)>(),
+        .Aggregate(new List<(int Index, int Value)> { (0, 0) },
         (acc, item) =>
         {
-            int index = acc.Any()
-                ? acc.Last().Index
-                : 1;
+            var (index, value) = acc[^1];
 
-            return item == 0
-                ? acc.Append((++index, item))
-                : acc.Append((index, item));
+            if (item == 0) acc.Add((++index, item));
+            else acc.Add((index, item));
+
+            return acc;
         })
         .GroupBy(x => x.Index, v => v.Value)
         .Select(x => x.Sum())
