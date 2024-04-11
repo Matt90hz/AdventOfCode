@@ -28,7 +28,7 @@ public sealed class MonkeyInTheMiddleTests
     public void Part2_Test1()
     {
         string input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2022\\Day11\\input_test1.txt");
-        BigInteger result = MonkeyInTheMiddle.GetLongMonkeyBusiness(input);
+        ulong result = MonkeyInTheMiddle.GetLongMonkeyBusiness(input);
 
         result.Should().Be(2713310158);
     }
@@ -37,7 +37,7 @@ public sealed class MonkeyInTheMiddleTests
     public void Part2_Solution()
     {
         string input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2022\\Day11\\input.txt");
-        BigInteger result = MonkeyInTheMiddle.GetLongMonkeyBusiness(input);
+        ulong result = MonkeyInTheMiddle.GetLongMonkeyBusiness(input);
 
         result.Should().Be(12848882750);
     }
