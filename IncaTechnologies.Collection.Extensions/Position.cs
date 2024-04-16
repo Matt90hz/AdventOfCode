@@ -131,46 +131,66 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static bool TryMoveUp<T>(this IPosition<T> position, out IPosition<T> @out)
         {
-            @out = position;
+            bool isInbound = position.Row > 0;
 
-            if (position.TryGetValue(out _)) return false;
-
-            @out = position.MoveUp();
-
-            return true;
+            if (isInbound)
+            {
+                @out = position.MoveUp();
+                return isInbound;
+            }
+            else
+            {
+                @out = position;
+                return isInbound;
+            }
         }
 
         public static bool TryMoveDown<T>(this IPosition<T> position, out IPosition<T> @out)
         {
-            @out = position;
+            bool isInbound = position.Row < position.Array.GetLongLength(0) - 1;
 
-            if (position.TryGetValue(out _)) return false;
-
-            @out = position.MoveDown();
-
-            return true;
+            if (isInbound)
+            {
+                @out = position.MoveDown();
+                return isInbound;
+            }
+            else
+            {
+                @out = position;
+                return isInbound;
+            }
         }
 
         public static bool TryMoveLeft<T>(this IPosition<T> position, out IPosition<T> @out)
         {
-            @out = position;
+            bool isInbound = position.Column > 0;
 
-            if (position.TryGetValue(out _)) return false;
-
-            @out = position.MoveLeft();
-
-            return true;
+            if (isInbound)
+            {
+                @out = position.MoveLeft();
+                return isInbound;
+            }
+            else
+            {
+                @out = position;
+                return isInbound;
+            }
         }
 
         public static bool TryMoveRight<T>(this IPosition<T> position, out IPosition<T> @out)
         {
-            @out = position;
+            bool isInbound = position.Column < position.Array.GetLongLength(1) - 1;
 
-            if (position.TryGetValue(out _)) return false;
-
-            @out = position.MoveRight();
-
-            return true;
+            if (isInbound)
+            {
+                @out = position.MoveRight();
+                return isInbound;
+            }
+            else
+            {
+                @out = position;
+                return isInbound;
+            }
         }
 
         public static bool TryGetValue<T>(this IPosition<T> position, out T @out)
