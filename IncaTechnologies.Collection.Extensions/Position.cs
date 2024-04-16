@@ -190,20 +190,31 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static IEnumerable<IPosition<T>> GetNeighbours<T>(this IPosition<T> position)
         {
-            yield return position.MoveUp().MoveLeft();
-            yield return position.MoveUp();
-            yield return position.MoveUp().MoveRight();
-            yield return position.MoveDown().MoveRight();
-            yield return position.MoveDown();
-            yield return position.MoveDown().MoveLeft();
+            if (position.TryMoveUp(out var up)) 
+            { 
+                if (up.TryMoveLeft(out var upLeft)) yield return upLeft;
+                yield return up;
+                if (up.TryMoveRight(out var upRight)) yield return upRight;
+            }
+
+            if (position.TryMoveRight(out var right)) yield return right;
+
+            if (position.TryMoveDown(out var down)) 
+            {
+                if (down.TryMoveRight(out var downRight)) yield return downRight;
+                yield return down;
+                if (down.TryMoveRight(out var downLeft)) yield return downLeft;
+            }
+
+            if (position.TryMoveLeft(out var left)) yield return left;
         }
 
         public static IEnumerable<IPosition<T>> GetAdjecents<T>(this IPosition<T> position)
         {
-            yield return position.MoveUp();
-            yield return position.MoveRight();
-            yield return position.MoveDown();
-            yield return position.MoveLeft();
+            if (position.TryMoveUp(out var up)) yield return up;
+            if (position.TryMoveRight(out var right)) yield return right;
+            if (position.TryMoveDown(out var down)) yield return down;
+            if (position.TryMoveLeft(out var left)) yield return left;
         }
 
         public static IEnumerable<IPosition<T>> GetNorth<T>(this IPosition<T> position)
