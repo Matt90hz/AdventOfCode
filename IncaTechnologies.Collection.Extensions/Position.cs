@@ -43,22 +43,12 @@ namespace IncaTechnologies.Collection.Extensions
             Column = column;
         }
 
-        public bool Equals(IPosition<T> other)
-        {
-            return Row == other.Row && Column == other.Column;
-        }
+        public bool Equals(IPosition<T> other) => Row == other.Row && Column == other.Column;
+        
 
-        public bool Equals(Position<T> other)
-        {
-            return Row == other.Row && Column == other.Column;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is IPosition<T> other)) return false;
-
-            return Equals(other);
-        }
+        public bool Equals(Position<T> other) => Row == other.Row && Column == other.Column;
+        
+        public override bool Equals(object obj) => obj is IPosition<T> other && Equals(other);
 
         public override string ToString()
         {
@@ -70,15 +60,9 @@ namespace IncaTechnologies.Collection.Extensions
             return base.GetHashCode();
         }
 
-        public static bool operator ==(Position<T> x, Position<T> y)
-        {
-            return x.Equals(y);
-        }
+        public static bool operator ==(Position<T> x, Position<T> y) => x.Equals(y);
 
-        public static bool operator !=(Position<T> x, Position<T> y)
-        {
-            return !x.Equals(y);
-        }
+        public static bool operator !=(Position<T> x, Position<T> y) => !x.Equals(y);
 
     }
 
