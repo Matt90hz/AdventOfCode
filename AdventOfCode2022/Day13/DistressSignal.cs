@@ -50,7 +50,7 @@ public static class DistressSignal
             {
                 var (_, left, right) = x;
 
-                var isOrdered = IsOrdered(left, right);
+                bool? isOrdered = IsOrdered(left, right);
 
                 return isOrdered ?? true;
             });
@@ -82,13 +82,9 @@ public static class DistressSignal
             int leftNumber = int.Parse(leftElement);
             int rightNumber = int.Parse(rightElement);
 
-            if (leftNumber == rightNumber)
-            {
-                compare++;
-                return IsOrdered(left, right, compare);
-            }
-
-            return leftNumber < rightNumber;
+            return leftNumber == rightNumber 
+                ? IsOrdered(left, right, ++compare) 
+                : leftNumber < rightNumber;
         }
 
         if (isLeftElementNumber)
