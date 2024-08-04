@@ -1,14 +1,43 @@
-﻿using AdventOfCode2022.Day07;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace AdventOfCode2022.Day13;
 public static class DistressSignal
 {
+    public const string DIVIDER_1 = "[[6]]";
+    public const string DIVIDER_2 = "[[2]]";
+
+    public static int GetDecoderKey(string input)
+    {
+        var packets = input
+            .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+            .Append(DIVIDER_1)
+            .Append(DIVIDER_2);
+
+        var packetsComparer = Comparer<string>.Create((string left, string right) =>
+        {
+            bool? isOrdered = IsOrdered(left, right);
+
+            return isOrdered switch
+            {
+                true => -1,
+                false => 1,
+                _ => 0
+            };
+        });
+
+        var orderedPackets = packets
+            .Order(packetsComparer)
+            .Select((x, i) => (Index: ++i, Packet: x));
+        
+        var markerPackets = orderedPackets
+            .Where(x => x.Packet is DIVIDER_1 or DIVIDER_2);
+
+        var decoderKey = markerPackets
+            .Aggregate(1, (result, x) => result *= x.Index);
+
+        return decoderKey;
+    }
+
     public static int SumOrderedPairIndex(string input)
     {
         var packets = input
@@ -72,14 +101,9 @@ public static class DistressSignal
             rightElement = rightElement.ToListElement();
         }
 
-        bool? areListsOrdered = IsOrdered(leftElement, rightElement);
+        bool? isOrdered = IsOrdered(leftElement, rightElement) ?? IsOrdered(left, right, ++compare);
 
-        if (areListsOrdered is null)
-        {
-            return IsOrdered(left, right, ++compare);
-        }
-
-        return areListsOrdered;
+        return isOrdered;
     }
 
     static string GetElement(this string x, int index)
