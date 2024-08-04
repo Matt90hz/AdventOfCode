@@ -29,7 +29,9 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static IEnumerable<IEnumerable<T>> GetRows<T>(this T[,] @this)
         {
-            for (long i = 0; i < @this.GetLongLength(0); i++)
+            long length = @this.GetLongLength(0);
+
+            for (long i = 0; i < length; i++)
             {
                 yield return @this.GetRow(i);
             }
@@ -37,7 +39,9 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static IEnumerable<IEnumerable<T>> GetColumns<T>(this T[,] @this)
         {
-            for (long j = 0; j < @this.GetLongLength(1); j++)
+            long length = @this.GetLongLength(1);
+
+            for (long j = 0; j < length; j++)
             {
                 yield return @this.GetColumn(j);
             }
@@ -45,7 +49,9 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static IEnumerable<T> GetRow<T>(this T[,] @this, long index)
         {
-            for (long j = 0; j < @this.GetLongLength(1); j++)
+            long length = @this.GetLongLength(1);
+
+            for (long j = 0; j < length; j++)
             {
                 yield return @this[index, j];
             }
@@ -53,7 +59,9 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static IEnumerable<T> GetColumn<T>(this T[,] @this, long index)
         {
-            for (long i = 0; i < @this.GetLongLength(0); i++)
+            long length = @this.GetLongLength(0);
+
+            for (long i = 0; i < length; i++)
             {
                 yield return @this[i, index];
             }
@@ -61,11 +69,14 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static U[,] Select<T, U>(this T[,] @this, Func<T,(long Row, long Column), U> selector)
         {
-            var matrix = new U[@this.GetLength(0), @this.GetLength(1)];
+            long rowConut = @this.GetLength(0);
+            long columnConut = @this.GetLength(1);
 
-            for (long i = 0; i < @this.GetLongLength(0); i++)
+            var matrix = new U[rowConut, columnConut];
+
+            for (long i = 0; i < rowConut; i++)
             {
-                for (long j = 0; j < @this.GetLongLength(1); j++)
+                for (long j = 0; j < columnConut; j++)
                 {
                     matrix[i, j] = selector(@this[i, j], (i, j));
                 }
@@ -98,31 +109,37 @@ namespace IncaTechnologies.Collection.Extensions
             return turn;
         }
 
-        public static T[,] AddRow<T>(this T[,] @this, IEnumerable<T> row, int? index = null)
+        public static T[,] AddRow<T>(this T[,] @this, IEnumerable<T> row, long? index = null)
         {
-            var r = index ?? @this.GetLongLength(0) + 1;
+            long columnCount = @this.GetLongLength(0) + 1;
+            long rowCount = @this.GetLongLength(1);
+
+            long i_index = index ?? columnCount - 1;
 
             var rowArray = row.ToArray();
-            var matrix = new T[@this.GetLongLength(0) + 1, @this.GetLongLength(1)];
+            if (rowArray.LongLength < rowCount) throw new ArgumentException("Row too small.");
 
-            for (long i = 0; i < matrix.GetLongLength(0); i++)
+            var matrix = new T[columnCount, rowCount];
+
+            for (long i = 0; i < i_index; i++)
             {
-                for (long j = 0; j < matrix.GetLongLength(1); j++)
+                for (long j = 0; j < rowCount; j++)
                 {
-                    if (i == r)
-                    {
-                        matrix[i, j] = rowArray[i];
-                        continue;
-                    }
+                    matrix[i, j] = @this[i, j];
+                }
+            }
 
-                    if (i < r)
-                    {
-                        matrix[i, j] = @this[i, j];
-                        continue;
-                    }
-
+            for (long i = i_index + 1; i < columnCount; i++)
+            {
+                for (long j = 0; j < rowCount; j++)
+                {
                     matrix[i, j] = @this[i - 1, j];
                 }
+            }
+
+            for (long j = 0; j < rowCount; j++)
+            {
+                matrix[i_index, j] = rowArray[j];
             }
 
             return matrix;
@@ -130,29 +147,28 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static T[,] AddColumn<T>(this T[,] @this, IEnumerable<T> column, long? index = null)
         {
-            var col = index ?? @this.GetLongLength(1) + 1;
+            long columnCount = @this.GetLongLength(0);
+            long rowCount = @this.GetLongLength(1) + 1;
+
+            long i_index = index ?? rowCount - 1;
 
             var columnArray = column.ToArray();
-            var matrix = new T[@this.GetLongLength(0), @this.GetLongLength(1) + 1];
+            if(columnArray.LongLength < columnCount) throw new ArgumentException("Column too small.");
 
-            for (long i = 0; i < matrix.GetLongLength(0); i++)
+            var matrix = new T[columnCount, rowCount];
+
+            for (long i = 0; i < columnCount; i++)
             {
-                for (long j = 0; j < matrix.GetLongLength(1); j++)
+                for (long j = 0; j < i_index; j++)
                 {
-                    if(j == col)
-                    {
-                        matrix[i, j] = columnArray[i];
-                        continue;
-                    }
+                    matrix[i, j] = @this[i, j];
+                }
 
-                    if (j < col)
-                    {
-                        matrix[i, j] = @this[i, j];
-                        continue;
-                    }
+                matrix[i, i_index] = columnArray[i];
 
+                for (long j = i_index + 1; j < rowCount; j++)
+                {
                     matrix[i, j] = @this[i, j - 1];
-                    
                 }
             }
 
@@ -178,9 +194,12 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static IEnumerable<T> AsEnumerable<T>(this T[,] @this)
         {
-            for (long i = 0; i < @this.GetLongLength(0); i++)
+            long rowCount = @this.GetLongLength(0);
+            long columnCount = @this.GetLongLength(1);
+
+            for (long i = 0; i < rowCount; i++)
             {
-                for (long j = 0; j < @this.GetLongLength(1); j++)
+                for (long j = 0; j < columnCount; j++)
                 {
                     yield return @this[i, j];
                 }
@@ -237,11 +256,11 @@ namespace IncaTechnologies.Collection.Extensions
                 {
                     sb.Append(format(item));
                 }
+
                 sb.AppendLine();
             }
 
             return sb.ToString();
         }
-
     }
 }

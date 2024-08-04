@@ -31,8 +31,6 @@ namespace IncaTechnologies.Collection.Extensions
             return splitted;
         }
 
-
-
         public static U[,] Select<T, U>(T[,] @this, Func<T, (long Row, long Column), U> selector)
         {
             var matrix = new U[@this.GetLength(0), @this.GetLength(1)];
