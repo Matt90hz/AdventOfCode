@@ -9,11 +9,6 @@ using System.Threading.Tasks;
 namespace AdventOfCode2022.Day13;
 public static class DistressSignal
 {
-    //6451 too high
-    //5981 too high
-    //5754 too high
-    //5605 ok
-
     public static int SumOrderedPairIndex(string input)
     {
         var packets = input
@@ -25,6 +20,7 @@ public static class DistressSignal
             .Where(x =>
             {
                 var (_, left, right) = x;
+
                 var isOrdered = IsOrdered(left, right);
 
                 return isOrdered ?? true;
@@ -37,22 +33,25 @@ public static class DistressSignal
 
     static bool? IsOrdered(string left, string right, int compare = 0)
     {
-        string leftFirstElement = left.GetElement(compare);
-        string rightFirstElement = right.GetElement(compare);
+        string leftElement = left.GetElement(compare);
+        string rightElement = right.GetElement(compare);
 
-        if (string.IsNullOrEmpty(leftFirstElement) && string.IsNullOrEmpty(rightFirstElement))
-            return null;
+        bool isLeftEmpty = string.IsNullOrEmpty(leftElement);
+        bool isRightEmpty = string.IsNullOrEmpty(rightElement);
 
-        if (string.IsNullOrEmpty(leftFirstElement)) 
-            return true;
+        if (isLeftEmpty && isRightEmpty) return null;
+        
+        if (isLeftEmpty) return true;     
 
-        if (string.IsNullOrEmpty(rightFirstElement)) 
-            return false;
+        if (isRightEmpty) return false;
+        
+        bool isLeftElementNumber = leftElement.IsNumber();
+        bool isRightElementNumber = rightElement.IsNumber();
 
-        if (leftFirstElement.IsNumber() && rightFirstElement.IsNumber())
+        if (isLeftElementNumber && isRightElementNumber)
         {
-            int leftNumber = int.Parse(leftFirstElement);
-            int rightNumber = int.Parse(rightFirstElement);
+            int leftNumber = int.Parse(leftElement);
+            int rightNumber = int.Parse(rightElement);
 
             if (leftNumber == rightNumber)
             {
@@ -63,35 +62,31 @@ public static class DistressSignal
             return leftNumber < rightNumber;
         }
 
-        if (leftFirstElement.IsNumber() && rightFirstElement.IsList())
+        if (isLeftElementNumber)
         {
-            leftFirstElement = leftFirstElement.ToListElement();
+            leftElement = leftElement.ToListElement();
         }
 
-        if (rightFirstElement.IsNumber() && leftFirstElement.IsList())
+        if (isRightElementNumber)
         {
-            rightFirstElement = rightFirstElement.ToListElement();
+            rightElement = rightElement.ToListElement();
         }
 
-        bool? areListOrdered = IsOrdered(leftFirstElement, rightFirstElement);
+        bool? areListsOrdered = IsOrdered(leftElement, rightElement);
 
-        if (areListOrdered is null)
+        if (areListsOrdered is null)
         {
-            compare++;
-            return IsOrdered(left, right, compare);
+            return IsOrdered(left, right, ++compare);
         }
 
-        return areListOrdered;
+        return areListsOrdered;
     }
 
     static string GetElement(this string x, int index)
     {
-        if (x[0] != '[') 
-            throw new ArgumentException();
-        if (x[^1] != ']') 
-            throw new ArgumentException();
+        if (x[0] != '[' || x[^1] != ']') throw new ArgumentException(x);
 
-        string scope = x[1..^1] + ",";
+        string scope = x[1..^1];
 
         int start = 0;
         int indentation = 0;
@@ -101,22 +96,15 @@ public static class DistressSignal
         {
             char c = scope[i];
 
-            if (c == '[')
-            {
-                indentation++;
-            }
+            if (c == '[') indentation++;        
 
-            if (c == ']')
-            {
-                indentation--;
-            }
+            if (c == ']') indentation--;          
 
             if (c == ',' && indentation == 0)
             {
                 if (found == index)
                 {
                     string element = scope[start..i];
-
                     return element;
                 }
 
@@ -125,12 +113,10 @@ public static class DistressSignal
             }
         }
 
-        return string.Empty;
+        return found == index ? scope[start..] : string.Empty;
     }
 
     static string ToListElement(this string x) => $"[{x}]";
 
     static bool IsNumber(this string x) => int.TryParse(x, out _);
-
-    static bool IsList(this string x) => x is { Length: > 0 } && x[0] == '[';
 }

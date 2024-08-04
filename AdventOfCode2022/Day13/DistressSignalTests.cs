@@ -19,6 +19,6 @@ public sealed class DistressSignalTests
         var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2022\\Day13\\input.txt");
         var result = DistressSignal.SumOrderedPairIndex(input);
 
-        Assert.Equal(13, result);
+        Assert.Equal(5605, result);
     }
 }
