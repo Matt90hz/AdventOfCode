@@ -6,7 +6,6 @@ using System.Text;
 
 namespace IncaTechnologies.Collection.Extensions
 {
-
     public static class CollectionExtensions
     {
         public static T[,] GetSquare<T>(this T[,] @this, long row, long colum, long widht)
@@ -83,9 +82,53 @@ namespace IncaTechnologies.Collection.Extensions
             }
 
             return matrix;
-        }
+        }   
 
         public static U[,] Select<T, U>(this T[,] @this, Func<T, U> selector) => @this.Select((x, _) => selector(x));
+
+        public static T[,] ForEach<T>(this T[,] @this, Func<T, (long Row, long Column), T> apply)
+        {
+            long rowConut = @this.GetLength(0);
+            long columnConut = @this.GetLength(1);
+
+            for (long i = 0; i < rowConut; i++)
+            {
+                for (long j = 0; j < columnConut; j++)
+                {
+                    @this[i, j] = apply(@this[i, j], (i, j));
+                }
+            }
+
+            return @this;
+        }
+
+        public static T[,] ForEach<T>(this T[,] @this, Func<T, T> apply)
+        {
+            long rowConut = @this.GetLength(0);
+            long columnConut = @this.GetLength(1);
+
+            for (long i = 0; i < rowConut; i++)
+            {
+                for (long j = 0; j < columnConut; j++)
+                {
+                    @this[i, j] = apply(@this[i, j]);
+                }
+            }
+
+            return @this;
+        }
+
+        public static int Count<T>(this T[,] @this, Func<T, bool> predicate)
+        {
+            int count = 0;
+
+            foreach (T item in @this)
+            {
+                if (predicate(item)) count++;
+            }
+
+            return count;
+        }
 
         public static T[,] RotateCounterClockwise<T>(this T[,] @this)
         {
