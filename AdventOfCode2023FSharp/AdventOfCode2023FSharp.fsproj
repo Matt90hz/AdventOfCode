@@ -7,11 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Day15\LensLibrary.fs" />
-    <None Include="Program.fs" />
-    <Compile Include="Day10\PipeMaze.fs" />
-    <Compile Include="Day1\Trebuchet.fs" />
-	<Compile Include="Program.fs" />
+    <Compile Include="01_Trebuchet.fs" />
+    <Compile Include="02_CubeCunundrum.fs" />
+    <Compile Include="03_GearRatios.fs" />
+    <Compile Include="10_PipeMaze.fs" />
+    <Compile Include="15_LensLibrary.fs" />
+    <Compile Include="main.fs" />
   </ItemGroup>
 
 </Project>

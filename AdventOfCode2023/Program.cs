@@ -24,12 +24,12 @@ using AdventOfCode2023.Dayz23;
 using AdventOfCode2023.Dayz24;
 using AdventOfCode2023.Dayz25;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input.txt");
-var result = SnowverloadFastest.GroupSize(input);
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input.txt");
+//var result = SnowverloadFastest.GroupSize(input);
 
-Console.WriteLine(result);
+//Console.WriteLine(result);
 
-return;
+//return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz24\\input_test1.txt");
 //var result = NeverTellMeTheOdds.DwayneTheRockJohnson(input);
@@ -179,11 +179,11 @@ return;
 
 //return;
 
-//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day3\\input.txt");
-//var result = GearRatios.PartNumbers(input);
-//Console.WriteLine(result);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day3\\input.txt");
+var result = GearRatios.PartNumbers(input);
+Console.WriteLine(result);
 
-//return;
+return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day2\\input_ross.txt");
 //var result = CubesGame.PossibleGames(input);
