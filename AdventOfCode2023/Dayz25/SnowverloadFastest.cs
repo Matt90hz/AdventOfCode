@@ -59,34 +59,6 @@ internal static class SnowverloadFastest
         return globalMinimumCut;
     }
 
-    [Obsolete]
-    static string GetMostTightlyConnectedVertex(string a, ReadOnlySpan<(string V1, string V2, int W)> edges)
-    {
-        int maxW = 0;
-        string mostTightlyConnectedVertex = string.Empty;
-        foreach (var (v1, v2, w) in edges)
-        {
-            if (w > maxW)
-            {
-                if (v1.Equals(a))
-                {
-                    mostTightlyConnectedVertex = v2;
-                    maxW = w;
-                    continue;
-                }
-
-                if (v2.Equals(a))
-                {
-                    mostTightlyConnectedVertex = v1;
-                    maxW = w;
-                    continue;
-                }
-            }
-        }
-
-        return mostTightlyConnectedVertex;
-    }
-
     static string GetMostTightlyConnectedVertexOnOrderedVertex(ReadOnlySpan<(string V1, string V2, int W)> edges)
     {
         string a = edges[0].V1;
