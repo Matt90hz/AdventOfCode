@@ -9,12 +9,24 @@ using PommaLabs.Hippie;
 
 namespace AdventOfCode2023.Dayz25;
 
+internal static class SnowverloadFast
+{
+    public static int GroupSize(string input)
+    {
+        var graph = Parser.GetGraph(input);
+
+        var partition = graph.MinimumGlobalCut();
+
+        return partition.Left.Sum(vertex => vertex.Values.Count) * partition.Right.Sum(vertex => vertex.Values.Count);
+    }
+}
+
 sealed record Partition<T>(Graph<T> Graph, List<Vertex<T>> Left, List<Vertex<T>> Right)
 {
     public override string ToString() => this.ToFriendlyString();
 }
 
-readonly record struct Edge<T>(Vertex<T> Source, Vertex<T> Target, int Weight)
+sealed record Edge<T>(Vertex<T> Source, Vertex<T> Target, int Weight)
 {
     internal bool IsInvolved(Vertex<T> vertex) => Source.Id == vertex.Id || Target.Id == vertex.Id;
 
@@ -337,14 +349,3 @@ internal static class Cutter
     }
 }
 
-internal static class SnowverloadFast
-{
-    public static int GroupSize(string input)
-    {
-        var graph = Parser.GetGraph(input);
-
-        var partition = graph.MinimumGlobalCut();
-
-        return partition.Left.Sum(vertex => vertex.Values.Count) * partition.Right.Sum(vertex => vertex.Values.Count);
-    }
-}
