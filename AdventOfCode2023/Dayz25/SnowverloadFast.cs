@@ -11,8 +11,6 @@ namespace AdventOfCode2023.Dayz25;
 
 sealed record Partition<T>(Graph<T> Graph, List<Vertex<T>> Left, List<Vertex<T>> Right)
 {
-    public int Weight() => this.GetConnectionsToLeft().Sum(x => x.Weight);
-
     public override string ToString() => this.ToFriendlyString();
 }
 
@@ -45,55 +43,50 @@ internal static class Merger
     {
         var (vertices, edges) = graph;
 
-        vertices = new(vertices);
-        edges = new(edges);
+        var newVertex = new Vertex<T>(Guid.NewGuid(), source.Values.Concat(target.Values).ToList());
 
-        var vertex = new Vertex<T>(Guid.NewGuid(), source.Values.Concat(target.Values).ToList());
-
-        vertices.Add(vertex);
+        vertices.Add(newVertex);
         vertices.Remove(source);
         vertices.Remove(target);
 
         var sourceId = source.Id;
         var targetId = target.Id;
 
-        var edgesToFix = edges
-            .Where(edge => edge.IsInvolved(source) || edge.IsInvolved(target))
-            .ToArray();
+        var newEdges = new List<Edge<T>>();
+        var edgesToAdd = new Dictionary<Guid, int>();
 
-        var edgesToAdd = new List<Edge<T>>();
-
-        foreach (var edge in edgesToFix)
+        foreach(var edge in edges)
         {
-            edges.Remove(edge);
+            var ((edgeSource, _), (edgeTarget, _), weight) = edge;
 
-            if (edge.IsBetween(source, target)) continue;
+            bool isSource = edgeSource == sourceId || edgeSource == targetId;
+            bool isTarget = edgeTarget == targetId || edgeTarget == sourceId;
 
-            var toAdd = edge switch
+            if (isTarget is false && isSource is false)
             {
-                var e when e.IsInvolved(source) && e.Source.Id == sourceId => e with { Source = vertex },
-                var e when e.IsInvolved(source) && e.Target.Id == sourceId => e with { Source = vertex, Target = e.Source },
-                var e when e.IsInvolved(target) && e.Source.Id == targetId => e with { Source = vertex },
-                var e when e.IsInvolved(target) && e.Target.Id == targetId => e with { Source = vertex, Target = e.Source },
-                _ => new Edge<T>(),
-            };
-
-            if (toAdd.Source.Id == Guid.Empty)
-            {
-                Debug.WriteLine("I did not expect toAdd to be null");
+                newEdges.Add(edge);
                 continue;
             }
 
-            edgesToAdd.Add(toAdd);
+            if (isSource && isTarget) continue;     
+
+            var (idToAdd, weightToAdd) = isSource 
+                ? (edgeTarget, weight)
+                : (edgeSource, weight);
+
+            if (edgesToAdd.TryAdd(idToAdd, weightToAdd)) continue;
+
+            var newWeight = edgesToAdd[idToAdd] + weightToAdd;
+
+            edgesToAdd[idToAdd] = newWeight;
         }
 
-        var mergeEdges = edgesToAdd
-            .GroupBy(edge => edge.Target)
-            .Select(group => group.Count() > 1 ? new Edge<T>(vertex, group.Key, group.Sum(e => e.Weight)) : group.First());
+        foreach(var (id, weight) in edgesToAdd)
+        {
+            newEdges.Add(new(newVertex, graph[id], weight));
+        }
 
-        edges.AddRange(mergeEdges);
-
-        var newGraph = new Graph<T>(vertices, edges);
+        var newGraph = new Graph<T>(vertices, newEdges);
 
         return newGraph;
     }
@@ -105,78 +98,65 @@ internal static class Connector
     {
         var heap = HeapFactory.NewFibonacciHeap<Vertex<T>, int>(Comparer<int>.Create((x, y) => (-x).CompareTo(-y)));
 
-        partition.Right.ForEach(x =>
+        var (graph, left, right) = partition;
+
+        foreach(var vertex in right)
         {
-            var conn = partition.GetConnectionsToLeft(x);
+            heap.Add(vertex, 0);
+        }
 
-            if (conn.Count == 0)
+        var leftVertexId = left[0].Id;
+
+        foreach(var (source, target, weight) in graph.Edges)
+        {
+            bool isTargetLeft = leftVertexId == target.Id;
+            bool isSourceLeft = leftVertexId == source.Id;
+
+            if (isTargetLeft)
             {
-                heap.Add(x, 0);
-                return;
+                heap.UpdatePriorityOf(source, weight);
             }
-
-            var priority = conn.Max(x => x.Weight);
-
-            heap.Add(x, priority);
-        });
+            else if (isSourceLeft)
+            {
+                heap.UpdatePriorityOf(target, weight);
+            }
+        }
 
         return heap;
     }
 
-    internal static List<(Vertex<T> Vertex, int Weight)> GetConnectedVertices<T>(this Graph<T> graph, Vertex<T> vertex)
+    internal static Dictionary<Guid, List<(Vertex<T> Vertex, int Weight)>> GetConnections<T>(this Graph<T> graph)
     {
-        var conn = graph.Edges
-            .Where(edge => edge.IsInvolved(vertex))
-            .Select(edge => edge.Source.Id == vertex.Id ? (Vertex: edge.Target, edge.Weight) : (Vertex: edge.Source, edge.Weight))
-            .Select(x => (x.Vertex, x.Weight))
-            .ToList();
+        var connections = new Dictionary<Guid, List<(Vertex<T> Vertex, int Weight)>>();
 
-        return conn;
+        foreach (var (target, source, weight) in graph.Edges)
+        {
+            var (targetId, sourceId) = (target.Id, source.Id);
+
+            connections.TryAdd(sourceId, new());
+            connections[sourceId].Add((target, weight));
+
+            connections.TryAdd(targetId, new());
+            connections[targetId].Add((source, weight));
+        }
+
+        return connections;
     }
+}
 
-    internal static List<(Vertex<T> Vertex, int Weight)> GetConnectionsToLeft<T>(this Partition<T> partition)
+internal static class Weighter
+{
+    internal static int Weight<T>(this Partition<T> partition)
     {
-        var conn = partition.Right
-            .SelectMany(x => partition.Graph.GetConnectedVertices(x))
+        var connections = partition.Graph.GetConnections();
+
+        var weight = partition.Right
+            .SelectMany(x => connections[x.Id])
             .Where(x => partition.Left.Contains(x.Vertex))
-            .GroupBy(x => x.Vertex)
-            .Select(x => (x.Key, x.Sum(x => x.Weight)))
-            .ToList();
+            .Sum(x => x.Weight);
 
-        return conn;
+        return weight;
     }
-
-    internal static List<(Vertex<T> Vertex, int Weight)> GetConnectionsToLeft<T>(this Partition<T> partition, Vertex<T> v)
-    {
-        var connToVertex = partition.Graph.GetConnectedVertices(v);
-
-        var connToLeft = connToVertex
-            .Where(x => partition.Left.Contains(x.Vertex))
-            .GroupBy(x => x.Vertex)
-            .Select(x => (x.Key, x.Sum(x => x.Weight)))
-            .ToList();
-
-        return connToLeft;
-    }
-
-    internal static List<(Vertex<T> Vertex, int Weight)> GetConnectionsToRight<T>(this Partition<T> partition, Vertex<T> v)
-    {
-        var connToVertex = partition.Graph.GetConnectedVertices(v);
-
-        var connToLeft = connToVertex
-            .Where(x => partition.Right.Contains(x.Vertex))
-            .GroupBy(x => x.Vertex)
-            .Select(x => (x.Key, x.Sum(x => x.Weight)))
-            .ToList();
-
-        return connToLeft;
-    }
-
-    internal static List<Edge<T>> GetEdges<T>(this Graph<T> graph, Vertex<T> vertex) => graph.Edges
-        .Where(edge => edge.IsInvolved(vertex))
-        .ToList();
-
-    internal static bool AreConnected<T>(this Graph<T> graph, Vertex<T> v1, Vertex<T> v2) => graph.Edges.Any(edge => edge.IsBetween(v1, v2));
 }
 
 internal static class Visualizer
@@ -185,10 +165,10 @@ internal static class Visualizer
     {
         StringBuilder builder = new();
 
-        foreach (var vertex in graph.Vertices)
+        foreach (var (key, connections) in graph.GetConnections())
         {
             builder.Append('[');
-            foreach (var value in vertex.Values)
+            foreach (var value in graph[key].Values)
             {
                 builder.Append(' ');
                 builder.Append(value);
@@ -197,7 +177,7 @@ internal static class Visualizer
 
             builder.Append("] -> [");
 
-            foreach (var conn in graph.GetConnectedVertices(vertex))
+            foreach (var conn in connections)
             {
                 builder.Append(" ([");
 
@@ -304,15 +284,14 @@ internal static class Cutter
     internal static Partition<T> MinimumGlobalCut<T>(this Graph<T> graph)
     {
         List<Partition<T>> partitions = new();
-        Graph<T> mergedGraph = graph;
 
-        while (mergedGraph.Vertices.Count > 1)
+        while (graph.Vertices.Count > 1)
         {
-            var (partition, s, t) = MinimumCutPhase(mergedGraph);
+            var (partition, s, t) = MinimumCutPhase(graph);
 
             partitions.Add(partition);
 
-            mergedGraph = mergedGraph.MergeVertex(s, t);
+            graph = graph.MergeVertex(s, t);
         }
 
         var min = partitions.MinBy(partition => partition.Weight());
@@ -330,37 +309,28 @@ internal static class Cutter
             .Skip(1)
             .ToList();
 
-        Partition<T> partition = new(graph, A, V);
-
+        var partition = new Partition<T>(graph, A, V);
         var heap = partition.GetHeap();
+        var connections = graph.GetConnections();
 
         Vertex<T> s = A[0];
-
-        var heapItem = heap.RemoveMin();
-
-        int tPriority = heapItem.Priority;
-        Vertex<T> t = heapItem.Value;
+        Vertex<T> t = heap.RemoveMin().Value;
 
         while (V.Count > 1)
         {
-
             partition.Right.Remove(t);
             partition.Left.Add(t);
 
-            var toUpdate = partition.GetConnectionsToRight(t);
-
-            foreach (var (v, p) in toUpdate)
+            foreach (var (v, p) in connections[t.Id])
             {
-                var oldPriority = heap.PriorityOf(v);
-                heap.UpdatePriorityOf(v, p + oldPriority);
+                if (heap.Contains(v) is false) continue;
+
+                var newPriority = heap.PriorityOf(v) + p;
+                heap.UpdatePriorityOf(v, newPriority);
             }
 
             s = t;
-
-            heapItem = heap.RemoveMin();
-
-            t = heapItem.Value;
-            tPriority = heapItem.Priority;
+            t = heap.RemoveMin().Value;
         }
 
         return new(partition, s, t);
