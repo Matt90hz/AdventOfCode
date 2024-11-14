@@ -73,4 +73,22 @@ public static class SnowverloadTests
 
         Assert.Equal(614655, result);
     }
+
+    [Fact]
+    public static void Part1Test1Optimized()
+    {
+        var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input_test1.txt");
+        var result = SnowerloadOptimized.GroupSize(input);
+
+        Assert.Equal(54, result);
+    }
+
+    [Fact]
+    public static void Part1SolutionOptimized()
+    {
+        var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input.txt");
+        var result = SnowerloadOptimized.GroupSize(input);
+
+        Assert.Equal(614655, result);
+    }
 }

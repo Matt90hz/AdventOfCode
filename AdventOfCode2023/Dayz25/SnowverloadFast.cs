@@ -338,6 +338,7 @@ internal static class Cutter
                 if (heap.Contains(v) is false) continue;
 
                 var newPriority = heap.PriorityOf(v) + p;
+
                 heap.UpdatePriorityOf(v, newPriority);
             }
 
@@ -348,4 +349,3 @@ internal static class Cutter
         return new(partition, s, t);
     }
 }
-

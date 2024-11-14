@@ -24,7 +24,7 @@ internal static class SnowverloadFastest
         return a.Length * b.Length;
     }
 
-    static (string[] A, string[] B) GetMinimumGlobalCut(this string[] vertices, (string V1, string V2, int W)[] edges)
+    static (string[] A, string[] B) GetMinimumGlobalCut(string[] vertices, (string V1, string V2, int W)[] edges)
     {
         if (vertices.Length == 0) return (vertices, vertices);
         if (vertices.Length == 1) return (vertices, Array.Empty<string>());
