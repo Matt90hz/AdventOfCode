@@ -15,7 +15,8 @@ public static class SnowerloadOptimized
     {
         var (graph, cypher) = GetGraph(input);
 
-        var globalMinimumCut = (new List<int>(), 0);
+        var vertexCount = graph.Count;
+        var globalMinimumCut = 0;
         var globalMinimumCutWeight = int.MaxValue;
 
         while (graph.Keys.Count > 1)
@@ -25,55 +26,60 @@ public static class SnowerloadOptimized
 
             if (minimumCutPhaseWeight < globalMinimumCutWeight)
             {
-                globalMinimumCut = minimumCutPhase;
+                globalMinimumCut = minimumCutPhase.V;
                 globalMinimumCutWeight = minimumCutPhaseWeight;
             }
 
-            graph.Merge(minimumCutPhase.Item1[^1], minimumCutPhase.Item2, cypher);
+            graph.Merge(minimumCutPhase.A[^1], minimumCutPhase.V, cypher);
         }
 
-        var groupSize = globalMinimumCut.Item1.Select(x => cypher[x].Length).Sum() * cypher[globalMinimumCut.Item2].Length;
+        var vLenght = cypher[globalMinimumCut].Length;
+
+        var groupSize = (vertexCount - vLenght) * vLenght;
 
         return groupSize;
     }
 
-    private static (List<int>, int) GetMinimumCutPhase(this Dictionary<int, List<(int V, int W)>> graph)
+    private static (List<int> A, int V) GetMinimumCutPhase(this Dictionary<int, List<(int V, int W)>> graph)
     {
-        var a = graph.Keys.Take(1).ToList();
-        var v = graph.Keys.Skip(1).ToList();
+        var a = new List<int>(graph.Count)
+        {
+            graph.Keys.First()
+        };
 
-        a.Capacity = graph.Count;
-        v.Capacity = graph.Count;
-
-        var heap = GetHeap(a, v, graph);
+        var v = CreateHeap(graph);
 
         while (v.Count > 1)
         {
-            var mostAdjecent = heap.RemoveMin().Value;
-
+            var mostAdjecent = v.RemoveMin().Value;
             a.Add(mostAdjecent);
-            v.Remove(mostAdjecent);
-
-            foreach (var (x, w) in graph[mostAdjecent])
-            {
-                if(heap.Contains(x) is false) continue;
-                heap.UpdatePriorityOf(x, heap.PriorityOf(x) + w);
-            }
+            v.UpdatePriorities(graph[mostAdjecent]);
         }
 
-        return (a, v[0]);
+        return (a, v.Min.Value);
     }
 
-    internal static UniqueHeap<int, int> GetHeap(List<int> a, List<int> v, Dictionary<int, List<(int, int)>> graph)
+    private static UniqueHeap<int, int> UpdatePriorities(this UniqueHeap<int, int> heap, List<(int V, int W)> items)
+    {
+        foreach (var (x, w) in items)
+        {
+            if (heap.Contains(x) is false) continue;
+            heap.UpdatePriorityOf(x, heap.PriorityOf(x) + w);
+        }
+
+        return heap;
+    }
+
+    private static UniqueHeap<int, int> CreateHeap(Dictionary<int, List<(int, int)>> graph)
     {
         var heap = HeapFactory.NewFibonacciHeap<int, int>(Comparer<int>.Create((x, y) => (-x).CompareTo(-y)));
 
-        foreach (var vertex in v)
+        foreach (var vertex in graph.Keys.Skip(1))
         {
             heap.Add(vertex, 0);
         }
 
-        foreach (var (target, weight) in graph[a[0]])
+        foreach (var (target, weight) in graph[graph.Keys.First()])
         {
             heap.UpdatePriorityOf(target, weight);
         }
@@ -81,9 +87,9 @@ public static class SnowerloadOptimized
         return heap;
     }
 
-    private static int GetWeight(this Dictionary<int, List<(int, int)>> graph, (List<int>, int) cut)
+    private static int GetWeight(this Dictionary<int, List<(int V, int W)>> graph, (List<int> A, int V) cut)
     {
-        return graph[cut.Item2].Sum(x => x.Item2);
+        return graph[cut.V].Sum(x => x.W);
     }
 
     private static Dictionary<int, List<(int, int)>> Merge(
