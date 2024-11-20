@@ -1,9 +1,11 @@
 ﻿using PommaLabs.Hippie;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,55 +35,59 @@ public static class SnowerloadOptimized
             graph.Merge(minimumCutPhase.A[^1], minimumCutPhase.V, cypher);
         }
 
-        var vLenght = cypher[globalMinimumCut].Length;
+        var vLength = cypher[globalMinimumCut].Length;
 
-        var groupSize = (vertexCount - vLenght) * vLenght;
+        var groupSize = (vertexCount - vLength) * vLength;
 
         return groupSize;
     }
 
     private static (List<int> A, int V) GetMinimumCutPhase(this Dictionary<int, List<(int V, int W)>> graph)
     {
+        ReadOnlySpan<int> keys = graph.Keys.ToArray();
+
         var a = new List<int>(graph.Count)
         {
-            graph.Keys.First()
+            keys[0]
         };
 
-        var v = CreateHeap(graph);
+        var v = CreateHeap(graph, keys);
 
         while (v.Count > 1)
         {
-            var mostAdjecent = v.RemoveMin().Value;
-            a.Add(mostAdjecent);
-            v.UpdatePriorities(graph[mostAdjecent]);
+            var mostAdjacent = v.RemoveMin().Value;
+            a.Add(mostAdjacent);
+            v.UpdatePriorities(CollectionsMarshal.AsSpan(graph[mostAdjacent]));
         }
 
         return (a, v.Min.Value);
     }
 
-    private static UniqueHeap<int, int> UpdatePriorities(this UniqueHeap<int, int> heap, List<(int V, int W)> items)
+    private static UniqueHeap<int, int> CreateHeap(Dictionary<int, List<(int, int)>> graph, ReadOnlySpan<int> keys)
     {
-        foreach (var (x, w) in items)
+        var heap = HeapFactory.NewFibonacciHeap<int, int>(Comparer<int>.Create((x, y) => (-x).CompareTo(-y)));
+
+        foreach (var vertex in keys[1..])
         {
-            if (heap.Contains(x) is false) continue;
-            heap.UpdatePriorityOf(x, heap.PriorityOf(x) + w);
+            heap.Add(vertex, 0);
+        }
+
+        ReadOnlySpan<(int, int)> conn = CollectionsMarshal.AsSpan(graph[keys[0]]);
+
+        foreach (var (target, weight) in conn)
+        {
+            heap.UpdatePriorityOf(target, weight);
         }
 
         return heap;
     }
 
-    private static UniqueHeap<int, int> CreateHeap(Dictionary<int, List<(int, int)>> graph)
+    private static UniqueHeap<int, int> UpdatePriorities(this UniqueHeap<int, int> heap, ReadOnlySpan<(int V, int W)> items)
     {
-        var heap = HeapFactory.NewFibonacciHeap<int, int>(Comparer<int>.Create((x, y) => (-x).CompareTo(-y)));
-
-        foreach (var vertex in graph.Keys.Skip(1))
+        foreach (var (x, w) in items)
         {
-            heap.Add(vertex, 0);
-        }
-
-        foreach (var (target, weight) in graph[graph.Keys.First()])
-        {
-            heap.UpdatePriorityOf(target, weight);
+            if (heap.Contains(x) is false) continue;
+            heap.UpdatePriorityOf(x, heap.PriorityOf(x) + w);
         }
 
         return heap;
@@ -97,39 +103,108 @@ public static class SnowerloadOptimized
         int v1, int v2,
         Dictionary<int, string[]> cypher)
     {
-        var newKey = cypher.Keys.Max() + 1;
+        var newKey = cypher.Keys.Count;
 
-        cypher.Add(newKey, cypher[v1].Concat(cypher[v2]).ToArray());
+        cypher.Merge(v1, v2, newKey);
 
-        var v1Edges = graph[v1];
-        var v2Edges = graph[v2];
+        /*
+        ReadOnlySpan<(int V, int W)> v1Edges = CollectionsMarshal.AsSpan(graph[v1]);
+        Span<(int V, int W)> v2Edges = CollectionsMarshal.AsSpan(graph[v2]);
 
-        var newEdges = v1Edges
-            .Concat(v2Edges)
-            .Where(x => x.Item1 != v1 && x.Item1 != v2)
-            .GroupBy(x => x.Item1, x => x.Item2)
-            .Select(group => (group.Key, group.Sum()))
-            .ToList();
+        var newEdges = new List<(int, int)>(v1Edges.Length + v2Edges.Length);
 
-        foreach (var (key, value) in newEdges)
+        foreach (var (v, w) in v1Edges)
         {
-            var edges = graph[key];
+            if (v == v2) continue;
 
-            var toRemove = edges.Where(x => x.Item1 == v1 || x.Item1 == v2).ToArray();
+            var finalW = w;
 
-            foreach (var edge in toRemove)
+            for (int i = 0; i < v2Edges.Length; i++)
             {
-                edges.Remove(edge);
+                var (x, y) = v2Edges[i];
+
+                if (v != x) continue;
+
+                finalW += y;
+
+                v2Edges[i] = (v, 0);
             }
 
-            edges.Add((newKey, value));
+            newEdges.Add((v, finalW));
+
+            var edges = graph[v];
+
+            for (int i = edges.Count - 1; i >= 0; i--)
+            {
+                var (ev, _) = edges[i];
+
+                if (ev == v1 || ev == v2) edges.RemoveAt(i);
+            }
+
+            edges.Add((newKey, finalW));
         }
+
+        foreach (var (v, w) in v2Edges)
+        {
+            if (v == v1 || w == 0) continue;
+
+            newEdges.Add((v, w));
+
+            var edges = graph[v];
+
+            for (int i = edges.Count - 1; i >= 0; i--)
+            {
+                var (ev, _) = edges[i];
+
+                if (ev == v1 || ev == v2) edges.RemoveAt(i);
+            }
+
+            edges.Add((newKey, w));
+        }
+        */
+
+        var newEdges = graph[v1]
+            .Concat(graph[v2])
+            .Where(x => x.Item1 != v1 && x.Item1 != v2)
+            .GroupBy(x => x.Item1, x => x.Item2, (k, v) => (k, v.Sum()))
+            .ToList();
+
+        newEdges.ForEach(x =>
+        {
+            var (key, w) = x;
+
+            var edges = graph[key];
+
+            for (int i = edges.Count - 1; i >= 0; i--)
+            {
+                var (ev, _) = edges[i];
+
+                if (ev == v1 || ev == v2) edges.RemoveAt(i);
+            }
+
+            edges.Add((newKey, w));
+        });
 
         graph.Remove(v1);
         graph.Remove(v2);
         graph.Add(newKey, newEdges);
 
         return graph;
+    }
+
+    private static Dictionary<int, string[]> Merge(this Dictionary<int, string[]> cypher, int v1, int v2, int newKey)
+    {
+        var cypherV1 = cypher[v1];
+        var cypherV2 = cypher[v2];
+        var cypherV1Length = cypher[v1].Length;
+        var cypherV2Length = cypher[v2].Length;
+
+        var cypherArray = new string[cypherV1Length + cypherV2Length];
+        Array.Copy(cypherV1, cypherArray, cypherV1.Length);
+        Array.Copy(cypherV2, sourceIndex: 0, cypherArray, destinationIndex: cypherV1Length, cypherV2Length);
+        cypher.Add(newKey, cypherArray);
+
+        return cypher;
     }
 
     private static (Dictionary<int, List<(int, int)>> Graph, Dictionary<int, string[]> Cypher) GetGraph(string input)
@@ -154,22 +229,22 @@ public static class SnowerloadOptimized
             .SelectMany(key => connections[key].Select(conn => (counterCypher[key], counterCypher[conn])))
             .ToList();
 
-        foreach(var (key, value) in graph)
+        foreach (var (key, value) in graph)
         {
-            foreach(var (v1, v2) in edges)
+            foreach (var (v1, v2) in edges)
             {
-                if(key == v1)
+                if (key == v1)
                 {
                     value.Add((v2, 1));
                     continue;
                 }
 
-                if(key == v2)
+                if (key == v2)
                 {
                     value.Add((v1, 1));
                     continue;
                 }
-            }       
+            }
         }
 
         return (graph, cypher);

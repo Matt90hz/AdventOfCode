@@ -179,11 +179,11 @@ using AdventOfCode2023.Dayz25;
 
 //return;
 
-var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day3\\input.txt");
-var result = GearRatios.PartNumbers(input);
-Console.WriteLine(result);
+//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day3\\input.txt");
+//var result = GearRatios.PartNumbers(input);
+//Console.WriteLine(result);
 
-return;
+//return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Day2\\input_ross.txt");
 //var result = CubesGame.PossibleGames(input);
