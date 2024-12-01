@@ -26,17 +26,17 @@ public class HistorianHysteriaTests
     public void Part2_Test()
     {
         var input = File.ReadAllText(".\\Day01\\input_test.txt");
-        var result = HistorianHysteria.TotalDistanceBetweenLists(input);
+        var result = HistorianHysteria.SimilarityScore(input);
 
-        Assert.Equal(0, result);
+        Assert.Equal(31, result);
     }
 
     [Fact]
     public void Part2_Solution()
     {
         var input = File.ReadAllText(".\\Day01\\input.txt");
-        var result = HistorianHysteria.TotalDistanceBetweenLists(input);
+        var result = HistorianHysteria.SimilarityScore(input);
 
-        Assert.Equal(0, result);
+        Assert.Equal(21328497, result);
     }
 }
