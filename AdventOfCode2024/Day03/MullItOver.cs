@@ -31,4 +31,17 @@ public static class MullItOver
 
         return result;
     }
+
+    public static int SumAllEnabledMultiplications(string input)
+    {
+        var regex = @"do\(\).*?don\'t\(\)";
+
+        var matches = Regex.Matches("do()" + input + "don't()", regex, RegexOptions.Singleline);
+
+        var products = matches.Select(match => SumAllMultiplications(match.Value));
+
+        var result = products.Sum();
+
+        return result;
+    }
 }
