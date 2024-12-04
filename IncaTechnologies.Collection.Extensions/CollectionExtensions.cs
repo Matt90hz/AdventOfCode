@@ -261,9 +261,9 @@ namespace IncaTechnologies.Collection.Extensions
             //the transformation in jagged is to preserve long indexes
             var jagged = enumerable as T[][] ?? enumerable.ToJaggedArray();
             var rows = jagged.LongLength;
-            var coloumns = jagged.Select(x => x.LongLength).Max();
+            var columns = jagged.Select(x => x.LongLength).Max();
 
-            var matrix = new T[rows, coloumns];
+            var matrix = new T[rows, columns];
             
             for (long i = 0; i < rows; i++)
             {

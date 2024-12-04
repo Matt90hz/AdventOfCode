@@ -192,7 +192,7 @@ namespace IncaTechnologies.Collection.Extensions
             return true;
         }
 
-        public static IEnumerable<IPosition<T>> GetNeighbours<T>(this IPosition<T> position)
+        public static IEnumerable<IPosition<T>> GetNeighbors<T>(this IPosition<T> position)
         {
             if (position.TryMoveUp(out var up)) 
             { 
@@ -213,7 +213,7 @@ namespace IncaTechnologies.Collection.Extensions
             if (position.TryMoveLeft(out var left)) yield return left;
         }
 
-        public static IEnumerable<IPosition<T>> GetAdjecents<T>(this IPosition<T> position)
+        public static IEnumerable<IPosition<T>> GetAdjacent<T>(this IPosition<T> position)
         {
             if (position.TryMoveUp(out var up)) yield return up;
             if (position.TryMoveRight(out var right)) yield return right;

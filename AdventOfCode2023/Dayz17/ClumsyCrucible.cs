@@ -94,7 +94,7 @@ internal static class ClumsyCrucible
     static IEnumerable<Path> GetUltraReachables(this Path from)
     {
         var reachable = from.Position
-                .GetAdjecents()
+                .GetAdjacent()
                 .Where(from.CanUltraReach)
                 .Select(next => new Path(next, GetDirection(from.Position, next), from.HeatLoss + next.Value.HeatLoss, from));
 
@@ -207,7 +207,7 @@ internal static class ClumsyCrucible
     static IEnumerable<Path> GetReachables(this Path from)
     {
         var reachable = from.Position
-                .GetAdjecents()
+                .GetAdjacent()
                 .Where(from.CanReach)
                 .Select(next => new Path(next, GetDirection(from.Position, next), from.HeatLoss + next.Value.HeatLoss, from));
 

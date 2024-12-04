@@ -110,7 +110,7 @@ internal static class StepCounter
         .ToArray();
 
     static IEnumerable<IPosition<char>> MoveAround(IPosition<char> position) => position
-        .GetAdjecents()
+        .GetAdjacent()
         .Where(pos => pos.Value == '.' || pos.Value == 'S');
 
     static char[,] GetGarden(string input)

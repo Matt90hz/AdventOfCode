@@ -94,7 +94,7 @@ internal static class LongWalk
         var current = island.GetPosition(row, col);
 
         var connectedNodes = current
-            .GetAdjecents()
+            .GetAdjacent()
             .Where(IsPath)
             .Select(adjecent => FindConnectedNode(current, adjecent))
             .ToArray();
@@ -123,7 +123,7 @@ internal static class LongWalk
     static IEnumerable<IPosition<char>> NextPossibleSteps(IPosition<char> position, IPosition<char> previous)
     {
         var nextPossibleSteps = position
-            .GetAdjecents()
+            .GetAdjacent()
             .Where(adjecent => adjecent.IsPath() && adjecent.Equals(previous) is false);
 
         return nextPossibleSteps;
@@ -242,7 +242,7 @@ internal static class LongWalk
     static IEnumerable<IEnumerable<IPosition<char>>> ExplorePath(IPosition<char> currStep, IEnumerable<IPosition<char>> path)
     {
         var nextPaths = currStep
-            .GetAdjecents()
+            .GetAdjacent()
             .Where(next => next.Value != '#' && next.Value != '@' && path.Contains(next) is false)
             .Select(next => path.Append(next))
             .ToArray();

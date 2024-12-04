@@ -24,7 +24,7 @@ static class HillClimbingAlgorithm
             var positionToEvalute = positionsToEvaluate.Dequeue();
 
             var nextPositionsToEvaluate = positionToEvalute
-                .GetAdjecents()
+                .GetAdjacent()
                 .Where(adjecent =>
                     CanClimb(positionToEvalute.Value, adjecent.Value)
                     && distances[adjecent.Row, adjecent.Column] == -1)
@@ -61,7 +61,7 @@ static class HillClimbingAlgorithm
             var positionToEvalute = positionsToEvaluate.Dequeue();
 
             var nextPositionsToEvaluate = positionToEvalute
-                .GetAdjecents()
+                .GetAdjacent()
                 .Where(adjecent =>
                     CanClimbDown(positionToEvalute.Value, adjecent.Value)
                     && distances[adjecent.Row, adjecent.Column] == -1)
