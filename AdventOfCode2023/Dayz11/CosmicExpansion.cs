@@ -16,13 +16,38 @@ internal static class CosmicExpansion
     {
         var map = input.Select(x => x.Select(x => x)).ToMultidimensionalArray();
 
+        var rowExpansion = map
+            .GetRows()
+            .Select((x, i) => x.Contains('#') ? 1L : expansion)
+            .ToArray();
+
+        var colExpansion = map
+            .GetColumns()
+            .Select((x, i) => x.Contains('#') ? 1L : expansion)
+            .ToArray();
+
         var galaxyPositions = map
             .GetPositions()
             .Where(x => x.Value == GALAXY);
 
-        var distances = galaxyPositions
-            .SelectMany((x, i) =>
-                x.DistancesFrom(galaxyPositions.Skip(i + 1), expansion));
+        var distances = galaxyPositions.SelectMany((x, i) => galaxyPositions.Skip(i + 1).Select(y =>
+        {
+            var xr = (int)x.Row;
+            var yr = (int)y.Row;
+
+            var rowDistance = Enumerable
+                .Range(xr < yr ? xr : yr, int.Abs(xr - yr))
+                .Sum(x => rowExpansion[x]);
+
+            var xc = (int)x.Column;
+            var yc = (int)y.Column;
+
+            var colDistance = Enumerable
+                .Range(xc < yc ? xc : yc, int.Abs(xc - yc))
+                .Sum(x => colExpansion[x]);
+
+            return rowDistance + colDistance;
+        }));
 
         var distance = distances.Sum();
 
@@ -33,120 +58,51 @@ internal static class CosmicExpansion
     {
         var map = input.Select(x => x.Select(x => x)).ToMultidimensionalArray();
 
-        var galaxyPositions = map
+        var expandedMap = map.Expand();
+
+        var galaxyPositions = expandedMap
             .GetPositions()
-            .Where(x => x.Value == GALAXY);
+            .Where(x => x.Value == GALAXY)
+            .ToArray();
 
         var distances = galaxyPositions
-            .SelectMany((x, i) =>
-                x.DistancesFrom(galaxyPositions.Skip(i + 1), 2));
+            .SelectMany((x, i) => galaxyPositions
+                .Skip(i + 1)
+                .Select(y => long.Abs(x.Row - y.Row) + long.Abs(x.Column - y.Column)));
 
-        var distance = distances.Sum();
-
-        return distance;
-    }
-
-    static IEnumerable<long> DistancesFrom(this IPosition<char> @this, IEnumerable<IPosition<char>> otherGalaxies, long expansion) =>
-        otherGalaxies.Select(x => x.DistanceFrom(@this, expansion));
-
-    static long DistanceFrom(this IPosition<char> @this, IPosition<char> otherGalaxy, long expansion)
-    {
-        var (rowStart, rowEnd) = @this.Row <= otherGalaxy.Row 
-            ? (@this.Row, otherGalaxy.Row) 
-            : (otherGalaxy.Row, @this.Row);
-
-        var (colStart, colEnd) = @this.Column <= otherGalaxy.Column
-            ? (@this.Column, otherGalaxy.Column)
-            : (otherGalaxy.Column, @this.Column);
-
-        var dRow = Math.Abs(@this.Row - otherGalaxy.Row);
-        var dCol = Math.Abs(@this.Column - otherGalaxy.Column);
-
-        var cols = @this.Array.GetColumns().Where((column, i) => colStart < i && colEnd > i);
-        var rows = @this.Array.GetRows().Where((row, i) => rowStart < i && rowEnd > i);
-
-        var emptySpaceRows = rows
-            .Where(x => x.All(x => x == VOID))
-            .Count();
-
-        var emptySpaceCols = cols
-            .Where(x => x.All(x => x == VOID))
-            .Count();
-
-        var distance = 
-            dRow - emptySpaceRows + (emptySpaceRows * expansion) +
-            dCol - emptySpaceCols + (emptySpaceCols * expansion);
+        long distance = distances.Sum();
 
         return distance;
     }
 
-    static long DistanceFrom(this IPosition<char> @this, IPosition<char> otherGalaxy)
+    public static char[,] Expand(this char[,] map)
     {
-        var dRow = Math.Abs(@this.Row - otherGalaxy.Row);
-        var dCol = Math.Abs(@this.Column - otherGalaxy.Column);
+        var rowsToExpand = map
+            .GetRows()
+            .Select((x, i) => x.Contains('#') ? -1 : i)
+            .Where(x => x >= 0)
+            .Reverse();
 
-        var distance = dRow + dCol;
+        var colsToExpand = map
+            .GetColumns()
+            .Select((x, i) => x.Contains('#') ? -1 : i)
+            .Where(x => x >= 0)
+            .Reverse();
 
-        return distance;
-    }
+        var rowToAdd = Enumerable
+            .Range(0, map.GetLength(1))
+            .Select(_ => '.')
+            .ToArray();
 
-    static void FillWithSpace(this char[,] map) 
-    { 
+        var expandRows = rowsToExpand.Aggregate(map, (a, x) => a.AddRow(rowToAdd, x));
 
-        for(long i = 0; i < map.GetLength(0); i++)
-        {
-            if (map.GetRow(i).All(x => x == VOID))
-            {
-                for (long j = 0; j < map.GetLength(1); j++)
-                {
-                    map[i, j] = SPACE;
-                }
-            }          
-        }
+        var colToAdd = Enumerable
+            .Range(0, expandRows.GetLength(0))
+            .Select(_ => '.')
+            .ToArray();
 
-        for (long j = 0; j < map.GetLength(1); j++)
-        {
-            if (map.GetColumn(j).All(x => x == VOID || x == SPACE))
-            {
-                for (long i = 0; i < map.GetLength(0); i++)
-                {
-                    map[i, j] = SPACE;
-                }
-            }
-        }
-    }
+        var expandCols = colsToExpand.Aggregate(expandRows, (a, x) => a.AddColumn(colToAdd, x));
 
-    static char[,] ExpandRows(this char[,] map)
-    {
-        var expanded = map;
-
-        for(int i = expanded.GetLength(0) - 1; i > 0; i--)
-        {
-            var row = expanded.GetRow(i);
-
-            if(row.All(x => x == VOID))
-            {
-                expanded = expanded.AddRow(row, i);
-            }
-        }
-
-        return expanded;
-    }
-
-    static char[,] ExpandColumns(this char[,] map)
-    {
-        var expanded = map;
-
-        for (int i = expanded.GetLength(1) - 1; i > 0; i--)
-        {
-            var col = expanded.GetColumn(i);
-
-            if (col.All(x => x == VOID))
-            {
-                expanded = expanded.AddColumn(col, i);
-            }
-        }
-
-        return expanded;
+        return expandCols;
     }
 }
