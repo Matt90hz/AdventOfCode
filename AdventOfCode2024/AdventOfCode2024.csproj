@@ -17,6 +17,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\IncaTechnologies.Collection.Extensions\IncaTechnologies.Collection.Extensions.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="IncaTechnologies.Collection.Extensions" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Update="Day01\input.txt">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
@@ -33,6 +41,12 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Day03\input.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Day04\input.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Day04\input_test.txt">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
