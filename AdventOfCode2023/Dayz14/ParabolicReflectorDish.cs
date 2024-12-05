@@ -14,9 +14,7 @@ internal static class ParabolicReflectorDish
 
         var tilted = platform.TiltNorth();
 
-        var load = tilted.GetRows()
-            .Select((row, i) => row.Count(IsRoundRock) * (platform.GetLength(0) - i))
-            .Sum();
+        var load = tilted.CalculateLoad();
 
         return load;
     }
@@ -27,46 +25,44 @@ internal static class ParabolicReflectorDish
 
         char[,] platform = GetPlatform(input);
 
-        var cache = new Dictionary<string, char[,]>();
+        var cache = new List<string>();
+        var map = new Dictionary<string, char[,]>();
 
         while (cycles > 0)
         {
-            if (cache.TryGetValue(platform.GetKey(), out var cached))
-            {
-                var loop = cache.SkipWhile(x => x.Key != platform.GetKey());
+            if (cache.Contains(platform.GetKey())) break;
 
-                var outsiders = cache.Count - loop.Count() + 1;
+            var key = platform.GetKey();
 
-                var resultIndex = (1_000_000_000 - outsiders) % (loop.Count());
+            cache.Add(key);
+            map.Add(key, platform);
 
-                var result = loop.ElementAt((int)resultIndex).Value.Load();
-
-                return result;
-                
-            }
-            else
-            {
-                var key = platform.GetKey();
-                var spinned = Spin(platform);
-                cache.Add(key, spinned);
-                platform = spinned;
-            }
+            platform = Spin(platform);
 
             cycles--;
         }
 
-        var load = platform.Load();
+        // the cache as found a loop that will repeat infinitely
+        // so you have only to find where it will end the repeated loop
+        var spare = cache.IndexOf(platform.GetKey());
+        var loop = cache.Count - spare;
+        var indexInLoop = cycles % loop;
+        var indexInCache = spare + indexInLoop;
+
+        var load = map[cache[(int)indexInCache]].CalculateLoad();
 
         return load;
     }
 
     static char[,] Spin(char[,] platform)
     {
-        var tiltedNorth = platform.TiltNorth();
-            
-         var tiltedWest = tiltedNorth
-            .RotateClockwise()
+        var tiltedNorth = platform
+            .Select(x => x) //clone the platform
             .TiltNorth();
+
+        var tiltedWest = tiltedNorth
+           .RotateClockwise()
+           .TiltNorth();
 
         var tiltedSouth = tiltedWest
             .RotateClockwise()
@@ -76,70 +72,53 @@ internal static class ParabolicReflectorDish
             .RotateClockwise()
             .TiltNorth();
 
-        var spinned = tiltedEast.RotateClockwise();
+        var original = tiltedEast.RotateClockwise();
 
-        return spinned;
+        return original;
     }
 
     static char[,] TiltNorth(this char[,] platform)
     {
-        var columns = platform
-            .GetColumns()
-            .Select(MoveRocksNorth);
+        int rows = platform.GetLength(0);
+        int cols = platform.GetLength(1);
 
-        var tilted = columns
-            .ToMultidimensionalArray()
-            .GetColumns()
-            .ToMultidimensionalArray();
-
-        return tilted;
-    }
-
-    static IEnumerable<char> MoveRocksNorth(IEnumerable<char> column)
-    {
-        if (column.Any() is false || column.Any(IsRoundRock) is false || column.All(IsRoundRock)) return column;
-
-        if(IsSquareRock(column.First()))
+        for (int c = 0; c < cols; c++)
         {
-            var squareRocksChunk = column.TakeWhile(IsSquareRock);
-            var next = column.SkipWhile(IsSquareRock);
+            int empty = 0;
 
-            return squareRocksChunk.Concat(MoveRocksNorth(next));
+            for (int r = 0; r < rows; r++)
+            {
+                var x = platform[r, c];
+
+                switch (x)
+                {
+                    case '#':
+                        empty = r + 1;
+                        break;
+                    case 'O':
+                        platform[r, c] = '.';
+                        platform[empty, c] = x;
+                        empty++;
+                        break;
+                }
+            }
         }
 
-        var firstChunk = column.TakeWhile(IsNotSquareRock);
-
-        var roundRocks = firstChunk.Count(IsRoundRock);
-        var empties = firstChunk.Count(IsEmpty);
-
-        var tilted = Enumerable.Repeat('O', roundRocks)
-            .Concat(Enumerable.Repeat('.', empties));
-
-        var rest = column.SkipWhile(IsNotSquareRock);
-
-        return tilted.Concat(MoveRocksNorth(rest));
+        return platform;
     }
 
-    static int Load(this char[,] platform) => platform
+    static int CalculateLoad(this char[,] platform) => platform
         .GetRows()
-        .Select((row, i) => row.Count(IsRoundRock) * (platform.GetLength(0) - i))
+        .Select((row, i) => row.Count(x => x == 'O') * (platform.GetLength(0) - i))
         .Sum();
 
-    static bool IsRoundRock(char x) => x == 'O';
-
-    static bool IsSquareRock(char x) => x == '#';
-
-    static bool IsNotSquareRock(char x) => x != '#';
-
-    static bool IsEmpty(char x) => x == '.';
-
-    static string GetKey(this char[,] platform) 
+    static string GetKey(this char[,] platform)
     {
-        var key = new char[platform.Length]; 
+        var key = new char[platform.Length];
 
         long i = 0;
 
-        foreach(char x in platform)
+        foreach (char x in platform)
         {
             key[i++] = x;
         }
