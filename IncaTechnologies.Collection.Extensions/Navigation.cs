@@ -7,6 +7,15 @@ namespace IncaTechnologies.Collection.Extensions
 
     public static class Navigation
     {
+        public static IPosition<T> Move<T>(this IPosition<T> position, Direction direction) => direction switch
+        {
+            Direction.Up => position.MoveUp(),
+            Direction.Down => position.MoveDown(),
+            Direction.Left => position.MoveLeft(),
+            Direction.Right => position.MoveRight(),
+            Direction.None => position,
+        };
+
         public static IPosition<T> MoveUp<T>(this IPosition<T> position)
             => new Position<T>(position.Array, position.Row - 1, position.Column);
 

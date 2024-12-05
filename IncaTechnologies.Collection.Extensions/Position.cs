@@ -2,8 +2,6 @@
 
 namespace IncaTechnologies.Collection.Extensions
 {
-
-
     public interface IPosition<T> : IEquatable<IPosition<T>>
     {
         T[,] Array { get; }
