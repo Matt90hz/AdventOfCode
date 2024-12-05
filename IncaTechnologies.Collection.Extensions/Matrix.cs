@@ -8,24 +8,36 @@ namespace IncaTechnologies.Collection.Extensions
     {
         public static T[,] RotateCounterClockwise<T>(this T[,] @this)
         {
-            var reverse = @this
-                .GetRows()
-                .Select(x => x.Reverse())
-                .ToMultidimensionalArray();
+            long rows = @this.GetLongLength(0);
+            long cols = @this.GetLongLength(1);
+            T[,] rotatedMatrix = new T[cols, rows]; 
 
-            var turn = reverse.GetColumns().ToMultidimensionalArray();
+            for (long r = 0; r < rows; r++) 
+            { 
+                for (long c = 0; c < cols; c++)
+                { 
+                    rotatedMatrix[cols - c - 1, r] = @this[r, c]; 
+                } 
+            }
 
-            return turn;
+            return rotatedMatrix;
         }
 
         public static T[,] RotateClockwise<T>(this T[,] @this)
         {
-            var turn = @this
-                .GetColumns()
-                .Select(x => x.Reverse())
-                .ToMultidimensionalArray();
+            long rows = @this.GetLongLength(0); 
+            long cols = @this.GetLongLength(1); 
+            T[,] rotatedMatrix = new T[cols, rows]; 
 
-            return turn;
+            for (long r = 0; r < rows; r++) 
+            { 
+                for (long c = 0; c < cols; c++) 
+                { 
+                    rotatedMatrix[c, rows - 1 - r] = @this[r, c]; 
+                } 
+            }
+
+            return rotatedMatrix;
         }
 
         public static T[,] AddRow<T>(this T[,] @this, IEnumerable<T> row, long? index = null)
