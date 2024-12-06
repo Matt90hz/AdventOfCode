@@ -23,6 +23,19 @@ namespace IncaTechnologies.Collection.Extensions
             Column = column;
         }
 
+        public readonly void Deconstruct(out T[,] array, out long row, out long column)
+        {
+            array = Array;
+            row = Row;
+            column = Column;
+        }
+
+        public readonly void Deconstruct(out long row, out long column)
+        {
+            row = Row;
+            column = Column;
+        }
+
         public readonly bool Equals(Position<T> other) => Row == other.Row && Column == other.Column;
 
         public override readonly bool Equals(object obj) => obj is Position<T> other && Equals(other);
