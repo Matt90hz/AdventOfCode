@@ -31,18 +31,19 @@ public static class GuardGallivant
             .Select(pos => map.Select((x, _pos) => _pos == pos ? 'O' : x));
 
         int count = 0;
+        var (row, col) = map.FindPosition('^') ?? default;
 
         Parallel.ForEach(possibleMaps, x =>
         {
-            if (IsInfiniteLoop(x)) count++;         
+            if (IsInfiniteLoop(x, row, col)) count++;         
         });
 
         return count;
     }
 
-    public static bool IsInfiniteLoop(char[,] map)
+    public static bool IsInfiniteLoop(char[,] map, long row, long col)
     {
-        var guard = map.FindPosition('^') ?? default;
+        var guard = map.GetPosition(row, col);
 
         guard.Value = '.';
 
@@ -50,9 +51,7 @@ public static class GuardGallivant
 
         while (guard.TryMove(direction, out var next))
         {
-            var n = next.Value;
-
-            switch ((n, direction))
+            switch ((next.Value, direction))
             {
                 case ('.', _):
                     guard = next;
