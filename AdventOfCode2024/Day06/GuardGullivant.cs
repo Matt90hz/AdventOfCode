@@ -30,9 +30,12 @@ public static class GuardGallivant
             .Where(pos => map[pos.row, pos.col] == '.' && drawn[pos.row, pos.col] == 'X')
             .Select(pos => map.Select((x, _pos) => _pos == pos ? 'O' : x));
 
-        var infiniteMaps = possibleMaps.Where(IsInfiniteLoop);
+        int count = 0;
 
-        var count = infiniteMaps.Count();
+        Parallel.ForEach(possibleMaps, x =>
+        {
+            if (IsInfiniteLoop(x)) count++;         
+        });
 
         return count;
     }
@@ -41,17 +44,17 @@ public static class GuardGallivant
     {
         var guard = map.FindPosition('^') ?? default;
 
-        guard.Value = 'X';
+        guard.Value = '.';
 
         var direction = Direction.Up;
 
         while (guard.TryMove(direction, out var next))
-        {          
+        {
             var n = next.Value;
 
             switch ((n, direction))
             {
-                case ('.' or 'X', _):
+                case ('.', _):
                     guard = next;
                     break;
                 case ('^', Direction.Up)
@@ -60,21 +63,13 @@ public static class GuardGallivant
                     or ('<', Direction.Left):
                     return true;
                 default:
-                    next.Value = direction switch
+                    (next.Value, direction) = direction switch
                     {
-                        Direction.Up => '^',
-                        Direction.Down => 'v',
-                        Direction.Right => '>',
-                        Direction.Left => '<',
-                        _ => '#'
-                    };
-                    direction = direction switch
-                    {
-                        Direction.Up => Direction.Right,
-                        Direction.Down => Direction.Left,
-                        Direction.Right => Direction.Down,
-                        Direction.Left => Direction.Up,
-                        _ => direction
+                        Direction.Up => ('^', Direction.Right),
+                        Direction.Down => ('v', Direction.Left),
+                        Direction.Right => ('>', Direction.Down),
+                        Direction.Left => ('<', Direction.Up),
+                        _ => ('#', direction)
                     };
                     break;
             }
