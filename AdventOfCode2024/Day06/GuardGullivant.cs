@@ -1,11 +1,4 @@
-﻿using AdventOfCode2024.Day05;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AdventOfCode2024.Day06;
+﻿namespace AdventOfCode2024.Day06;
 public static class GuardGallivant
 {
     public static int CountPositions(string input)
