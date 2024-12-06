@@ -20,9 +20,9 @@ namespace IncaTechnologies.Collection.Extensions
             return new Position<T>(@this, row, column);
         }
 
-        public static IPosition<T>? FindPosition<T>(this T @this, T[,] source, IEqualityComparer<T>? comparer = default) where T : class
+        public static IPosition<T>? FindPosition<T>(this T[,] source, T value, IEqualityComparer<T>? comparer = default)
         {
-            if (@this is null) return null;
+            if (value is null) return null;
 
             comparer ??= EqualityComparer<T>.Default;
 
@@ -32,7 +32,7 @@ namespace IncaTechnologies.Collection.Extensions
                 {
                     if (source[i, j] is null) continue;
 
-                    if (comparer.Equals(source[i, j], @this)) return new Position<T>(source, i, j);
+                    if (comparer.Equals(source[i, j], value)) return new Position<T>(source, i, j);
                 }
             }
 

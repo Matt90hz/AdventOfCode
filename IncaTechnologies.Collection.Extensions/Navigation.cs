@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace IncaTechnologies.Collection.Extensions
 {
@@ -27,6 +28,23 @@ namespace IncaTechnologies.Collection.Extensions
 
         public static IPosition<T> MoveRight<T>(this IPosition<T> position)
             => new Position<T>(position.Array, position.Row, position.Column + 1);
+
+        public static bool TryMove<T>(this IPosition<T> position, Direction direction, out IPosition<T> @out)
+        {
+            @out = position;
+
+            var success = direction switch
+            {
+                Direction.Up => position.TryMoveUp(out @out),
+                Direction.Down => position.TryMoveDown(out @out),
+                Direction.Left => position.TryMoveLeft(out @out),
+                Direction.Right => position.TryMoveRight(out @out),
+                Direction.None => true,
+                _ => throw new NotImplementedException($"{direction} not implemented")
+            };
+
+            return success;
+        }
 
         public static bool TryMoveUp<T>(this IPosition<T> position, out IPosition<T> @out)
         {
