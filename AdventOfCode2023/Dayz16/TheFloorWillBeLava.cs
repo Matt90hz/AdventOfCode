@@ -26,7 +26,7 @@ abstract record Splitter : ContraptionObject;
 record Vertical : Splitter;
 record Horizontal : Splitter;
 
-record Beam(IPosition<ContraptionObject> Position, Direction Direction);
+record Beam(Position<ContraptionObject> Position, Direction Direction);
 
 internal static class TheFloorWillBeLava
 {

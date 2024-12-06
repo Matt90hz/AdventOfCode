@@ -8,7 +8,7 @@ namespace IncaTechnologies.Collection.Extensions
 
     public static class Navigation
     {
-        public static IPosition<T> Move<T>(this IPosition<T> position, Direction direction) => direction switch
+        public static Position<T> Move<T>(this Position<T> position, Direction direction) => direction switch
         {
             Direction.Up => position.MoveUp(),
             Direction.Down => position.MoveDown(),
@@ -17,19 +17,31 @@ namespace IncaTechnologies.Collection.Extensions
             Direction.None => position,
         };
 
-        public static IPosition<T> MoveUp<T>(this IPosition<T> position)
-            => new Position<T>(position.Array, position.Row - 1, position.Column);
+        public static Position<T> MoveUp<T>(this Position<T> position)
+        {
+            position.Row--;
+            return position;
+        }
 
-        public static IPosition<T> MoveDown<T>(this IPosition<T> position)
-            => new Position<T>(position.Array, position.Row + 1, position.Column);
+        public static Position<T> MoveDown<T>(this Position<T> position)
+        {
+            position.Row++;
+            return position;
+        }
 
-        public static IPosition<T> MoveLeft<T>(this IPosition<T> position)
-            => new Position<T>(position.Array, position.Row, position.Column - 1);
+        public static Position<T> MoveLeft<T>(this Position<T> position)
+        {
+            position.Column--;
+            return position;
+        }
 
-        public static IPosition<T> MoveRight<T>(this IPosition<T> position)
-            => new Position<T>(position.Array, position.Row, position.Column + 1);
+        public static Position<T> MoveRight<T>(this Position<T> position)
+        {
+            position.Column++;
+            return position;
+        }
 
-        public static bool TryMove<T>(this IPosition<T> position, Direction direction, out IPosition<T> @out)
+        public static bool TryMove<T>(this Position<T> position, Direction direction, out Position<T> @out)
         {
             @out = position;
 
@@ -46,7 +58,7 @@ namespace IncaTechnologies.Collection.Extensions
             return success;
         }
 
-        public static bool TryMoveUp<T>(this IPosition<T> position, out IPosition<T> @out)
+        public static bool TryMoveUp<T>(this Position<T> position, out Position<T> @out)
         {
             bool isInbound = position.Row > 0;
 
@@ -62,7 +74,7 @@ namespace IncaTechnologies.Collection.Extensions
             }
         }
 
-        public static bool TryMoveDown<T>(this IPosition<T> position, out IPosition<T> @out)
+        public static bool TryMoveDown<T>(this Position<T> position, out Position<T> @out)
         {
             bool isInbound = position.Row < position.Array.GetLongLength(0) - 1;
 
@@ -78,7 +90,7 @@ namespace IncaTechnologies.Collection.Extensions
             }
         }
 
-        public static bool TryMoveLeft<T>(this IPosition<T> position, out IPosition<T> @out)
+        public static bool TryMoveLeft<T>(this Position<T> position, out Position<T> @out)
         {
             bool isInbound = position.Column > 0;
 
@@ -94,7 +106,7 @@ namespace IncaTechnologies.Collection.Extensions
             }
         }
 
-        public static bool TryMoveRight<T>(this IPosition<T> position, out IPosition<T> @out)
+        public static bool TryMoveRight<T>(this Position<T> position, out Position<T> @out)
         {
             bool isInbound = position.Column < position.Array.GetLongLength(1) - 1;
 
@@ -110,7 +122,7 @@ namespace IncaTechnologies.Collection.Extensions
             }
         }
 
-        public static bool TryGetValue<T>(this IPosition<T> position, out T @out)
+        public static bool TryGetValue<T>(this Position<T> position, out T @out)
         {
             @out = default!;
 
@@ -125,17 +137,17 @@ namespace IncaTechnologies.Collection.Extensions
             return true;
         }
 
-        public static Direction GetLastDirection<T>(this IEnumerable<IPosition<T>> path)
+        public static Direction GetLastDirection<T>(this IEnumerable<Position<T>> path)
         {
             var last = path.Last();
-            var beforeLast = path.SkipLast(1).LastOrDefault();
+            var beforeLast = path.SkipLast(1);
 
-            if (beforeLast is null) return Direction.None;
-
-            return GetDirection(beforeLast, last);
+            return beforeLast.Any() is false 
+                ? Direction.None 
+                : GetDirection(beforeLast.Last(), last);
         }
 
-        public static Direction GetDirection<T>(IPosition<T> first, IPosition<T> next)
+        public static Direction GetDirection<T>(Position<T> first, Position<T> next)
         {
             var direction = (first.Row, first.Column, next.Row, next.Column) switch
             {
@@ -147,7 +159,7 @@ namespace IncaTechnologies.Collection.Extensions
             return direction;
         }
 
-        public static bool IsBorder<T>(this IPosition<T> position)
+        public static bool IsBorder<T>(this Position<T> position)
         {
             var isBorder = position.Row == 0
                 || position.Column == 0

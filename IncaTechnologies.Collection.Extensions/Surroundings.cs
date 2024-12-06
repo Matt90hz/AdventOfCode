@@ -4,7 +4,7 @@ namespace IncaTechnologies.Collection.Extensions
 {
     public static class Surroundings
     {
-        public static IEnumerable<IPosition<T>> GetNeighbors<T>(this IPosition<T> position)
+        public static IEnumerable<Position<T>> GetNeighbors<T>(this Position<T> position)
         {
             if (position.TryMoveUp(out var up))
             {
@@ -25,7 +25,7 @@ namespace IncaTechnologies.Collection.Extensions
             if (position.TryMoveLeft(out var left)) yield return left;
         }
 
-        public static IEnumerable<IPosition<T>> GetAdjacent<T>(this IPosition<T> position)
+        public static IEnumerable<Position<T>> GetAdjacent<T>(this Position<T> position)
         {
             if (position.TryMoveUp(out var up)) yield return up;
             if (position.TryMoveRight(out var right)) yield return right;

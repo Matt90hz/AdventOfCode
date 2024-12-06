@@ -2,32 +2,16 @@
 
 namespace IncaTechnologies.Collection.Extensions
 {
-    public interface IPosition<T> : IEquatable<IPosition<T>>
-    {
-        T[,] Array { get; }
-
-        long Row { get; }
-
-        long Column { get; }
-
-        T Value
-        {
-            get => Array[Row, Column];
-            set => Array[Row, Column] = value;
-        }
-
-    }
-
-    internal class Position<T> : IPosition<T>, IEquatable<IPosition<T>>
+    public struct Position<T> : IEquatable<Position<T>>
     {
         public T[,] Array { get; }
 
-        public long Row { get; }
+        public long Row { get; internal set; }
 
-        public long Column { get; }
+        public long Column { get; internal set; }
 
-        public T Value
-        {
+        public readonly T Value
+        { 
             get => Array[Row, Column];
             set => Array[Row, Column] = value;
         }
@@ -39,21 +23,13 @@ namespace IncaTechnologies.Collection.Extensions
             Column = column;
         }
 
-        public bool Equals(IPosition<T> other) => Row == other.Row && Column == other.Column;
+        public readonly bool Equals(Position<T> other) => Row == other.Row && Column == other.Column;
 
-        public bool Equals(Position<T> other) => Row == other.Row && Column == other.Column;
+        public override readonly bool Equals(object obj) => obj is Position<T> other && Equals(other);
 
-        public override bool Equals(object obj) => obj is IPosition<T> other && Equals(other);
+        public readonly override string ToString() => $"[{Row}, {Column}] {Value}";
 
-        public override string ToString()
-        {
-            return $"[{Row}, {Column}] {Value}";
-        }
-
-        public override int GetHashCode() //to do
-        {
-            return base.GetHashCode();
-        }
+        public override readonly int GetHashCode() => base.GetHashCode(); // to do
 
         public static bool operator ==(Position<T> x, Position<T> y) => x.Equals(y);
 

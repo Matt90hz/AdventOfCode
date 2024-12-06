@@ -4,7 +4,7 @@ namespace IncaTechnologies.Collection.Extensions
 {
     public static class Coordinates
     {
-        public static IEnumerable<IPosition<T>> GetPositions<T>(this T[,] @this)
+        public static IEnumerable<Position<T>> GetPositions<T>(this T[,] @this)
         {
             for (long i = 0; i < @this.GetLongLength(0); i++)
             {
@@ -15,12 +15,12 @@ namespace IncaTechnologies.Collection.Extensions
             }
         }
 
-        public static IPosition<T> GetPosition<T>(this T[,] @this, long row, long column)
+        public static Position<T> GetPosition<T>(this T[,] @this, long row, long column)
         {
             return new Position<T>(@this, row, column);
         }
 
-        public static IPosition<T>? FindPosition<T>(this T[,] source, T value, IEqualityComparer<T>? comparer = default)
+        public static Position<T>? FindPosition<T>(this T[,] source, T value, IEqualityComparer<T>? comparer = default)
         {
             if (value is null) return null;
 

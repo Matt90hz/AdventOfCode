@@ -4,67 +4,79 @@ namespace IncaTechnologies.Collection.Extensions
 {
     public static class Compass
     {
-        public static IEnumerable<IPosition<T>> GetNorth<T>(this IPosition<T> position)
+        public static IEnumerable<Position<T>> GetNorth<T>(this Position<T> position)
         {
             for (long i = position.Row - 1; i >= 0; i--)
             {
-                yield return position.Array.GetPosition(i, position.Column);
+                position.Row = i;
+                yield return position;
             }
         }
 
-        public static IEnumerable<IPosition<T>> GetSouth<T>(this IPosition<T> position)
+        public static IEnumerable<Position<T>> GetSouth<T>(this Position<T> position)
         {
             for (long i = position.Row + 1; i < position.Array.GetLongLength(0); i++)
             {
-                yield return position.Array.GetPosition(i, position.Column);
+                position.Row = i;
+                yield return position;
             }
         }
 
-        public static IEnumerable<IPosition<T>> GetEast<T>(this IPosition<T> position)
+        public static IEnumerable<Position<T>> GetEast<T>(this Position<T> position)
         {
             for (long i = position.Column + 1; i < position.Array.GetLongLength(1); i++)
             {
-                yield return position.Array.GetPosition(position.Row, i);
+                position.Column = i;
+                yield return position;
             }
         }
 
-        public static IEnumerable<IPosition<T>> GetWest<T>(this IPosition<T> position)
+        public static IEnumerable<Position<T>> GetWest<T>(this Position<T> position)
         {
             for (long i = position.Column - 1; i >= 0; i--)
             {
-                yield return position.Array.GetPosition(position.Row, i);
+                position.Column = i;
+                yield return position;
             }
         }
 
-        public static IEnumerable<IPosition<T>> GetNorthEast<T>(this IPosition<T> position)
+        public static IEnumerable<Position<T>> GetNorthEast<T>(this Position<T> position)
         {
             for (long i = position.Row - 1, j = position.Column + 1; i >= 0 && j < position.Array.GetLongLength(1); i--, j++)
             {
-                yield return position.Array.GetPosition(i, j);
+                position.Row = i;
+                position.Column = j;
+                yield return position;
             }
         }
 
-        public static IEnumerable<IPosition<T>> GetNorthWest<T>(this IPosition<T> position)
+        public static IEnumerable<Position<T>> GetNorthWest<T>(this Position<T> position)
         {
             for (long i = position.Row - 1, j = position.Column - 1; i >= 0 && j >= 0; i--, j--)
             {
-                yield return position.Array.GetPosition(i, j);
+                position.Row = i;
+                position.Column = j;
+                yield return position;
             }
         }
 
-        public static IEnumerable<IPosition<T>> GetSouthEast<T>(this IPosition<T> position)
+        public static IEnumerable<Position<T>> GetSouthEast<T>(this Position<T> position)
         {
             for (long i = position.Row + 1, j = position.Column + 1; i < position.Array.GetLongLength(0) && j < position.Array.GetLongLength(1); i++, j++)
             {
-                yield return position.Array.GetPosition(i, j);
+                position.Row = i;
+                position.Column = j;
+                yield return position;
             }
         }
 
-        public static IEnumerable<IPosition<T>> GetSouthWest<T>(this IPosition<T> position)
+        public static IEnumerable<Position<T>> GetSouthWest<T>(this Position<T> position)
         {
             for (long i = position.Row + 1, j = position.Column - 1; i < position.Array.GetLongLength(0) && j >= 0; i++, j--)
             {
-                yield return position.Array.GetPosition(i, j);
+                position.Row = i;
+                position.Column = j;
+                yield return position;
             }
         }
     }

@@ -39,7 +39,7 @@ public static class GuardGallivant
 
     public static bool IsInfiniteLoop(char[,] map)
     {
-        var guard = map.FindPosition('^')!;
+        var guard = map.FindPosition('^') ?? default;
 
         guard.Value = 'X';
 

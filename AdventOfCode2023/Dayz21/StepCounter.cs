@@ -86,7 +86,7 @@ internal static class StepCounter
         return PlotsReachable(start, remaningSteps);
     }
 
-    static int PlotsReachable(IPosition<char> start, long remaningSteps)
+    static int PlotsReachable(Position<char> start, long remaningSteps)
     {
         var reached = new[] { start };
 
@@ -99,17 +99,17 @@ internal static class StepCounter
         return reached.Length;
     }
 
-    static string Print(IPosition<char>[] reached, char[,] garden) => garden
+    static string Print(Position<char>[] reached, char[,] garden) => garden
         .Select((x, pos) => reached.Any(r => (r.Row, r.Column) == pos) ? 'O' : x)
         .ToFriendlyString();
 
 
-    static IPosition<char>[] Explore(IPosition<char>[] reached) => reached
+    static Position<char>[] Explore(Position<char>[] reached) => reached
         .SelectMany(MoveAround)
         .DistinctBy(pos => (pos.Row, pos.Column))
         .ToArray();
 
-    static IEnumerable<IPosition<char>> MoveAround(IPosition<char> position) => position
+    static IEnumerable<Position<char>> MoveAround(Position<char> position) => position
         .GetAdjacent()
         .Where(pos => pos.Value == '.' || pos.Value == 'S');
 

@@ -55,7 +55,7 @@ public static class CeresSearch
         return count;
     }
 
-    private static int CountIfXMAS(char[,] letters, int row, int col, Func<IPosition<char>, IEnumerable<IPosition<char>>> direction)
+    private static int CountIfXMAS(char[,] letters, int row, int col, Func<Position<char>, IEnumerable<Position<char>>> direction)
     {
         if (letters[row, col] != 'X') return 0;
 

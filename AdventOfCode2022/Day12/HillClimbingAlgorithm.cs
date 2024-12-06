@@ -17,7 +17,7 @@ static class HillClimbingAlgorithm
 
         var distances = map.Select(c => c.IsStartPosition() ? 0 : -1);
 
-        Queue<IPosition<char>> positionsToEvaluate = new (map.GetPositions().Where(pos => pos.Value.IsStartPosition()));
+        Queue<Position<char>> positionsToEvaluate = new (map.GetPositions().Where(pos => pos.Value.IsStartPosition()));
 
         while (positionsToEvaluate.Count > 0)
         {
@@ -54,7 +54,7 @@ static class HillClimbingAlgorithm
 
         var distances = map.Select(c => c.IsBestSignalSpot() ? 0 : -1);
 
-        Queue<IPosition<char>> positionsToEvaluate = new(map.GetPositions().Where(pos => pos.Value.IsBestSignalSpot()));
+        Queue<Position<char>> positionsToEvaluate = new(map.GetPositions().Where(pos => pos.Value.IsBestSignalSpot()));
 
         while (positionsToEvaluate.Count > 0)
         {

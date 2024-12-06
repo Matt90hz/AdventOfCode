@@ -14,7 +14,7 @@ namespace AdventOfCode2023.Dayz17;
 
 readonly record struct Block(int HeatLoss);
 
-record Path(IPosition<Block> Position, Direction Direction, int HeatLoss, Path? From)
+record Path(Position<Block> Position, Direction Direction, int HeatLoss, Path? From)
 {
     public override string ToString()
     {
@@ -101,7 +101,7 @@ internal static class ClumsyCrucible
         return reachable;
     }
 
-    static bool CanUltraReach(this Path from, IPosition<Block> to)
+    static bool CanUltraReach(this Path from, Position<Block> to)
     {
         //border
         if (to.Value.HeatLoss > 9) return false;
@@ -214,7 +214,7 @@ internal static class ClumsyCrucible
         return reachable;
     }
 
-    static bool CanReach(this Path from, IPosition<Block> to)
+    static bool CanReach(this Path from, Position<Block> to)
     {
         //border
         if (to.Value.HeatLoss > 9) return false;
@@ -247,12 +247,12 @@ internal static class ClumsyCrucible
     }
 
     //make it generic
-    static IEnumerable<Direction> GetDirections(this IEnumerable<IPosition<Block>> path) => path
+    static IEnumerable<Direction> GetDirections(this IEnumerable<Position<Block>> path) => path
         .Skip(1)
         .Select((x, i) => GetDirection(path.ElementAt(i), x));
 
     //make it generic
-    static Direction GetDirection(IPosition<Block> first, IPosition<Block> second) =>
+    static Direction GetDirection(Position<Block> first, Position<Block> second) =>
         (first.Column > second.Column, first.Row > second.Row, first.Column == second.Column, first.Row == second.Row) switch
         {
             (true, _, _, true) => Direction.Left,
@@ -287,7 +287,7 @@ internal static class ClumsyCrucible
         return x.ToFriendlyString();
     }
 
-    static string ToFriendlyString(this IEnumerable<IPosition<Block>> path)
+    static string ToFriendlyString(this IEnumerable<Position<Block>> path)
     {
         var blocks = path.First().Array;
         var pathPositions = path.Select(x => (x.Row, x.Column)).ToArray();
@@ -301,7 +301,7 @@ internal static class ClumsyCrucible
         return x.ToFriendlyString();
     }
 
-    static string ToFriendlyString(this IEnumerable<IEnumerable<IPosition<Block>>> paths)
+    static string ToFriendlyString(this IEnumerable<IEnumerable<Position<Block>>> paths)
     {
         var sb = new StringBuilder();
 

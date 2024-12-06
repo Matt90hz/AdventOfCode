@@ -102,7 +102,7 @@ internal static class LongWalk
         return connectedNodes;
     }
 
-    static (int Row, int Col, int Len) FindConnectedNode(IPosition<char> position, IPosition<char> next)
+    static (int Row, int Col, int Len) FindConnectedNode(Position<char> position, Position<char> next)
     {
         int len = 1;
 
@@ -120,7 +120,7 @@ internal static class LongWalk
         return ((int)next.Row, (int)next.Column, len);
     }
 
-    static IEnumerable<IPosition<char>> NextPossibleSteps(IPosition<char> position, IPosition<char> previous)
+    static IEnumerable<Position<char>> NextPossibleSteps(Position<char> position, Position<char> previous)
     {
         var nextPossibleSteps = position
             .GetAdjacent()
@@ -129,7 +129,7 @@ internal static class LongWalk
         return nextPossibleSteps;
     }
 
-    static bool IsPath(this IPosition<char> pos) => pos.Value != '#' && pos.Value != '@';
+    static bool IsPath(this Position<char> pos) => pos.Value != '#' && pos.Value != '@';
 
     //PART 2 TAKE 1
     public static int LongestHikeNoSlope(string input)
@@ -143,12 +143,12 @@ internal static class LongWalk
         return longestPath - 1;
     }
 
-    static IEnumerable<IEnumerable<IPosition<char>>> GetHikingPathsNoSlopes(char[,] island)
+    static IEnumerable<IEnumerable<Position<char>>> GetHikingPathsNoSlopes(char[,] island)
     {
         var startPosition = island.GetPosition(1, 2);
 
-        Queue<IEnumerable<IPosition<char>>> pathsToExplore = new();
-        List<IEnumerable<IPosition<char>>> pathsExplored = new();
+        Queue<IEnumerable<Position<char>>> pathsToExplore = new();
+        List<IEnumerable<Position<char>>> pathsExplored = new();
 
         pathsToExplore.Enqueue(new[] { startPosition });
 
@@ -182,12 +182,12 @@ internal static class LongWalk
     }
 
     //PART 1
-    static IEnumerable<IEnumerable<IPosition<char>>> GetHikingPaths(char[,] island)
+    static IEnumerable<IEnumerable<Position<char>>> GetHikingPaths(char[,] island)
     {
         var startPosition = island.GetPosition(1, 2);
 
-        Queue<IEnumerable<IPosition<char>>> pathsToExplore = new();
-        List<IEnumerable<IPosition<char>>> pathsExplored = new();
+        Queue<IEnumerable<Position<char>>> pathsToExplore = new();
+        List<IEnumerable<Position<char>>> pathsExplored = new();
 
         pathsToExplore.Enqueue(new[] { startPosition });
 
@@ -207,16 +207,16 @@ internal static class LongWalk
         return pathsExplored;
     }
 
-    static bool ExitFound(this char[,] island, IEnumerable<IPosition<char>> path) => path.Last().Row == island.GetLength(0) - 2;
+    static bool ExitFound(this char[,] island, IEnumerable<Position<char>> path) => path.Last().Row == island.GetLength(0) - 2;
 
-    static IEnumerable<IEnumerable<IPosition<char>>> Explore(IEnumerable<IPosition<char>> path)
+    static IEnumerable<IEnumerable<Position<char>>> Explore(IEnumerable<Position<char>> path)
     {
         var currStep = path.Last();
 
         return currStep.Value == '.' ? ExplorePath(currStep, path) : ExploreSlope(currStep, path);
     }
 
-    static IEnumerable<IEnumerable<IPosition<char>>> ExploreSlope(IPosition<char> currStep, IEnumerable<IPosition<char>> path)
+    static IEnumerable<IEnumerable<Position<char>>> ExploreSlope(Position<char> currStep, IEnumerable<Position<char>> path)
     {
         var direction = path.GetLastDirection();
 
@@ -229,7 +229,7 @@ internal static class LongWalk
         };
 
         if (path.Contains(nextStep))
-            return Enumerable.Empty<IEnumerable<IPosition<char>>>();
+            return Enumerable.Empty<IEnumerable<Position<char>>>();
 
         var nextPath = path
             .Append(nextStep)
@@ -239,7 +239,7 @@ internal static class LongWalk
 
     }
 
-    static IEnumerable<IEnumerable<IPosition<char>>> ExplorePath(IPosition<char> currStep, IEnumerable<IPosition<char>> path)
+    static IEnumerable<IEnumerable<Position<char>>> ExplorePath(Position<char> currStep, IEnumerable<Position<char>> path)
     {
         var nextPaths = currStep
             .GetAdjacent()

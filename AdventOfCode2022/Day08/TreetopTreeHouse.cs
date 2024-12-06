@@ -24,13 +24,13 @@ static class TreetopTreeHouse
         .GetPositions()
         .Max(position => position.GetViewScore());
 
-    static int GetViewScore(this IPosition<int> tree) => new[] { tree.GetNorth(), tree.GetSouth(), tree.GetWest(), tree.GetEast() }
+    static int GetViewScore(this Position<int> tree) => new[] { tree.GetNorth(), tree.GetSouth(), tree.GetWest(), tree.GetEast() }
         .Select(otherTrees => otherTrees
             .TakeWhile(otherTree => otherTree.IsBorder() is false && otherTree.Value < tree.Value)
             .Count() + 1)
         .Aggregate((total, score) => total *= score);
 
-    static bool IsVisible(this IPosition<int> tree) => new[] { tree.GetNorth(), tree.GetSouth(), tree.GetWest(), tree.GetEast() }
+    static bool IsVisible(this Position<int> tree) => new[] { tree.GetNorth(), tree.GetSouth(), tree.GetWest(), tree.GetEast() }
         .Any(otherTrees => otherTrees.All(otherTree => otherTree.Value < tree.Value));
 }
 
