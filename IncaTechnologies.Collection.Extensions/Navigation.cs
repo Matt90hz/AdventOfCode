@@ -168,5 +168,15 @@ namespace IncaTechnologies.Collection.Extensions
 
             return isBorder;
         }
+
+        public static bool IsOutOfBound<T>(this Position<T> position)
+        {
+            var isBorder = position.Row < 0
+                || position.Column < 0
+                || position.Row >= position.Array.GetLongLength(0)
+                || position.Column >= position.Array.GetLongLength(1);
+
+            return isBorder;
+        }
     }
 }
