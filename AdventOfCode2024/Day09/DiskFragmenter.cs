@@ -83,7 +83,7 @@ public static class DiskFragmenter
         return checksum;
     }
 
-    public static IEnumerable<int> GetSpaceIndexes(int[] blocks)
+    private static IEnumerable<int> GetSpaceIndexes(int[] blocks)
     {
         for (int i = 0; i < blocks.Length; i++)
         {
@@ -92,7 +92,7 @@ public static class DiskFragmenter
         }
     }
 
-    public static IEnumerable<int> GetFileIndexes(int[] blocks)
+    private static IEnumerable<int> GetFileIndexes(int[] blocks)
     {
         yield return blocks.Length - 1;
 
@@ -100,150 +100,6 @@ public static class DiskFragmenter
         {
             if (blocks[i] >= 0 && blocks[i + 1] != blocks[i]) yield return i;
         }
-    }
-
-    public static long CompactedPreserveFilesChecksumSlowSlow(string input)
-    {
-        var blocks = input
-            .Select((x, i) => i % 2 == 0
-                ? (Id: i / 2, Size: x - '0', IsFile: true)
-                : (Id: i / 2, Size: x - '0', IsFile: false))
-            .ToList();
-
-        var files = blocks.Where(x => x.IsFile).Reverse().ToArray();
-        var spaces = blocks.Where(x => !x.IsFile);
-
-        foreach (var file in files)
-        {
-            var (idf, size, _) = file;
-
-            foreach (var space in spaces.ToArray())
-            {
-                var (id, empty, _) = space;
-
-                var indexSpace = blocks.IndexOf(space);
-                var indexFile = blocks.IndexOf(file);
-
-                if (indexSpace > indexFile) break;
-
-                var reminder = empty - size;
-
-                if (reminder < 0) continue;
-
-                blocks.RemoveAt(indexSpace);
-                blocks.Insert(indexSpace, file);
-
-                if (reminder > 0)
-                {
-                    blocks.Insert(indexSpace + 1, (id, reminder, false));
-                    indexFile++;
-                }
-
-                blocks.RemoveAt(indexFile);
-                blocks.Insert(indexFile, (id, size, false));
-
-                break;
-            }
-        }
-
-        var checksum = blocks.SelectMany((x, i) =>
-        {
-            var (id, size, isFile) = x;
-
-            var block = isFile
-                ? Enumerable.Range(0, size).Select(_ => id)
-                : Enumerable.Range(0, size).Select(_ => -1);
-
-            return block;
-        });
-
-        return Checksum(checksum.ToArray());
-    }
-
-    public static long CompactedPreserveFilesChecksumSlow(string input)
-    {
-        var blocks = ParseBlocks(input);
-
-        int i = 0;
-        int j = blocks.Length - 1;
-        int size = GetSize(blocks, j);
-
-        while (blocks[j] != 0)
-        {
-            var curr = blocks[i];
-            var last = blocks[j];
-
-            if (curr >= 0)
-            {
-                i++;
-            }
-
-            if (last < 0)
-            {
-                j--;
-                size = GetSize(blocks, j);
-            }
-
-            if (curr == last)
-            {
-                i = 0;
-                j -= size;
-                size = GetSize(blocks, j);
-                continue;
-            }
-
-            int space = GetSpace(blocks, i);
-
-            if (space < size)
-            {
-                i += space;
-                continue;
-            }
-
-            for (int k = 0; k < size; k++, i++, j--)
-            {
-                blocks[i] = last;
-                blocks[j] = -1;
-            }
-
-            size = GetSize(blocks, j);
-            i = 0;
-        }
-
-        var checksum = Checksum(blocks);
-
-        return checksum;
-    }
-
-    private static int GetSize(int[] blocks, int j)
-    {
-        var id = blocks[j];
-
-        if (id < 0) return 0;
-
-        var count = 0;
-
-        for (; j >= 0; j--)
-        {
-            if (blocks[j] != id) break;
-            count++;
-        }
-
-        return count;
-    }
-
-    private static int GetSpace(int[] blocks, int i)
-    {
-        var length = blocks.Length;
-        var count = 0;
-
-        for (; i < length; i++)
-        {
-            if (blocks[i] >= 0) break;
-            count++;
-        }
-
-        return count;
     }
 
     public static long Checksum(int[] blocks)
