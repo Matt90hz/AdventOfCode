@@ -58,21 +58,28 @@ public static class DiskFragmenter
         var spaceIndexes = GetSpaceIndexes(blocks).ToArray();
         var fileIndexes = GetFileIndexes(blocks).Reverse().ToArray();
 
-        for (int f = files.Length - 1; f > 0; f--)
+        var filesLength = files.Length - 1;
+
+        for (int f = filesLength; f > 0; f--)
         {
-            for (int s = 0; s < spaces.Length - (files.Length - f) + 1; s++)
+            var spacesLength = spaces.Length - (files.Length - f) + 1;
+
+            for (int s = 0; s < spacesLength; s++)
             {
-                if (spaces[s] < files[f]) continue;
+                var size = files[f];
+
+                if (spaces[s] < size) continue;
                 
-                for (int m = 0; m < files[f]; m++)
+                for (int m = 0; m < size; m++)
                 {
-                    var x = blocks[fileIndexes[f] - m];
-                    blocks[spaceIndexes[s] + m] = x;
-                    blocks[fileIndexes[f] - m] = -1;
+                    var fi = fileIndexes[f] - m;
+
+                    blocks[spaceIndexes[s] + m] = blocks[fi];
+                    blocks[fi] = -1;
                 }
 
-                spaces[s] -= files[f];
-                spaceIndexes[s] += files[f];
+                spaces[s] -= size;
+                spaceIndexes[s] += size;
 
                 break;
             }
