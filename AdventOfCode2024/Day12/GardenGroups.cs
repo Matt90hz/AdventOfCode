@@ -19,55 +19,36 @@ public static class GardenGroups
 
     private static int GetSides(this IEnumerable<Position<char>> region)
     {
-        int corners = 0;
+        var sides = region.Sum(x => 
+        { 
+            var corners = x.GetNeighbors().Where(n => IsCorner(n, x));
+            
+            return corners.Count();
+        });
 
-        foreach (var p in region) 
-        {
-            var extCorners = p
-                .GetNeighbors()
-                .Where(e => IsExternalCorner(e, p));
+        return sides;
 
-            var intCorners = p
-                .GetNeighbors()
-                .Where(n => n.Value != p.Value)
-                .Where(e => IsInternalCorner(e, p));
-
-            corners += (intCorners.Count() + extCorners.Count());
-        }
-
-        return corners;
-
-        static bool IsExternalCorner(Position<char> n, Position<char> p)
+        static bool IsCorner(Position<char> n, Position<char> p)
         {
             var commons = n.GetAdjacent().Intersect(p.GetAdjacent());
 
-            var isExternal = commons.Count() == 2 && commons.All(n => n.Value != p.Value);
+            var isCorner = commons.Count() == 2;
+            var isExternal = commons.All(n => n.Value != p.Value);
+            var isInternal = n.Value != p.Value && commons.All(n => n.Value == p.Value);
 
-            return isExternal;
-        }
-
-        static bool IsInternalCorner(Position<char> n, Position<char> p)
-        {
-            var commons = n.GetAdjacent().Intersect(p.GetAdjacent());
-
-            var isInternal = commons.Count() == 2 && commons.All(n => n.Value == p.Value);
-
-            return isInternal;
+            return isCorner && (isExternal || isInternal);
         }
     }
 
     private static int GetPerimeter(this IEnumerable<Position<char>> region)
     {
-        var sides = region.Select(x =>
+        var perimeter = region.Sum(x =>
         {
             var adjacent = x.GetAdjacent().Where(y => x.Value == y.Value);
-
             var sides = 4 - adjacent.Count();
 
             return sides;
         });
-
-        var perimeter = sides.Sum();
 
         return perimeter;
     }
