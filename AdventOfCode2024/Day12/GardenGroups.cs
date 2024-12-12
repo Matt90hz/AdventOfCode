@@ -1,7 +1,4 @@
-﻿using AdventOfCode2024.Day12;
-using Xunit.Abstractions;
-
-namespace AdventOfCode2024.Day12;
+﻿namespace AdventOfCode2024.Day12;
 public static class GardenGroups
 {
     public static int FencingCost(string input)
@@ -14,24 +11,56 @@ public static class GardenGroups
 
     public static int FencingDiscountCost(string input)
     {
-        var plot = ParsePlot(input);
-        var regions = plot.GetRegions();
+        var plot = ParsePlot(input).SurroundWith('#');
+        var regions = plot.GetRegions().Skip(1);
         var cost = regions.Sum(x => x.GetArea() * x.GetSides());
         return cost;
     }
 
     private static int GetSides(this IEnumerable<Position<char>> region)
     {
-        var border = region.Where(x => x.GetAdjacent().Any(y => x.Value))
+        int corners = 0;
+
+        foreach (var p in region) 
+        {
+            var extCorners = p
+                .GetNeighbors()
+                .Where(e => IsExternalCorner(e, p));
+
+            var intCorners = p
+                .GetNeighbors()
+                .Where(n => n.Value != p.Value)
+                .Where(e => IsInternalCorner(e, p));
+
+            corners += (intCorners.Count() + extCorners.Count());
+        }
+
+        return corners;
+
+        static bool IsExternalCorner(Position<char> n, Position<char> p)
+        {
+            var commons = n.GetAdjacent().Intersect(p.GetAdjacent());
+
+            var isExternal = commons.Count() == 2 && commons.All(n => n.Value != p.Value);
+
+            return isExternal;
+        }
+
+        static bool IsInternalCorner(Position<char> n, Position<char> p)
+        {
+            var commons = n.GetAdjacent().Intersect(p.GetAdjacent());
+
+            var isInternal = commons.Count() == 2 && commons.All(n => n.Value == p.Value);
+
+            return isInternal;
+        }
     }
 
     private static int GetPerimeter(this IEnumerable<Position<char>> region)
     {
         var sides = region.Select(x =>
         {
-            var adjacent = x
-                .GetAdjacent()
-                .Where(y => x.Value == y.Value);
+            var adjacent = x.GetAdjacent().Where(y => x.Value == y.Value);
 
             var sides = 4 - adjacent.Count();
 
@@ -73,9 +102,7 @@ public static class GardenGroups
 
             done[r, c] = true;
 
-            var adjacent = x
-                .GetAdjacent()
-                .Where(a => a.Value == x.Value && !done[a.Row, a.Column]);
+            var adjacent = x.GetAdjacent().Where(a => a.Value == x.Value && !done[a.Row, a.Column]);
 
             var region = new List<Position<char>>() { x };
 

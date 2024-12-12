@@ -35,10 +35,42 @@ public sealed class GardenGroupsTests
     }
 
     [Fact]
+    public void Part2_Test1()
+    {
+        var input = File.ReadAllText(@".\Day12\input_test1.txt");
+        var result = GardenGroups.FencingDiscountCost(input);
+        Assert.Equal(80, result);
+    }
+
+    [Fact]
+    public void Part2_Test2()
+    {
+        var input = File.ReadAllText(@".\Day12\input_test2.txt");
+        var result = GardenGroups.FencingDiscountCost(input);
+        Assert.Equal(436, result);
+    }
+
+    [Fact]
+    public void Part2_Test4()
+    {
+        var input = File.ReadAllText(@".\Day12\input_test4.txt");
+        var result = GardenGroups.FencingDiscountCost(input);
+        Assert.Equal(236, result);
+    }
+
+    [Fact]
+    public void Part2_Test5()
+    {
+        var input = File.ReadAllText(@".\Day12\input_test5.txt");
+        var result = GardenGroups.FencingDiscountCost(input);
+        Assert.Equal(368, result);
+    }
+
+    [Fact]
     public void Part2_Solution()
     {
         var input = File.ReadAllText(@".\Day12\input.txt");
-        var result = GardenGroups.FencingCost(input);
-        Assert.Equal(0, result);
+        var result = GardenGroups.FencingDiscountCost(input);
+        Assert.Equal(865662, result);
     }
 }
