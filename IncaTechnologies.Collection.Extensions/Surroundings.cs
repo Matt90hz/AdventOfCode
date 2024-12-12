@@ -19,7 +19,7 @@ namespace IncaTechnologies.Collection.Extensions
             {
                 if (down.TryMoveRight(out var downRight)) yield return downRight;
                 yield return down;
-                if (down.TryMoveRight(out var downLeft)) yield return downLeft;
+                if (down.TryMoveLeft(out var downLeft)) yield return downLeft;
             }
 
             if (position.TryMoveLeft(out var left)) yield return left;
