@@ -151,7 +151,7 @@ namespace IncaTechnologies.Collection.Extensions
         {
             var direction = (first.Row, first.Column, next.Row, next.Column) switch
             {
-                (var fr, var fc, var nr, var nc) when fr == nr && fc != nc => fc < nc ? Direction.Left : Direction.Right,
+                (var fr, var fc, var nr, var nc) when fr == nr && fc != nc => fc < nc ? Direction.Right : Direction.Left,
                 (var fr, var fc, var nr, var nc) when fc == nc && fr != nr => fr < nr ? Direction.Down : Direction.Up,
                 _ => Direction.None
             };
