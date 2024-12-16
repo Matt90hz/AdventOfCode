@@ -5,18 +5,128 @@ public static class WarehouseWoes
     public static int SumGPSCoordinates(string input)
     {
         var (map, moves) = ParseInput(input);
-        var simulation = moves.Select(x => Move(map, x)).ToArray();
-        var sum = simulation.Last().GetPositions().Sum(GPSCoordinate);
+
+        foreach (var move in moves) Move(map, move);
+
+        var sum = map.GetPositions().Sum(GPSCoordinate);
 
         return sum;
     }
 
-    private static int GPSCoordinate(Position<char> p)
+    public static int SumGPSCoordinatesBigWarehouse(string input)
     {
-        if(p.Value != 'O') return 0;
+        var (map, moves) = ParseInput(input);
+
+        var border = new[] { '#', '#' };
+        var empty = new[] { '.', '.' };
+        var obstacle = new[] { '[', ']' };
+        var robot = new[] { '@', '.' };
+
+        var mapConversion = map.GetRows().Select(x => x.SelectMany(x => x switch
+        {
+            '#' => border,
+            '.' => empty,
+            'O' => obstacle,
+            _ => robot
+        }));
+
+        var bigMap = mapConversion.ToMultidimensionalArray();
+
+        foreach (var move in moves) MoveBig(bigMap, move);
+
+        var sum = bigMap.GetPositions().Sum(GPSCoordinateBig);
+
+        var debug = bigMap.ToFriendlyString();
+
+        return sum;
+    }
+
+    private static char[,] MoveBig(char[,] map, char move)
+    {
+        var robot = map.FindPosition('@') ?? throw new ArgumentNullException(nameof(map));
+
+        var (next, direction) = move switch
+        {
+            '>' => (robot.MoveRight(), Direction.Right),
+            '<' => (robot.MoveLeft(), Direction.Left),
+            'v' => (robot.MoveDown(), Direction.Down),
+            _ => (robot.MoveUp(), Direction.Up),
+        };
+
+        switch (next.Value)
+        {
+            case '.':
+                next.Value = '@';
+                robot.Value = '.';
+                break;
+            case '[' or ']':
+                var connected = GetConnected(next, direction).ToArray();
+                var moved = connected.Select(x => x.Move(direction)).ToArray();
+                if (moved.Any(x => x is { Value: '#' })) break;
+                var conValues = connected.Select(x => x.Value).ToArray();
+                foreach (var c in connected) c.Value = '.';
+                foreach (var (i, m) in moved.Index()) m.Value = conValues[i];
+                next.Value = '@';
+                robot.Value = '.';
+                break;
+        }
+
+        return map;
+    }
+
+    private static IEnumerable<Position<char>> GetConnected(Position<char> next, Direction direction)
+    {
+        if (next.Value is not '[' and not ']') return [];
+
+        if (direction is Direction.Left)
+        {
+            return next
+                .GetWest()
+                .TakeWhile(x => x.Value is '[' or ']')
+                .Append(next);
+        }
+
+        if (direction is Direction.Right)
+        {
+            return next
+                .GetEast()
+                .TakeWhile(x => x.Value is '[' or ']')
+                .Append(next);
+        }
+
+        var adjacent = next.Value switch
+        {
+            '[' => next.MoveRight(),
+            _ => next.MoveLeft(),
+        };
+
+        var top = next.Move(direction);
+        var topAdjacent = adjacent.Move(direction);
+
+        var connected = (next.Value, top.Value) switch
+        {
+            (']', ']') or ('[', '[') => GetConnected(top, direction),
+            _ => GetConnected(top, direction).Concat(GetConnected(topAdjacent, direction)),
+        };
+
+        return connected.Append(next).Append(adjacent);
+    }
+
+    private static int GPSCoordinateBig(Position<char> p)
+    {
+        if (p.Value != '[') return 0;
 
         var (x, y) = p;
+        var gps = (x * 100) + y;
 
+        return (int)gps;
+    }
+
+    private static int GPSCoordinate(Position<char> p)
+    {
+        if (p.Value != 'O') return 0;
+
+        var (x, y) = p;
         var gps = (x * 100) + y;
 
         return (int)gps;
@@ -36,7 +146,7 @@ public static class WarehouseWoes
 
         var next = path.First();
 
-        switch (next.Value) 
+        switch (next.Value)
         {
             case '.':
                 next.Value = '@';

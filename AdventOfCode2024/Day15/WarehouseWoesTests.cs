@@ -27,18 +27,26 @@ public sealed class WarehouseWoesTests
     }
 
     [Fact]
-    public void Part2_Test()
+    public void Part2_Test1()
     {
-        var input = File.ReadAllText(@".\Day15\input_test.txt");
-        var result = WarehouseWoes.SumGPSCoordinates(input);
-        Assert.Equal(0, result);
+        var input = File.ReadAllText(@".\Day15\input_test3.txt");
+        var result = WarehouseWoes.SumGPSCoordinatesBigWarehouse(input);
+        Assert.Equal(618, result);
+    }
+
+    [Fact]
+    public void Part2_Test2()
+    {
+        var input = File.ReadAllText(@".\Day15\input_test2.txt");
+        var result = WarehouseWoes.SumGPSCoordinatesBigWarehouse(input);
+        Assert.Equal(9021, result);
     }
 
     [Fact]
     public void Part2_Solution()
     {
         var input = File.ReadAllText(@".\Day15\input.txt");
-        var result = WarehouseWoes.SumGPSCoordinates(input);
-        Assert.Equal(0, result);
+        var result = WarehouseWoes.SumGPSCoordinatesBigWarehouse(input);
+        Assert.Equal(1448458, result);
     }
 }
