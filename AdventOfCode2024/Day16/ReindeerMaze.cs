@@ -63,6 +63,115 @@ public static class ReindeerMaze
         throw new Exception("Exit noy found");
     }
 
+    public static int CountTilesBestPaths(string input)
+    {
+        var maze = ParseMaze(input);
+        var start = (maze.FindPosition('S') ?? throw new Exception("Start not found"), Direction.Right);
+
+        var path = new Path();
+        path.Push(start);
+
+        var priorityQueue = new PriorityQueue<Path, int>();
+        priorityQueue.Enqueue(path, 0);
+
+        var pathCache = new Dictionary<(Pos, Direction), Path>
+        {
+            { start, path }
+        };
+
+        var priorityCache = new Dictionary<(Pos, Direction), int>()
+        {
+            { start, 0 }
+        };
+
+        var bestPaths = new List<Path>();
+        var bestScore = int.MaxValue;
+
+        while (priorityQueue.TryDequeue(out path, out var pathScore))
+        {
+            var (headPos, headDir) = path.Peek();
+            //Animate(path);
+            if (headPos is { Value :'E' })
+            {
+                if(pathScore < bestScore) bestScore = pathScore;
+                bestPaths.Add(path);
+                continue;
+            }
+
+            if (pathScore > bestScore) break;
+
+            var nextPaths = NextPaths(path);
+
+            foreach (var (nextPath, scoreIncrease) in nextPaths)
+            {
+                var newScore = pathScore + scoreIncrease;
+                var cacheKey = nextPath.Peek();
+
+                var isCached = priorityCache.TryGetValue(cacheKey, out var cachedScore);
+
+                if (isCached)
+                {
+                    if (cachedScore > newScore)
+                    {
+                        var cachedPath = pathCache[cacheKey];
+                        priorityQueue.Remove(cachedPath, out _, out _);
+                        pathCache[cacheKey] = nextPath;
+                        priorityCache[cacheKey] = newScore;
+                    }
+                    else if (cachedScore < newScore)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else
+                {
+                    pathCache.Add(cacheKey, nextPath);
+                    priorityCache.Add(cacheKey, newScore);
+                }
+
+                priorityQueue.Enqueue(nextPath, newScore);
+            }
+        }
+
+        var count = bestPaths.SelectMany(x => x.Select(x => x.Pos)).Distinct().Count();
+
+        return count;
+    }
+
+    private static IEnumerable<(Path Path, int ScoreIncrease)> NextPaths2(Path path)
+    {
+        var (pos, dir) = path.Pop();
+        var prevPos = path.Count > 1 ? path.Peek().Pos : pos;
+
+        var adjacentPositions = pos
+            .GetAdjacent()
+            .Where(adjPos => prevPos != adjPos && adjPos is { Value: '.' or 'E' });
+
+        var nextPaths = adjacentPositions.Select(a =>
+        {
+            var aDir = Navigation.GetDirection(pos, a);
+            var newPath = new Path(path);
+
+            if (aDir == dir)
+            {
+                newPath.Push((pos, aDir));
+                newPath.Push((a, aDir));
+
+                return (newPath, 1);
+            }
+
+            newPath.Push((pos, aDir));
+
+            return (newPath, 1000);
+        });
+
+        return nextPaths;
+    }
+
     private static IEnumerable<(Path Path, int ScoreIncrease)> NextPaths(Path path)
     {
         var (pos, dir) = path.Pop();
