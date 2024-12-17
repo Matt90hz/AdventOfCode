@@ -11,38 +11,68 @@ public static class ReindeerMaze
         var path = new Path();
         path.Push((start, Direction.Right));
 
-        var pq = new PriorityQueue<Path, int>();
-        pq.Enqueue(path, 0);
+        var priorityQueue = new PriorityQueue<Path, int>();
+        priorityQueue.Enqueue(path, 0);
 
-        //var priorities = maze.Select(_ => int.MaxValue);
-
-        while(pq.TryDequeue(out path, out var p))
+        var pathCache = new Dictionary<Pos, Path>
         {
-            if (path.Peek() is { Pos.Value: 'E' }) return p;
+            { start, path }
+        };
 
-            Animate(path);
+        var priorityCache = new Dictionary<Pos, int>()
+        {
+            { start, 0 }
+        };
 
-            var n = Next(path);
+        while (priorityQueue.TryDequeue(out path, out var pathScore))
+        {
+            //Animate(path);
+            if (path.Peek() is { Pos.Value: 'E' }) return pathScore;
 
-            foreach(var (x, sc) in n)
+            var nextPaths = NextPaths(path);
+
+            foreach (var (nextPath, scoreIncrease) in nextPaths)
             {
-                if (pq.UnorderedItems.Any(y => y.Element.Peek().Pos == x.Peek().Pos && y.Priority <= p + sc)) continue;
-                pq.Enqueue(x, p + sc);
+                var newScore = pathScore + scoreIncrease;
+                var cacheKey = nextPath.Peek().Pos;
+
+                if (priorityCache.TryGetValue(nextPath.Peek().Pos, out var cachedScore))
+                {
+                    if (cachedScore > newScore)
+                    {
+                        var cachedPath = pathCache[cacheKey];
+                        priorityQueue.Remove(cachedPath, out _, out _);
+                        pathCache[cacheKey] = nextPath;
+                        priorityCache[cacheKey] = newScore;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    pathCache.Add(cacheKey, nextPath);
+                    priorityCache.Add(cacheKey, newScore);
+                }
+
+                priorityQueue.Enqueue(nextPath, newScore);
             }
         }
 
         throw new Exception("Exit noy found");
     }
 
-    private static (Path, int)[] Next(Path path)
+    private static IEnumerable<(Path Path, int ScoreIncrease)> NextPaths(Path path)
     {
         var (pos, dir) = path.Pop();
-        var positions = path.Select(x => x.Pos).ToArray();
-        var adjacent = pos
-            .GetAdjacent()
-            .Where(x => positions.Contains(x) is false && x is { Value: '.' or 'E'});
+        var prevPos = path.Count > 1 ? path.Peek().Pos : pos;
 
-        var next = adjacent.Select(a =>
+        var adjacentPositions = pos
+            .GetAdjacent()
+            .Where(adjPos => prevPos != adjPos && adjPos is { Value: '.' or 'E' });
+
+        var nextPaths = adjacentPositions.Select(a =>
         {
             var aDir = Navigation.GetDirection(pos, a);
             var score = aDir == dir ? 1 : 1001;
@@ -53,8 +83,8 @@ public static class ReindeerMaze
 
             return (newPath, score);
         });
-        
-        return next.ToArray();
+
+        return nextPaths;
     }
 
     private static char[,] ParseMaze(string input)
@@ -65,29 +95,29 @@ public static class ReindeerMaze
             .ToMultidimensionalArray();
 
         return maze;
-    } 
+    }
 
     private static void Animate(Path path)
     {
         var maze = path.First().Pos.Array.Select(x => x);
 
-        foreach(var ((r, c), dir) in path)
+        foreach (var ((r, c), dir) in path)
         {
-            maze[r, c] = dir switch 
-            { 
-                Direction.Up => '^', 
-                Direction.Down => 'v', 
-                Direction.Left => '<', 
-                Direction.Right => '>', 
+            maze[r, c] = dir switch
+            {
+                Direction.Up => '^',
+                Direction.Down => 'v',
+                Direction.Left => '<',
+                Direction.Right => '>',
                 _ => throw new NotImplementedException(),
             };
         }
 
         var str = maze.ToFriendlyString();
 
-        Console.Write(str);
         Console.CursorTop = 0;
         Console.CursorLeft = 0;
         Console.CursorVisible = false;
+        Console.Write(str);
     }
 }

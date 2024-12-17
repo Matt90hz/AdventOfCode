@@ -23,6 +23,6 @@ public sealed class ReindeerMazeTests
     {
         var input = File.ReadAllText(@".\Day16\input.txt");
         var result = ReindeerMaze.LowestScore(input);
-        Assert.Equal(0, result);
+        Assert.Equal(143580, result);
     }
 }
