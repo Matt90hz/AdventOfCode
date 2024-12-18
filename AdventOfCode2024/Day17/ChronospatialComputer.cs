@@ -9,13 +9,6 @@ using System.Threading.Tasks;
 namespace AdventOfCode2024.Day17;
 public static class ChronospatialComputer
 {
-    private static long _a;
-    private static long _b;
-    private static long _c;
-    private static List<int> _output = [];
-    private static readonly Dictionary<(int A, int B, int C, int I, int O, int OP), List<int>> _cache = [];
-    private static int _instruction = -1;
-
     public static string Execute(string input)
     {
         var (a, b, c, program) = ParseState(input);
