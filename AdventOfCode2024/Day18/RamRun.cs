@@ -6,10 +6,49 @@ public static class RamRun
     public static int MinimumStepToExit(string input, int size = 71, int bytes = 1024)
     {
         var memory = new char[size, size];
-        var corruptedBits = ParseCorruptedBits(input).Take(bytes);
+        var corruptedBits = ParseCorruptedBits(input).Take(bytes).ToHashSet();
         var corruptedMemory = memory.Select((_, p) => corruptedBits.Contains(((int)p.Column, (int)p.Row)) ? '#' : '.');
         var minimumSteps = CalculateMinimumSteps(corruptedMemory);
         return minimumSteps;
+    }
+
+    public static string LastCorruptedByte(string input, int size = 71)
+    {
+        var memory = new char[size, size];
+        var corruptedBits = ParseCorruptedBits(input);
+        var left = 0;
+        var right = corruptedBits.Length;
+        var lastCorruptedBit = 0;
+
+        while (left < right - 1)
+        {
+            var middle = (left + right) / 2;
+
+            var corruptionStage = corruptedBits.Take(middle);
+
+            if(IsExitReachable(memory, corruptionStage))
+            {
+                left = middle;
+                lastCorruptedBit = right;
+            }
+            else
+            {
+                right = middle - 1;
+                lastCorruptedBit = left;
+            }
+        }
+
+        var (x, y) = corruptedBits[lastCorruptedBit];
+
+        return $"{x},{y}";
+    }
+
+    private static bool IsExitReachable(char[,] memory, IEnumerable<(int X, int Y)> corruptionStage)
+    {
+        var corruptionStageSet = corruptionStage.ToHashSet();
+        var corruptedMemory = memory.Select((_, p) => corruptionStageSet.Contains(((int)p.Column, (int)p.Row)) ? '#' : '.');
+        var minimumSteps = CalculateMinimumSteps(corruptedMemory);
+        return minimumSteps != -1;
     }
 
     private static int CalculateMinimumSteps(char[,] corruptedMemory)
