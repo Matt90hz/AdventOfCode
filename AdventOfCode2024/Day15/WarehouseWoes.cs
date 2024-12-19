@@ -36,8 +36,6 @@ public static class WarehouseWoes
 
         var sum = bigMap.GetPositions().Sum(GPSCoordinateBig);
 
-        var debug = bigMap.ToFriendlyString();
-
         return sum;
     }
 

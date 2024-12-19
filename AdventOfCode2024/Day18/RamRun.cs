@@ -23,7 +23,6 @@ public static class RamRun
         while (left < right - 1)
         {
             var middle = (left + right) / 2;
-
             var corruptionStage = corruptedBits.Take(middle);
 
             if(IsExitReachable(memory, corruptionStage))
