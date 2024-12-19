@@ -23,7 +23,7 @@ namespace IncaTechnologies.Collection.Extensions
             return matrix;
         }
 
-        public static U[,] Select<T, U>(this T[,] @this, Func<T, U> selector) => @this.Select((x, _) => selector(x));
+        public static U[,] Select<T, U>(this T[,] @this, Func<T, U> selector) => @this.Select((x, _)=> selector(x));
 
         public static T[,] ForEach<T>(this T[,] @this, Func<T, (long Row, long Column), T> apply)
         {
