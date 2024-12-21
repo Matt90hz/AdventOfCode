@@ -147,7 +147,7 @@ namespace IncaTechnologies.Collection.Extensions
                 : GetDirection(beforeLast.Last(), last);
         }
 
-        public static Direction GetDirection<T>(Position<T> first, Position<T> next)
+        public static Direction GetDirection<T>(this Position<T> first, Position<T> next)
         {
             var direction = (first.Row, first.Column, next.Row, next.Column) switch
             {
