@@ -1,48 +1,25 @@
 ﻿using AdventOfCode2024.Day19;
+using IncaTechnologies.Collection.Extensions;
 
 namespace AdventOfCode2024.Day20;
 public static class RaceCondition
 {
-    public static int CountGoodCheats(string input)
+    public static int CountGoodCheats(string input, int cheatPicosecond = 20)
     {
         var track = ParseTrack(input);
         var distancesToExit = CalculateDistancesToExit(track);
         var trackPositions = distancesToExit.GetPositions().Where(x => x.Value > 0);
-        var shortCuts = trackPositions.SelectMany(x =>
+        var shortCuts = trackPositions.Sum(x =>
         {
-            var adjacent = x.GetAdjacent().Where(x => x.Value == -1);
-            var shortCuts = adjacent.Select(a =>
+            var adjacent = x.GetReachable(cheatPicosecond).Where(x => x.Value != -1);
+            var shortCuts = adjacent.Where(shortcut =>
             {
-                var shortcut = a.Move(x.GetDirection(a));
-                if (shortcut.IsOutOfBound() || shortcut.Value == -1) return -1;
-                var saved = x.Value - shortcut.Value - 2;
-                return saved;
+                var distance = Math.Abs(x.Row - shortcut.Row) + Math.Abs(x.Column - shortcut.Column);
+                return (x.Value - shortcut.Value - distance) >= 100;
             });
-            return shortCuts;
+            return shortCuts.Count();
         });
-        var goodShortcuts = shortCuts.Where(x => x >= 100);
-        return goodShortcuts.Count();
-    }
-
-    public static int CountLegalCheats(string input)
-    {
-        var track = ParseTrack(input);
-        var distancesToExit = CalculateDistancesToExit(track);
-        var trackPositions = distancesToExit.GetPositions().Where(x => x.Value > 0);
-        var shortCuts = trackPositions.SelectMany(x =>
-        {
-            var adjacent = x.GetAdjacent().Where(x => x.Value == -1);
-            var shortCuts = adjacent.Select(a =>
-            {
-                var shortcut = a.Move(x.GetDirection(a));
-                if (shortcut.IsOutOfBound() || shortcut.Value == -1) return -1;
-                var saved = x.Value - shortcut.Value - 2;
-                return saved;
-            });
-            return shortCuts;
-        });
-        var goodShortcuts = shortCuts.Where(x => x >= 100);
-        return goodShortcuts.Count();
+        return shortCuts;
     }
 
     private static int[,] CalculateDistancesToExit(char[,] track)

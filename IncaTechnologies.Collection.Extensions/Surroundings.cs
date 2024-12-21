@@ -32,5 +32,28 @@ namespace IncaTechnologies.Collection.Extensions
             if (position.TryMoveDown(out var down)) yield return down;
             if (position.TryMoveLeft(out var left)) yield return left;
         }
+
+        public static IEnumerable<Position<T>> GetReachable<T>(this Position<T> position, int distance)
+        {
+            var (array, r, c) = position;
+
+            for (int i = 1; i <= distance; i++)
+            {
+                for (int j = 0; j <= distance - i; j++)
+                {
+                    var reachable = array.GetPosition(r - i, c + j);
+                    if (!reachable.IsOutOfBound()) yield return reachable;
+
+                    reachable = array.GetPosition(r + i, c - j);
+                    if (!reachable.IsOutOfBound()) yield return reachable;
+
+                    reachable = array.GetPosition(r + j, c + i);
+                    if (!reachable.IsOutOfBound()) yield return reachable;
+
+                    reachable = array.GetPosition(r - j, c - i);
+                    if (!reachable.IsOutOfBound()) yield return reachable;
+                }
+            }
+        }
     }
 }
