@@ -17,4 +17,12 @@ public sealed class KeypadConundrumTests
         var result = KeypadConundrum.AirlockPassword(input);
         Assert.Equal(202648, result);
     }
+
+    [Fact]
+    public void Part2_Solution()
+    {
+        var input = File.ReadAllText(@".\Day21\input.txt");
+        var result = KeypadConundrum.AirlockPassword(input, 25);
+        Assert.Equal(248919739734728, result);
+    }
 }
