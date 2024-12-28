@@ -31,6 +31,6 @@ public sealed class LANPartyTests
     {
         var input = File.ReadAllText(@".\Day23\input.txt");
         var result = LANParty.LanPartyPassword(input);
-        Assert.Equal("co,de,ka,ta", result);
+        Assert.Equal("bs,ey,fq,fy,he,ii,lh,ol,tc,uu,wl,xq,xv", result);
     }
 }

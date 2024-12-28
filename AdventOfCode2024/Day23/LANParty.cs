@@ -4,60 +4,104 @@ public static class LANParty
 {
     public static int PossibleHistoriansComputers(string input)
     {
-        var connections = input.Split(Environment.NewLine).Select(x => x.Split('-')).Select(x => (x[0], x[1]));
-        var groups = connections.SelectMany(x => GetInterConnected(x, connections).Select(i => new[] { i, x.Item2, x.Item1 }));
-        var tGroups = groups.Where(x => x.Any(x => x.StartsWith('t')));
-        var distinct = tGroups.Select(x => string.Join('\0', x.Order())).Distinct();
-        return distinct.Count();
+        var graph = ParseGraph(input);
+
+        var connections = input
+            .Split(Environment.NewLine)
+            .Select(x => x.Split('-'))
+            .Select(x => (x[0], x[1]));
+
+        var comparer = EqualityComparer<IEnumerable<string>>.Create(
+            equals: (x, y) => x!.SequenceEqual(y!),
+            getHashCode: x => string.Join('\0', x).GetHashCode());
+
+        var interconnected = connections
+            .SelectMany(x => GetInterConnected(x, graph))
+            .Distinct(comparer);
+
+        var ts = interconnected.Where(x => x.Any(x => x.StartsWith('t')));
+
+        return ts.Count();
     }
 
     public static string LanPartyPassword(string input)
     {
-        var connections = input.Split(Environment.NewLine).Select(x => x.Split('-')).Select(x => (x[0], x[1]));
-        var connected = connections.Select(x => GetConnected(x, connections));
-        return string.Join(',', connected.Order());
+        var graph = ParseGraph(input);
+        var cliques = BronKerbosch([], [..graph.Keys], [], graph, []);
+        var max = cliques.MaxBy(x => x.Count)!.Order();
+        return string.Join(',', max);
     }
 
-    private static IEnumerable<string> GetInterConnected((string, string) x, IEnumerable<(string Pc1, string Pc2)> connections)
+    private static List<HashSet<string>> BronKerbosch(
+        HashSet<string> R,
+        HashSet<string> P,
+        HashSet<string> X,
+        Dictionary<string, HashSet<string>> graph,
+        List<HashSet<string>> cliques)
     {
-        var (a, b) = x;
-
-        var ca = connections
-            .Where(x => x.Pc1 == a || x.Pc2 == a)
-            .Select(x => x.Pc1 == a ? x.Pc2 : x.Pc1);
-
-        var cb = connections
-            .Where(x => x.Pc1 == b || x.Pc2 == b)
-            .Select(x => x.Pc1 == b ? x.Pc2 : x.Pc1);
-
-        var intersect = ca.Intersect(cb);
-        
-        return intersect;
-    }
-
-    private static List<(string x, string y)> GetConnected((string x, string y) x, IEnumerable<(string x, string y)> connections)
-    {
-        var list = new List<(string x, string y)> { x };
-        var hash = connections.ToHashSet();
-        hash.Remove(x);
-        var queue = new Queue<string>();
-        queue.Enqueue(x.x);
-        queue.Enqueue(x.y);
-
-        while (queue.TryDequeue(out var v)) 
+        if (P.Count == 0 && X.Count == 0) 
         {
-            var connected = hash
-                .Where(x => x.x == v || x.y == v)
-                .Select(x => (Edge: x, Other: x.x == v ? x.y : x.x));      
-            
-            foreach(var (edge, other) in connected)
-            {
-                list.Add(edge);
-                hash.Remove(edge);
-                queue.Enqueue(other);
-            }
+            cliques.Add(R);
+            return cliques;
         }
 
-        return list;
+        foreach(var v in P)
+        {
+            var n = graph[v];
+
+            BronKerbosch(
+                R.Union([v]).ToHashSet(), 
+                P.Intersect(n).ToHashSet(), 
+                X.Intersect(n).ToHashSet(), 
+                graph,
+                cliques);
+
+            P.Remove(v);
+            X.Add(v);
+        }
+
+        return cliques;
+    }
+
+    private static Dictionary<string, HashSet<string>> ParseGraph(string input)
+    {
+        var vertices = input
+            .Split(Environment.NewLine)
+            .SelectMany(x => x.Split('-'))
+            .Distinct();
+
+        var edges = input
+            .Split(Environment.NewLine)
+            .Select(x => x.Split('-'))
+            .Select(x => (x[0], x[1]))
+            .ToArray();
+
+        var graph = new Dictionary<string, HashSet<string>>();
+
+        foreach(var v in vertices)
+        {
+            var conn = edges
+                .Where(x => x.Item1 == v || x.Item2 == v)
+                .Select(x => x.Item1 == v ? x.Item2 : x.Item1)
+                .ToHashSet();
+
+            graph.Add(v, conn);
+        }
+
+        return graph;
+    }
+
+    private static IEnumerable<IEnumerable<string>> GetInterConnected((string, string) x, Dictionary<string, HashSet<string>> graph)
+    {
+        var (a, b) = x;
+        var ca = graph[a];
+        var cb = graph[b];
+
+        var intersect = ca.Intersect(cb);
+
+        foreach (var item in intersect)
+        {
+            yield return ((IEnumerable<string>)[a, b]).Append(item).Order();
+        }
     }
 }
