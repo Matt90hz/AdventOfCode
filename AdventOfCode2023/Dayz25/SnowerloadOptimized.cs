@@ -33,9 +33,9 @@ public static class SnowerloadOptimized
             graph.Merge(minimumCutPhase.A[^1], minimumCutPhase.V, cypher);
         }
 
-        var vLenght = cypher[globalMinimumCut].Length;
+        var vLength = cypher[globalMinimumCut].Length;
 
-        var groupSize = (vertexCount - vLenght) * vLenght;
+        var groupSize = (vertexCount - vLength) * vLength;
 
         return groupSize;
     }
@@ -51,9 +51,9 @@ public static class SnowerloadOptimized
 
         while (v.Count > 1)
         {
-            var mostAdjecent = v.RemoveMin().Value;
-            a.Add(mostAdjecent);
-            v.UpdatePriorities(graph[mostAdjecent]);
+            var mostAdjacent = v.RemoveMin().Value;
+            a.Add(mostAdjacent);
+            v.UpdatePriorities(graph[mostAdjacent]);
         }
 
         return (a, v.Min.Value);
@@ -70,9 +70,11 @@ public static class SnowerloadOptimized
         return heap;
     }
 
+    private static IComparer<int> Comparer { get; } = Comparer<int>.Create((x, y) => (-x).CompareTo(-y));
+
     private static UniqueHeap<int, int> CreateHeap(Dictionary<int, List<(int, int)>> graph)
     {
-        var heap = HeapFactory.NewFibonacciHeap<int, int>(Comparer<int>.Create((x, y) => (-x).CompareTo(-y)));
+        var heap = HeapFactory.NewFibonacciHeap<int, int>(Comparer);
 
         foreach (var vertex in graph.Keys.Skip(1))
         {
