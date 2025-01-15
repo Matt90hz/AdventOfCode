@@ -1,10 +1,4 @@
-﻿using AdventOfCode2023.Day5;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IncaTechnologies.Collection.Extensions;
+﻿using IncaTechnologies.Collection.Extensions;
 
 namespace AdventOfCode2023.Dayz18;
 internal static class LavaductLagoon
@@ -13,7 +7,7 @@ internal static class LavaductLagoon
     {
         var digPlan = DigPlanParser.CorrectParse(input);
 
-        var perimeter = digPlan.Select(x => x.Steps).Sum();
+        var perimeter = digPlan.Sum(x => x.Steps);
 
         var trench = GetTrenchVertices(digPlan);
 
@@ -25,8 +19,6 @@ internal static class LavaductLagoon
             long b = trench[i].Col;
             long c = trench[i - 1].Col;
             long d = trench[i].Row;
-            
-            var par = (a * b) - (c * d);
 
             area += (a * b) - (c * d);
         }
@@ -44,13 +36,13 @@ internal static class LavaductLagoon
     {
         var digPlan = DigPlanParser.Parse(input);
 
-        var trench = GetTrench(digPlan);
+        var trench = GetTrench(digPlan).ToHashSet();
 
         DigLagoon(trench);
 
         var count = trench.Count;
 
-        return (int)count;
+        return count;
     }
 
     static List<(int Row, int Col)> GetTrenchVertices((char Dir, int Steps)[] digPlan)
@@ -101,17 +93,16 @@ internal static class LavaductLagoon
         return trench;
     }
 
-    static List<(int Row, int Col)> DigLagoon(List<(int Row, int Col)> trench)
+    static HashSet<(int Row, int Col)> DigLagoon(HashSet<(int Row, int Col)> trench)
     {
-        var minRow = trench.Select(x => x.Row).Min();
-
-        var start = (minRow + 1, trench.First(x => x.Row == minRow).Col + 1);
+        var (mr, mc) = trench.MinBy(x => x.Row);
         var toDo = new Stack<(int Row, int Col)>();
-        toDo.Push(start);
 
-        while (toDo.Any())
+        toDo.Push((mr + 1, mc + 1));
+
+        while (toDo.TryPop(out var x))
         {
-            var (row, col) = toDo.Pop();
+            var (row, col) = x;
 
             for (int i = -1; i <= 1; i++)
             {
@@ -119,9 +110,8 @@ internal static class LavaductLagoon
                 {
                     var pos = (row + i, col + j);
 
-                    if (trench.Contains(pos)) continue;
+                    if (trench.Add(pos) is false) continue;
 
-                    trench.Add(pos);
                     toDo.Push(pos);
                 }
             }
