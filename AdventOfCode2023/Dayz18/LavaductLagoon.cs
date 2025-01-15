@@ -1,6 +1,4 @@
-﻿using IncaTechnologies.Collection.Extensions;
-
-namespace AdventOfCode2023.Dayz18;
+﻿namespace AdventOfCode2023.Dayz18;
 internal static class LavaductLagoon
 {
     public static long CorrectCapacity(string input)
@@ -131,5 +129,4 @@ internal static class LavaductLagoon
             _ => throw new ArgumentException($"Direction {dir} invalid."),
         };
     }
-
 }
