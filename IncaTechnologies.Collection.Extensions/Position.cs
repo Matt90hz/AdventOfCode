@@ -37,7 +37,7 @@ namespace IncaTechnologies.Collection.Extensions
             column = Column;
         }
 
-        public readonly bool Equals(Position<T> other) => Row == other.Row && Column == other.Column;
+        public readonly bool Equals(Position<T> other) => ReferenceEquals(Array, other.Array) && Row == other.Row && Column == other.Column;
 
         public override readonly bool Equals(object obj) => obj is Position<T> other && Equals(other);
 
