@@ -43,7 +43,7 @@ namespace IncaTechnologies.Collection.Extensions
 
         public readonly override string ToString() => $"[{Row}, {Column}] {Value}";
 
-        public override readonly int GetHashCode() => base.GetHashCode(); // to do
+        public override readonly int GetHashCode() => HashCode.Combine(Array.GetHashCode(), Row, Column);
 
         public static bool operator ==(Position<T> x, Position<T> y) => x.Equals(y);
 
