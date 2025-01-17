@@ -1,70 +1,58 @@
 ﻿using IncaTechnologies.Collection.Extensions;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AdventOfCode2023.Dayz23;
 
 internal static class LongWalk
 {
-    //PART 2 TAKE 2
+    //PART 2
     public static int LongestHikeNoSlopeFast(string input)
     {
         var island = GetIsland(input);
         var lastRow = island.GetLength(1) - 2;
-
         var graph = GetGraph(island);
+        var toExplore = new Stack<(int Level, (int Row, int Col) Head, int Len)>(50);
+        var seenSet = new HashSet<(int Row, int Col)>(50);
+        var seenList = new List<(int Row, int Col)>(50);
+        int max = 0;
 
-        var start = graph[(0, 0)];
+        toExplore.Push((0, (1, 2), 0));
 
-        Stack<(int Row, int Col, int Len)[]> toExplore = new(); toExplore.Push(start);
-        List<(int Row, int Col, int Len)[]> explored = new();
-
-        while (toExplore.Any())
+        while (toExplore.TryPop(out var x))
         {
-            var path = toExplore.Pop();
-            var (row, col, _) = path.Last();
+            var (level, head, len) = x;
 
-            if (row == lastRow)
+            if (head.Row == lastRow)
             {
-                explored.Add(path);
+                if (len > max) max = len;
                 continue;
             }
 
-            var connectedNodes = graph[(row, col)];
-
-            foreach (var node in connectedNodes)
+            if (level < seenSet.Count)
             {
-                if (path.IsAlreadySeen(node)) continue;
+                for (int i = seenSet.Count - 1; i >= level; i--)
+                {
+                    seenSet.Remove(seenList[i]);
+                    seenList.RemoveAt(i);
+                }
+            }
 
-                toExplore.Push(path.Append(node).ToArray());
+            seenSet.Add(head);
+            seenList.Add(head);
+
+            foreach (var (node, l) in graph[head])
+            {
+                if (seenSet.Contains(node)) continue;
+
+                toExplore.Push((level + 1, node, len + l));
             }
         }
 
-        return explored.Max(path => path.Sum(node => node.Len));
-
+        return max;
     }
 
-    static bool IsAlreadySeen(this (int Row, int Col, int Len)[] path, (int Row, int Col, int Len) node)
+    static Dictionary<(int Row, int Col), ((int Row, int Col), int)[]> GetGraph(char[,] island)
     {
-        var (row, col, _) = node;
-
-        var isAreadySeen = path.Any(x => x.Row == row && x.Col == col);
-
-        return isAreadySeen;
-    }
-
-    static IDictionary<(int Row, int Col), (int Row, int Col, int Len)[]> GetGraph(char[,] island)
-    {
-        Dictionary<(int Row, int Col), (int Row, int Col, int Len)[]> graph = new()
-        {
-            { (0, 0), new[]{ (1, 2, 0) } }
-        };
+        Dictionary<(int Row, int Col), ((int Row, int Col), int)[]> graph = new();
 
         Stack<(int Row, int Col)> positions = new(); positions.Push((1, 2));
 
@@ -78,16 +66,16 @@ internal static class LongWalk
 
             graph.Add(position, connNodes);
 
-            foreach (var (row, col, _) in connNodes)
+            foreach (var (p, _) in connNodes)
             {
-                positions.Push((row, col));
+                positions.Push(p);
             }
         }
 
         return graph;
     }
 
-    static (int Row, int Col, int Len)[] FindConnectedNodes((int Row, int Col) position, char[,] island)
+    static ((int Row, int Col) Node, int Len)[] FindConnectedNodes((int Row, int Col) position, char[,] island)
     {
         var (row, col) = position;
 
@@ -96,13 +84,12 @@ internal static class LongWalk
         var connectedNodes = current
             .GetAdjacent()
             .Where(IsPath)
-            .Select(adjecent => FindConnectedNode(current, adjecent))
-            .ToArray();
+            .Select(a => FindConnectedNode(current, a));
 
-        return connectedNodes;
+        return connectedNodes.ToArray();
     }
 
-    static (int Row, int Col, int Len) FindConnectedNode(Position<char> position, Position<char> next)
+    static ((int Row, int Col) Pos, int Len) FindConnectedNode(Position<char> position, Position<char> next)
     {
         int len = 1;
 
@@ -117,59 +104,21 @@ internal static class LongWalk
             nextPossibleSteps = NextPossibleSteps(next, position).ToArray();
         }
 
-        return ((int)next.Row, (int)next.Column, len);
+        return (((int)next.Row, (int)next.Column), len);
     }
 
     static IEnumerable<Position<char>> NextPossibleSteps(Position<char> position, Position<char> previous)
     {
         var nextPossibleSteps = position
             .GetAdjacent()
-            .Where(adjecent => adjecent.IsPath() && adjecent.Equals(previous) is false);
+            .Where(a => a.IsPath() && a != previous);
 
         return nextPossibleSteps;
     }
 
     static bool IsPath(this Position<char> pos) => pos.Value != '#' && pos.Value != '@';
 
-    //PART 2 TAKE 1
-    public static int LongestHikeNoSlope(string input)
-    {
-        char[,] island = GetIsland(input);
-
-        var hikingPaths = GetHikingPathsNoSlopes(island);
-
-        var longestPath = hikingPaths.Max(path => path.Count());
-
-        return longestPath - 1;
-    }
-
-    static IEnumerable<IEnumerable<Position<char>>> GetHikingPathsNoSlopes(char[,] island)
-    {
-        var startPosition = island.GetPosition(1, 2);
-
-        Queue<IEnumerable<Position<char>>> pathsToExplore = new();
-        List<IEnumerable<Position<char>>> pathsExplored = new();
-
-        pathsToExplore.Enqueue(new[] { startPosition });
-
-        while (pathsToExplore.Any())
-        {
-            var pathToExplore = pathsToExplore.Dequeue();
-            var pathExplored = ExplorePath(pathToExplore.Last(), pathToExplore);
-
-            if (pathExplored.Any() is false) continue;
-
-            var pathFinished = pathExplored.Where(island.ExitFound);
-            var pathNotFinished = pathExplored.Except(pathFinished);
-
-            pathsToExplore.EnqueueRange(pathNotFinished);
-            pathsExplored.AddRange(pathFinished);
-
-        }
-
-        return pathsExplored;
-    }
-
+    //PART 1
     public static int LongestHike(string input)
     {
         char[,] island = GetIsland(input);
@@ -181,84 +130,84 @@ internal static class LongWalk
         return longestPath - 1;
     }
 
-    //PART 1
     static IEnumerable<IEnumerable<Position<char>>> GetHikingPaths(char[,] island)
     {
         var startPosition = island.GetPosition(1, 2);
 
-        Queue<IEnumerable<Position<char>>> pathsToExplore = new();
-        List<IEnumerable<Position<char>>> pathsExplored = new();
+        Stack<(HashSet<Position<char>> Seen, Position<char> Head)> pathsToExplore = new();
+        List<HashSet<Position<char>>> pathsExplored = new();
 
-        pathsToExplore.Enqueue(new[] { startPosition });
+        pathsToExplore.Push((new HashSet<Position<char>> { startPosition }, startPosition));
 
-        while (pathsToExplore.Any())
+        while (pathsToExplore.TryPop(out var path))
         {
-            var pathExplored = Explore(pathsToExplore.Dequeue());
+            var pathExplored = Explore(path.Seen, path.Head);
 
-            if (pathExplored.Any() is false) continue;
+            foreach (var explored in pathExplored)
+            {
+                if (explored.Head.Row == island.GetLength(0) - 2)
+                {
+                    pathsExplored.Add(explored.Seen);
+                    continue;
+                }
 
-            var pathFinished = pathExplored.Where(island.ExitFound);
-            var pathNotFinished = pathExplored.Except(pathFinished);
-
-            pathsToExplore.EnqueueRange(pathNotFinished);
-            pathsExplored.AddRange(pathFinished);
+                pathsToExplore.Push(explored);
+            }
         }
 
         return pathsExplored;
     }
 
-    static bool ExitFound(this char[,] island, IEnumerable<Position<char>> path) => path.Last().Row == island.GetLength(0) - 2;
-
-    static IEnumerable<IEnumerable<Position<char>>> Explore(IEnumerable<Position<char>> path)
+    static IEnumerable<(HashSet<Position<char>> Seen, Position<char> Head)> Explore(HashSet<Position<char>> path, Position<char> head)
     {
-        var currStep = path.Last();
-
-        return currStep.Value == '.' ? ExplorePath(currStep, path) : ExploreSlope(currStep, path);
-    }
-
-    static IEnumerable<IEnumerable<Position<char>>> ExploreSlope(Position<char> currStep, IEnumerable<Position<char>> path)
-    {
-        var direction = path.GetLastDirection();
-
-        var nextStep = currStep.Value switch
+        var explored = head.Value switch
         {
-            '>' => currStep.MoveRight(),
-            '<' => currStep.MoveLeft(),
-            'v' => currStep.MoveDown(),
-            '^' => currStep.MoveUp(),
+            '@' or '#' => Enumerable.Empty<(HashSet<Position<char>> Seen, Position<char> Head)>(),
+            '.' => ExplorePath(head, path),
+            _ => ExploreSlope(head, path),
         };
 
-        if (path.Contains(nextStep))
-            return Enumerable.Empty<IEnumerable<Position<char>>>();
-
-        var nextPath = path
-            .Append(nextStep)
-            .ToArray();
-
-        return new[] { nextPath };
-
+        return explored;
     }
 
-    static IEnumerable<IEnumerable<Position<char>>> ExplorePath(Position<char> currStep, IEnumerable<Position<char>> path)
+    static IEnumerable<(HashSet<Position<char>> Seen, Position<char> Head)> ExploreSlope(Position<char> head, HashSet<Position<char>> path)
     {
-        var nextPaths = currStep
+        var nextHead = head.Value switch
+        {
+            '>' => head.MoveRight(),
+            '<' => head.MoveLeft(),
+            'v' => head.MoveDown(),
+            '^' => head.MoveUp(),
+            _ => throw new Exception($"Unexpected step {head}")
+        };
+
+        return path.Add(nextHead) is false
+            ? Enumerable.Empty<(HashSet<Position<char>> Seen, Position<char> Head)>()
+            : Enumerable.Range(0, 1).Select(_ => (path, nextHead));
+    }
+
+    static IEnumerable<(HashSet<Position<char>> Seen, Position<char> Head)> ExplorePath(Position<char> head, HashSet<Position<char>> path)
+    {
+        var nextHeads = head
             .GetAdjacent()
-            .Where(next => next.Value != '#' && next.Value != '@' && path.Contains(next) is false)
-            .Select(next => path.Append(next))
-            .ToArray();
+            .Where(next => next.Value != '#' && next.Value != '@' && path.Contains(next) is false);
+
+        var nextPaths = nextHeads.Select(nextHead =>
+        {
+            var seen = new HashSet<Position<char>>(path) { nextHead };
+            return (seen, nextHead);
+        });
 
         return nextPaths;
-
     }
 
     static char[,] GetIsland(string input)
     {
-        var lines = input.Split(Environment.NewLine);
-        var island = lines
+        var island = input
+            .Split(Environment.NewLine)
             .ToMultidimensionalArray()
             .SurroundWith('@');
 
         return island;
     }
-
 }
