@@ -10,36 +10,49 @@ internal static class LongWalk
         var island = GetIsland(input);
         var lastRow = island.GetLength(1) - 2;
         var graph = GetGraph(island);
-        var toExplore = new Stack<(HashSet<(int Row, int Col)> Seen, (int Row, int Col) Head, int Len)>();
+        var toExplore = new Stack<(int Level, (int Row, int Col) Head, int Len)>(50);
+        var seenSet = new HashSet<(int Row, int Col)>(50);
+        var seenList = new List<(int Row, int Col)>(50);
         int max = 0;
 
-        toExplore.Push((new() { (1, 2) }, (1, 2), 0));
+        toExplore.Push((0, (1, 2), 0));
 
         while (toExplore.TryPop(out var x))
         {
-            var (seen, head, len) = x;
+            var (level, head, len) = x;
 
             if (head.Row == lastRow)
             {
-                if(len > max) max = len;
+                if (len > max) max = len;
                 continue;
             }
 
+            if (level < seenSet.Count)
+            {
+                for (int i = seenSet.Count - 1; i >= level; i--)
+                {
+                    seenSet.Remove(seenList[i]);
+                    seenList.RemoveAt(i);
+                }
+            }
+
+            seenSet.Add(head);
+            seenList.Add(head);
+
             foreach (var (node, l) in graph[head])
             {
-                if (seen.Contains(node)) continue;
+                if (seenSet.Contains(node)) continue;
 
-                var ns = new HashSet<(int Row, int Col)>(seen, seen.Comparer) { node };
-                toExplore.Push((ns, node, len + l));
+                toExplore.Push((level + 1, node, len + l));
             }
         }
 
         return max;
     }
 
-    static Dictionary<(int Row, int Col), Dictionary<(int Row, int Col), int>> GetGraph(char[,] island)
+    static Dictionary<(int Row, int Col), ((int Row, int Col), int)[]> GetGraph(char[,] island)
     {
-        Dictionary<(int Row, int Col), Dictionary<(int Row, int Col), int>> graph = new();
+        Dictionary<(int Row, int Col), ((int Row, int Col), int)[]> graph = new();
 
         Stack<(int Row, int Col)> positions = new(); positions.Push((1, 2));
 
@@ -53,16 +66,16 @@ internal static class LongWalk
 
             graph.Add(position, connNodes);
 
-            foreach (var (row, col) in connNodes.Keys)
+            foreach (var (p, _) in connNodes)
             {
-                positions.Push((row, col));
+                positions.Push(p);
             }
         }
 
         return graph;
     }
 
-    static Dictionary<(int Row, int Col), int> FindConnectedNodes((int Row, int Col) position, char[,] island)
+    static ((int Row, int Col) Node, int Len)[] FindConnectedNodes((int Row, int Col) position, char[,] island)
     {
         var (row, col) = position;
 
@@ -71,13 +84,12 @@ internal static class LongWalk
         var connectedNodes = current
             .GetAdjacent()
             .Where(IsPath)
-            .Select(a => FindConnectedNode(current, a))
-            .ToDictionary(x => (x.Row, x.Col), x => x.Len);
+            .Select(a => FindConnectedNode(current, a));
 
-        return connectedNodes;
+        return connectedNodes.ToArray();
     }
 
-    static (int Row, int Col, int Len) FindConnectedNode(Position<char> position, Position<char> next)
+    static ((int Row, int Col) Pos, int Len) FindConnectedNode(Position<char> position, Position<char> next)
     {
         int len = 1;
 
@@ -92,7 +104,7 @@ internal static class LongWalk
             nextPossibleSteps = NextPossibleSteps(next, position).ToArray();
         }
 
-        return ((int)next.Row, (int)next.Column, len);
+        return (((int)next.Row, (int)next.Column), len);
     }
 
     static IEnumerable<Position<char>> NextPossibleSteps(Position<char> position, Position<char> previous)
@@ -133,7 +145,7 @@ internal static class LongWalk
 
             foreach (var explored in pathExplored)
             {
-                if(explored.Head.Row == island.GetLength(0) - 2)
+                if (explored.Head.Row == island.GetLength(0) - 2)
                 {
                     pathsExplored.Add(explored.Seen);
                     continue;
