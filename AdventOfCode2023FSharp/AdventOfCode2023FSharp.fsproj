@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="test.fsx" />
     <Compile Include="01_Trebuchet.fs" />
     <Compile Include="02_CubeCunundrum.fs" />
     <Compile Include="03_GearRatios.fs" />
@@ -14,5 +15,7 @@
     <Compile Include="15_LensLibrary.fs" />
     <Compile Include="main.fs" />
   </ItemGroup>
+
+  <ItemGroup />
 
 </Project>
