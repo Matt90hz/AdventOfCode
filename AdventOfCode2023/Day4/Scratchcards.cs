@@ -56,35 +56,6 @@ internal static class Scratchcards
         return cardsWithNumbers.Sum(c => c.NumOf);
     }
 
-    static Card[] GetCards(string input)
-    {
-        var lines = input.Split(Environment.NewLine);
-        var cards = lines.Select(GetCard);
-
-        return cards.ToArray();
-    }
-
-    static Card GetCard(string line)
-    {
-        var data = line.Split(':', '|');
-
-        var idString = data[0][5..];
-        var id = int.Parse(idString);
-
-        var winnindNumbersStrings = data[1].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var winningNumbers = winnindNumbersStrings.Select(int.Parse).ToArray();
-
-        var numbersStrings = data[2].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var numbers = numbersStrings.Select(int.Parse).ToArray();
-
-        var card = new Card(id, winningNumbers, numbers);
-
-        return card;
-    }
-}
-
-internal static class CardExtensions
-{
     public static int GetPoints(this Card card)
     {
         var drawnNumbers = card.Numbers.Where(x => card.WinningNumbers.Contains(x));
@@ -105,8 +76,34 @@ internal static class CardExtensions
     {
         var nextCards = cards.Skip(card.Id);
         var matches = card.GetMatches();
-        var winned = nextCards.Take(matches);
+        var won = nextCards.Take(matches);
 
-        return winned.ToArray();
+        return won.ToArray();
+    }
+
+    static Card[] GetCards(string input)
+    {
+        var lines = input.Split(Environment.NewLine);
+        var cards = lines.Select(GetCard);
+
+        return cards.ToArray();
+    }
+
+    static Card GetCard(string line)
+    {
+        var data = line.Split(':', '|');
+
+        var idString = data[0][5..];
+        var id = int.Parse(idString);
+
+        var winningNumbersStrings = data[1].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var winningNumbers = winningNumbersStrings.Select(int.Parse).ToArray();
+
+        var numbersStrings = data[2].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var numbers = numbersStrings.Select(int.Parse).ToArray();
+
+        var card = new Card(id, winningNumbers, numbers);
+
+        return card;
     }
 }
