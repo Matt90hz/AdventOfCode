@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AdventOfCode2023.Dayz25;
-public sealed class FibonacciHeap<TKey, TPriority> where TPriority : IComparable<TPriority>
+public sealed class FibonacciHeap<TKey, TPriority>(IComparer<TPriority>? comparer = null) 
+    where TPriority : IComparable<TPriority>
+    where TKey : notnull
 {
     public sealed class Node
     {
@@ -30,16 +32,14 @@ public sealed class FibonacciHeap<TKey, TPriority> where TPriority : IComparable
 
     private Node? _minNode;
     private int _count;
-    private readonly IComparer<TPriority> _comparer;
-
-    public FibonacciHeap(IComparer<TPriority>? comparer = null)
-    {
-        _comparer = comparer ?? Comparer<TPriority>.Default;
-    }
+    private readonly IComparer<TPriority> _comparer = comparer ?? Comparer<TPriority>.Default;
+    private readonly Dictionary<TKey, Node> _nodes = [];
 
     public bool IsEmpty => _minNode is null;
 
     public int Count => _count;
+
+    public IReadOnlyDictionary<TKey, Node> Nodes => _nodes;
 
     public TPriority MinimumPriority
     {
@@ -48,6 +48,16 @@ public sealed class FibonacciHeap<TKey, TPriority> where TPriority : IComparable
             if (_minNode is null)
                 throw new InvalidOperationException("Heap is empty.");
             return _minNode.Priority;
+        }
+    }
+
+    public TKey MinimumKey
+    {
+        get
+        {
+            if (_minNode is null)
+                throw new InvalidOperationException("Heap is empty.");
+            return _minNode.Key;
         }
     }
 
@@ -72,6 +82,8 @@ public sealed class FibonacciHeap<TKey, TPriority> where TPriority : IComparable
         }
 
         _count++;
+        _nodes.Add(node.Key, node);
+
         return node;
     }
 
@@ -113,7 +125,35 @@ public sealed class FibonacciHeap<TKey, TPriority> where TPriority : IComparable
         }
 
         _count--;
+
+        _nodes.Remove(z.Key);
+
         return z;
+    }
+
+    public void DecreaseKey(Node x, TPriority newPriority)
+    {
+        if (_comparer.Compare(newPriority, x.Priority) > 0)
+            throw new ArgumentException("New priority must be ≤ current priority.");
+
+        x.Priority = newPriority;
+        var y = x.Parent;
+
+        if (y is not null && _comparer.Compare(x.Priority, y.Priority) < 0)
+        {
+            Cut(x, y);
+            CascadingCut(y);
+        }
+
+        if (_comparer.Compare(x.Priority, _minNode!.Priority) < 0)
+            _minNode = x;
+    }
+
+    public void Delete(Node x)
+    {
+        // force x to min then extract
+        DecreaseKey(x, MinimumPriority);
+        ExtractMin();
     }
 
     private void Consolidate()
@@ -179,7 +219,7 @@ public sealed class FibonacciHeap<TKey, TPriority> where TPriority : IComparable
         b = tmp;
     }
 
-    private void Link(Node child, Node parent)
+    private static void Link(Node child, Node parent)
     {
         // remove child from root list
         child.Left.Right = child.Right;
@@ -203,24 +243,6 @@ public sealed class FibonacciHeap<TKey, TPriority> where TPriority : IComparable
         }
 
         parent.Degree++;
-    }
-
-    public void DecreaseKey(Node x, TPriority newPriority)
-    {
-        if (_comparer.Compare(newPriority, x.Priority) > 0)
-            throw new ArgumentException("New priority must be ≤ current priority.");
-
-        x.Priority = newPriority;
-        var y = x.Parent;
-
-        if (y is not null && _comparer.Compare(x.Priority, y.Priority) < 0)
-        {
-            Cut(x, y);
-            CascadingCut(y);
-        }
-
-        if (_comparer.Compare(x.Priority, _minNode!.Priority) < 0)
-            _minNode = x;
     }
 
     private void Cut(Node x, Node y)
@@ -263,13 +285,6 @@ public sealed class FibonacciHeap<TKey, TPriority> where TPriority : IComparable
                 CascadingCut(z);
             }
         }
-    }
-
-    public void Delete(Node x)
-    {
-        // force x to min then extract
-        DecreaseKey(x, MinimumPriority);
-        ExtractMin();
     }
 
     public static FibonacciHeap<TKey, TPriority> Merge(

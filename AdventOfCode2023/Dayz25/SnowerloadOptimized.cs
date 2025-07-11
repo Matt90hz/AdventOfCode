@@ -1,5 +1,4 @@
-﻿using PommaLabs.Hippie;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -49,20 +48,20 @@ public static class SnowerloadOptimized
 
         while (heap.Count > 1)
         {
-            s = heap.RemoveMin().Value;
+            s = heap.ExtractMin().Key;
             heap.UpdatePriorities(graph[s]);
         }
 
-        return (s, heap.Min.Value);
+        return (s, heap.MinimumKey);
     }
 
-    private static UniqueHeap<int, int> UpdatePriorities(this UniqueHeap<int, int> heap, Dictionary<int, int> items)
+    private static FibonacciHeap<int, int> UpdatePriorities(this FibonacciHeap<int, int> heap, Dictionary<int, int> items)
     {
         foreach (var (x, w) in items)
         {
-            if (heap.Contains(x) is false) continue;
+            if (heap.Nodes.TryGetValue(x, out var node) is false) continue;
 
-            heap.UpdatePriorityOf(x, heap.PriorityOf(x) + w);
+            heap.DecreaseKey(node, node.Priority + w);
         }
 
         return heap;
@@ -70,15 +69,15 @@ public static class SnowerloadOptimized
 
     private static IComparer<int> Comparer { get; } = Comparer<int>.Create(static (x, y) => (-x).CompareTo(-y));
 
-    private static UniqueHeap<int, int> CreateHeap(Dictionary<int, Dictionary<int, int>> graph)
+    private static FibonacciHeap<int, int> CreateHeap(Dictionary<int, Dictionary<int, int>> graph)
     {
-        var heap = HeapFactory.NewFibonacciHeap<int, int>(Comparer);
+        FibonacciHeap<int, int> heap = new(Comparer);
 
         var edgesToHeap = graph[graph.Keys.First()];
 
         foreach (var vertex in graph.Keys.Skip(1))
         {
-            heap.Add(vertex, edgesToHeap.GetValueOrDefault(vertex));
+            heap.Insert(vertex, edgesToHeap.GetValueOrDefault(vertex));
         }
 
         return heap;
