@@ -15,7 +15,8 @@ public static class SnowerloadOptimized
     {
         var (graph, cypher) = GetGraph(input);
 
-        var vertexCount = graph.Count;
+        int lastKey = graph.Count;
+        int vertexCount = graph.Count;
         var globalMinimumCut = 0;
         var globalMinimumCutWeight = int.MaxValue;
 
@@ -30,7 +31,7 @@ public static class SnowerloadOptimized
                 globalMinimumCutWeight = minimumCutPhaseWeight;
             }
 
-            graph.Merge(minimumCutPhase.A[^1], minimumCutPhase.V, cypher);
+            graph.Merge(minimumCutPhase.A[^1], minimumCutPhase.V, cypher, ++lastKey);
         }
 
         var vLength = cypher[globalMinimumCut].Count;
@@ -92,20 +93,21 @@ public static class SnowerloadOptimized
         return graph[cut.V].Sum(x => x.W);
     }
 
-    private static int _lastKey;
-
     private static Dictionary<int, List<(int, int)>> Merge(
         this Dictionary<int, List<(int, int)>> graph,
         int v1, int v2,
-        Dictionary<int, List<string>> cypher)
+        Dictionary<int, List<string>> cypher,
+        int lastKey)
     {
         // update cypher
-        var newKey = _lastKey++;
+        var v1Cypher = cypher[v1];
+        var v2Cypher = cypher[v2];
 
-        var newDecryption = cypher[v1];
-        newDecryption.AddRange(cypher[v2]);
+        List<string> newDecryption = new(v1Cypher.Count + v2Cypher.Count);
+        newDecryption.AddRange(v1Cypher);
+        newDecryption.AddRange(v2Cypher);
 
-        cypher.Add(newKey, newDecryption);
+        cypher.Add(lastKey, newDecryption);
 
         // merge
         var v1Edges = graph[v1];
@@ -140,60 +142,62 @@ public static class SnowerloadOptimized
                 if (x == v1 || x == v2) edges.RemoveAt(i);
             }
 
-            edges.Add((newKey, value));
+            edges.Add((lastKey, value));
         }
 
         graph.Remove(v1);
         graph.Remove(v2);
-        graph.Add(newKey, newEdges.Select(x => (x.Key, x.Value)).ToList());
+        graph.Add(lastKey, newEdges.Select(x => (x.Key, x.Value)).ToList());
 
         return graph;
     }
 
-    private static (Dictionary<int, List<(int, int)>> Graph, Dictionary<int, List<string>> Cypher) GetGraph(string input)
+    public static (Dictionary<int, List<(int, int)>> Graph, Dictionary<int, List<string>> Cypher) GetGraph(string input)
     {
-        var connections = Snowverload.GetConnections(input);
-        
-        var keys = connections
-            .Values
-            .SelectMany(x => x)
-            .Concat(connections.Keys)
-            .Distinct();
+        Dictionary<int, List<(int, int)>> graph = new();
+        Dictionary<int, List<string>> cypher = new();
+        Dictionary<string, int> keysFound = new();
 
-        var keysCount = keys.Count();
+        var lines = input.Split(Environment.NewLine);
+        var linesLength = lines.Length;
 
-        _lastKey = keysCount;
-
-        var cypher = keys
-            .Select((x, i) => (i, new List<string>(keysCount) { x }))
-            .ToDictionary(x => x.i, x => x.Item2);
-
-        var counterCypher = cypher
-            .Select(x => (x.Value[0], x.Key))
-            .ToDictionary(x => x.Item1, x => x.Key);
-
-        var graph = cypher.Keys.ToDictionary(x => x, _ => new List<(int, int)>());
-
-        var edges = connections.Keys
-            .SelectMany(key => connections[key].Select(conn => (counterCypher[key], counterCypher[conn])))
-            .ToList();
-
-        foreach(var (key, value) in graph)
+        for (int i = 0; i < linesLength; i++)
         {
-            foreach(var (v1, v2) in edges)
+            var line = lines[i];
+            var key = line[..3];
+
+            graph.Add(i, new());
+            cypher.Add(i, new() { key });
+            keysFound.Add(key, i);
+        }
+
+        var lastKey = linesLength;
+
+        for (int i = 0; i < linesLength; i++)
+        {
+            var line = lines[i];
+            var key = line[..3];
+            var connections = line[5..].Split(' ');
+            var connectionsLength = connections.Length;
+
+            for(int j = 0; j < connectionsLength; j++)
             {
-                if(key == v1)
+                var connection = connections[j];
+
+                if (keysFound.TryAdd(connection, lastKey))
                 {
-                    value.Add((v2, 1));
-                    continue;
+                    graph.Add(lastKey, new());
+                    cypher.Add(lastKey, new() { connection });
+
+                    lastKey++;
                 }
 
-                if(key == v2)
-                {
-                    value.Add((v1, 1));
-                    continue;
-                }
-            }       
+                var v1 = keysFound[key];
+                var v2 = keysFound[connection];
+
+                graph[v1].Add((v2, 1));
+                graph[v2].Add((v1, 1));
+            }
         }
 
         return (graph, cypher);
