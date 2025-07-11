@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using PommaLabs.Hippie;
 
 namespace AdventOfCode2023.Dayz25;
 
@@ -106,15 +105,15 @@ internal static class Merger
 
 internal static class Connector
 {
-    internal static UniqueHeap<Vertex<T>, int> GetHeap<T>(this Partition<T> partition)
+    internal static FibonacciHeap<Vertex<T>, int> GetHeap<T>(this Partition<T> partition)
     {
-        var heap = HeapFactory.NewFibonacciHeap<Vertex<T>, int>(Comparer<int>.Create((x, y) => (-x).CompareTo(-y)));
+        FibonacciHeap<Vertex<T>, int> heap = new(Comparer<int>.Create((x, y) => (-x).CompareTo(-y)));
 
         var (graph, left, right) = partition;
 
         foreach(var vertex in right)
         {
-            heap.Add(vertex, 0);
+            heap.Insert(vertex, 0);
         }
 
         var leftVertexId = left[0].Id;
@@ -126,11 +125,11 @@ internal static class Connector
 
             if (isTargetLeft)
             {
-                heap.UpdatePriorityOf(source, weight);
+                heap.DecreaseKey(heap.Nodes[source], weight);
             }
             else if (isSourceLeft)
             {
-                heap.UpdatePriorityOf(target, weight);
+                heap.DecreaseKey(heap.Nodes[target], weight);
             }
         }
 
@@ -326,7 +325,7 @@ internal static class Cutter
         var connections = graph.GetConnections();
 
         Vertex<T> s = A[0];
-        Vertex<T> t = heap.RemoveMin().Value;
+        Vertex<T> t = heap.ExtractMin().Key;
 
         while (V.Count > 1)
         {
@@ -335,15 +334,15 @@ internal static class Cutter
 
             foreach (var (v, p) in connections[t.Id])
             {
-                if (heap.Contains(v) is false) continue;
+                if (heap.Nodes.ContainsKey(v) is false) continue;
 
-                var newPriority = heap.PriorityOf(v) + p;
+                var newPriority = heap.Nodes[v].Priority + p;
 
-                heap.UpdatePriorityOf(v, newPriority);
+                heap.DecreaseKey(heap.Nodes[v], newPriority);
             }
 
             s = t;
-            t = heap.RemoveMin().Value;
+            t = heap.ExtractMin().Key;
         }
 
         return new(partition, s, t);

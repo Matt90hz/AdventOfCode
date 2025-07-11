@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AdventOfCode2023.Dayz25;
-public sealed class FibonacciHeap<TKey, TPriority>(IComparer<TPriority>? comparer = null) 
+public sealed class FibonacciHeap<TKey, TPriority>(IComparer<TPriority>? comparer = null)
     where TPriority : IComparable<TPriority>
     where TKey : notnull
 {
@@ -275,15 +275,17 @@ public sealed class FibonacciHeap<TKey, TPriority>(IComparer<TPriority>? compare
     private void CascadingCut(Node y)
     {
         var z = y.Parent;
-        if (z is not null)
+
+        if (z is null) return;
+
+        if (!y.Mark)
         {
-            if (!y.Mark)
-                y.Mark = true;
-            else
-            {
-                Cut(y, z);
-                CascadingCut(z);
-            }
+            y.Mark = true;
+        }
+        else
+        {
+            Cut(y, z);
+            CascadingCut(z);
         }
     }
 
