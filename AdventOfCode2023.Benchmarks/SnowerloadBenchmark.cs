@@ -3,7 +3,7 @@ using AdventOfCode2023.Dayz25;
 
 namespace AdventOfCode2023.Benchmarks;
 
-[MemoryDiagnoser(false)]
+[MemoryDiagnoser]
 public class SnowerloadBenchmark
 {
     private string _input = string.Empty;
