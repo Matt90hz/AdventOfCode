@@ -1,8 +1,12 @@
-﻿using System;
+﻿using AdventOfCode2023.Day8;
+using System;
+using System.Buffers;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,7 +38,6 @@ public static class SnowerloadOptimized
         }
 
         var vLength = cypher[globalMinimumCut].Count;
-
         var groupSize = (vertexCount - vLength) * vLength;
 
         return groupSize;
@@ -42,17 +45,18 @@ public static class SnowerloadOptimized
 
     private static (int S, int T) GetMinimumCutPhase(this Dictionary<int, Dictionary<int, int>> graph)
     {
-        var s = graph.Keys.First();
-
         var heap = CreateHeap(graph);
 
-        while (heap.Count > 1)
-        {
-            s = heap.ExtractMin().Key;
-            heap.UpdatePriorities(graph[s]);
-        }
+        FibonacciHeap<int, int>.Node s;
 
-        return (s, heap.MinimumKey);
+        do
+        {
+            s = heap.ExtractMin();
+            heap.UpdatePriorities(graph[s.Key]);
+        } 
+        while (heap.Count > 1);
+
+        return (s.Key, heap.MinimumKey);
     }
 
     private static FibonacciHeap<int, int> UpdatePriorities(this FibonacciHeap<int, int> heap, Dictionary<int, int> items)
@@ -73,11 +77,9 @@ public static class SnowerloadOptimized
     {
         FibonacciHeap<int, int> heap = new(Comparer);
 
-        var edgesToHeap = graph[graph.Keys.First()];
-
-        foreach (var vertex in graph.Keys.Skip(1))
+        foreach (var vertex in graph.Keys)
         {
-            heap.Insert(vertex, edgesToHeap.GetValueOrDefault(vertex));
+            heap.Insert(vertex, 0);
         }
 
         return heap;
@@ -131,7 +133,6 @@ public static class SnowerloadOptimized
 
             newEdges[x] = newW;
             edges[lastKey] = newW;
-
         }
 
         graph.Remove(v1);
