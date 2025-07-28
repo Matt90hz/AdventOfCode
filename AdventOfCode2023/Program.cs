@@ -24,12 +24,12 @@ using AdventOfCode2023.Dayz23;
 using AdventOfCode2023.Dayz24;
 using AdventOfCode2023.Dayz25;
 
-//var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input.txt");
-//var result = SnowverloadFastest.GroupSize(input);
+var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz25\\input.txt");
+var result = SnowerloadOptimized.GroupSize(input);
 
-//Console.WriteLine(result);
+Console.WriteLine(result);
 
-//return;
+return;
 
 //var input = File.ReadAllText("D:\\VisualStudio\\AdventOfCode\\AdventOfCode2023\\Dayz24\\input_test1.txt");
 //var result = NeverTellMeTheOdds.DwayneTheRockJohnson(input);

@@ -1,9 +1,9 @@
 ﻿using System.Buffers;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace AdventOfCode2023.Dayz25;
-internal class FibonacciIntegerHeap<TKey>
-    where TKey : notnull
+internal class FibonacciIntegerHeap<TKey> where TKey : notnull
 {
     public sealed class Node
     {
@@ -27,6 +27,7 @@ internal class FibonacciIntegerHeap<TKey>
     }
 
     private Node _minNode;
+    private Node[] _degreeTable = [];
     private readonly Dictionary<TKey, Node> _nodes;
 
     public bool IsEmpty => _minNode is null;
@@ -169,23 +170,23 @@ internal class FibonacciIntegerHeap<TKey>
             w = w._right;
         }
 
-        int maxDeg = (int)Math.Log(Count, 2) + 2;
-        var a = new Node[maxDeg];
+        int maxDeg = BitOperations.Log2((uint)Count) + 2;
+        if (_degreeTable.Length < maxDeg) Array.Resize(ref _degreeTable, maxDeg);
 
         for (var i = 0; i < rootsCount; i++)
         {
             var x = roots[i];
             int d = x._degree;
 
-            while (a[d] is Node y)
+            while (_degreeTable[d] is Node y)
             {
                 if (x.Priority > y.Priority) (x, y) = (y, x);
 
                 Link(y, x);
-                a[d++] = null!;
+                _degreeTable[d++] = null!;
             }
 
-            a[d] = x;
+            _degreeTable[d] = x;
         }
 
         // rebuild root list, find new min
@@ -194,19 +195,20 @@ internal class FibonacciIntegerHeap<TKey>
 
         for(int i = 0; i < maxDeg; i++)
         {
-            var n = a[i];
+            var n = _degreeTable[i];
             if (n is null) continue;
-            a[i] = null!;
-            a[aCount++] = n;
+            _degreeTable[i] = null!;
+            _degreeTable[aCount++] = n;
         }
 
-        _minNode = a[0];
+        _minNode = _degreeTable[0];
         _minNode._left = _minNode;
         _minNode._right = _minNode;
+        _degreeTable[0] = null!;
 
         for (int i = 1; i < aCount; i++)
         {
-            var node = a[i];
+            var node = _degreeTable[i];
 
             node._left = _minNode;
             node._right = _minNode._right;
@@ -214,6 +216,8 @@ internal class FibonacciIntegerHeap<TKey>
             _minNode._right = node;
 
             if (node.Priority < _minNode.Priority) _minNode = node;
+
+            _degreeTable[i] = null!;
         }
     }
 
