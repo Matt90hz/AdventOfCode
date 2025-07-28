@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Buffers;
+using System.Diagnostics;
 
 namespace AdventOfCode2023.Dayz25;
 internal class FibonacciIntegerHeap<TKey>
@@ -10,12 +7,12 @@ internal class FibonacciIntegerHeap<TKey>
 {
     public sealed class Node
     {
-        internal Node? Parent;
-        internal Node? Child;
-        internal Node Left;
-        internal Node Right;
-        internal int Degree;
-        internal bool Mark;
+        internal Node? _parent;
+        internal Node? _child;
+        internal Node _left;
+        internal Node _right;
+        internal int _degree;
+        internal bool _mark;
 
         public TKey Key { get; internal set; }
         public int Priority { get; internal set; }
@@ -24,8 +21,8 @@ internal class FibonacciIntegerHeap<TKey>
         {
             Key = key;
             Priority = priority;
-            Left = this;
-            Right = this;
+            _left = this;
+            _right = this;
         }
     }
 
@@ -57,12 +54,12 @@ internal class FibonacciIntegerHeap<TKey>
             // splice node into root list
             Node node = new(enumerator.Current, 0)
             {
-                Left = _minNode,
-                Right = _minNode.Right
+                _left = _minNode,
+                _right = _minNode._right
             };
 
-            _minNode.Right.Left = node;
-            _minNode.Right = node;
+            _minNode._right._left = node;
+            _minNode._right = node;
             _nodes.Add(node.Key, node);
         }
     }
@@ -78,10 +75,10 @@ internal class FibonacciIntegerHeap<TKey>
         else
         {
             // splice node into root list
-            node.Left = _minNode;
-            node.Right = _minNode.Right;
-            _minNode.Right.Left = node;
-            _minNode.Right = node;
+            node._left = _minNode;
+            node._right = _minNode._right;
+            _minNode._right._left = node;
+            _minNode._right = node;
 
             if (priority < _minNode.Priority) _minNode = node;
         }
@@ -96,19 +93,19 @@ internal class FibonacciIntegerHeap<TKey>
         var z = _minNode;
 
         // bring children of z to root list
-        if (z.Child is Node child)
+        if (z._child is Node child)
         {
             var start = child;
             do
             {
-                var next = child.Right;
-                child.Parent = null;
+                var next = child._right;
+                child._parent = null;
 
                 // splice into root list
-                child.Left = _minNode;
-                child.Right = _minNode.Right;
-                _minNode.Right.Left = child;
-                _minNode.Right = child;
+                child._left = _minNode;
+                child._right = _minNode._right;
+                _minNode._right._left = child;
+                _minNode._right = child;
 
                 child = next;
             }
@@ -116,10 +113,10 @@ internal class FibonacciIntegerHeap<TKey>
         }
 
         // remove z from root list
-        z.Left.Right = z.Right;
-        z.Right.Left = z.Left;
+        z._left._right = z._right;
+        z._right._left = z._left;
 
-        _minNode = z.Right;
+        _minNode = z._right;
         Consolidate();
 
         _nodes.Remove(z.Key);
@@ -133,7 +130,7 @@ internal class FibonacciIntegerHeap<TKey>
         //    throw new ArgumentException("New priority must be ≤ current priority.");
 
         x.Priority = newPriority;
-        var y = x.Parent;
+        var y = x._parent;
 
         if (y is not null && x.Priority < y.Priority)
         {
@@ -153,131 +150,139 @@ internal class FibonacciIntegerHeap<TKey>
 
     private void Consolidate()
     {
-        int maxDeg = (int)Math.Log(Count, 2) + 1;
-        var A = new Node?[maxDeg + 1];
-
-        // snapshot of root list
-        var roots = new List<Node>();
         var w = _minNode;
+        int rootsCount = 0;
+
         do
         {
-            roots.Add(w);
-            w = w.Right;
-        } 
+            w = w._right;
+            rootsCount++;
+        }
         while (w != _minNode);
 
-        for (var i = 0; i < roots.Count; i++)
+        var roots = new Node[rootsCount];
+        w = _minNode;
+
+        for (var i = 0; i < rootsCount; i++)
+        {
+            roots[i] = w;
+            w = w._right;
+        }
+
+        int maxDeg = (int)Math.Log(Count, 2) + 2;
+        var a = new Node[maxDeg];
+
+        for (var i = 0; i < rootsCount; i++)
         {
             var x = roots[i];
-            int d = x.Degree;
-            while (A[d] is Node y)
+            int d = x._degree;
+
+            while (a[d] is Node y)
             {
-                if (x.Priority > y.Priority) Swap(ref x, ref y);
+                if (x.Priority > y.Priority) (x, y) = (y, x);
 
                 Link(y, x);
-                A[d] = null;
-                d++;
+                a[d++] = null!;
             }
 
-            A[d] = x;
+            a[d] = x;
         }
 
         // rebuild root list, find new min
-        _minNode = null!;
-        foreach (var node in A)
+
+        int aCount = 0;
+
+        for(int i = 0; i < maxDeg; i++)
         {
-            if (node is null) continue;
-
-            if (_minNode is null)
-            {
-                node.Left = node;
-                node.Right = node;
-                _minNode = node;
-            }
-            else
-            {
-                node.Left = _minNode;
-                node.Right = _minNode.Right;
-                _minNode.Right.Left = node;
-                _minNode.Right = node;
-
-                if (node.Priority < _minNode.Priority) _minNode = node;
-            }
+            var n = a[i];
+            if (n is null) continue;
+            a[i] = null!;
+            a[aCount++] = n;
         }
-    }
 
-    private static void Swap(ref Node a, ref Node b)
-    {
-        (b, a) = (a, b);
+        _minNode = a[0];
+        _minNode._left = _minNode;
+        _minNode._right = _minNode;
+
+        for (int i = 1; i < aCount; i++)
+        {
+            var node = a[i];
+
+            node._left = _minNode;
+            node._right = _minNode._right;
+            _minNode._right._left = node;
+            _minNode._right = node;
+
+            if (node.Priority < _minNode.Priority) _minNode = node;
+        }
     }
 
     private static void Link(Node child, Node parent)
     {
         // remove child from root list
-        child.Left.Right = child.Right;
-        child.Right.Left = child.Left;
+        child._left._right = child._right;
+        child._right._left = child._left;
 
-        child.Parent = parent;
-        child.Mark = false;
+        child._parent = parent;
+        child._mark = false;
 
-        if (parent.Child is null)
+        if (parent._child is null)
         {
-            parent.Child = child;
-            child.Left = child;
-            child.Right = child;
+            parent._child = child;
+            child._left = child;
+            child._right = child;
         }
         else
         {
-            child.Left = parent.Child;
-            child.Right = parent.Child.Right;
-            parent.Child.Right.Left = child;
-            parent.Child.Right = child;
+            child._left = parent._child;
+            child._right = parent._child._right;
+            parent._child._right._left = child;
+            parent._child._right = child;
         }
 
-        parent.Degree++;
+        parent._degree++;
     }
 
     private void Cut(Node x, Node y)
     {
         // remove x from y's child list
-        if (x.Right == x)
+        if (x._right == x)
         {
-            y.Child = null;
+            y._child = null;
         }
         else
         {
-            x.Left.Right = x.Right;
-            x.Right.Left = x.Left;
-            if (y.Child == x) y.Child = x.Right;
+            x._left._right = x._right;
+            x._right._left = x._left;
+            if (y._child == x) y._child = x._right;
         }
 
-        y.Degree--;
+        y._degree--;
 
         // add x to root list
-        x.Left = _minNode;
-        x.Right = _minNode.Right;
-        _minNode.Right.Left = x;
-        _minNode.Right = x;
+        x._left = _minNode;
+        x._right = _minNode._right;
+        _minNode._right._left = x;
+        _minNode._right = x;
 
-        x.Parent = null;
-        x.Mark = false;
+        x._parent = null;
+        x._mark = false;
     }
 
     private void CascadingCut(Node y)
     {
-        var z = y.Parent;
+        var z = y._parent;
 
         if (z is null) return;
 
-        if (!y.Mark)
-        {
-            y.Mark = true;
-        }
-        else
+        if (y._mark)
         {
             Cut(y, z);
             CascadingCut(z);
         }
+        else
+        {
+            y._mark = true;
+        }
     }
-
 }

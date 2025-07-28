@@ -37,7 +37,7 @@ public static class SnowerloadOptimized
             graph.Merge(s, t, cypher, ++lastKey);
         }
 
-        var vLength = cypher[globalMinimumCut].Count;
+        var vLength = cypher[globalMinimumCut].Length;
         var groupSize = (vertexCount - vLength) * vLength;
 
         return groupSize;
@@ -78,14 +78,14 @@ public static class SnowerloadOptimized
     private static Dictionary<int, Dictionary<int, int>> Merge(
         this Dictionary<int, Dictionary<int, int>> graph,
         int v1, int v2,
-        Dictionary<int, List<string>> cypher,
+        Dictionary<int, string[]> cypher,
         int lastKey)
     {
         // update cypher
         var v1Cypher = cypher[v1];
         var v2Cypher = cypher[v2];
 
-        List<string> newDecryption = [.. v1Cypher, .. v2Cypher];
+        string[] newDecryption = [.. v1Cypher, .. v2Cypher];
 
         cypher.Add(lastKey, newDecryption);
 
@@ -127,10 +127,10 @@ public static class SnowerloadOptimized
         return graph;
     }
 
-    public static (Dictionary<int, Dictionary<int, int>> Graph, Dictionary<int, List<string>> Cypher) GetGraph(string input)
+    public static (Dictionary<int, Dictionary<int, int>> Graph, Dictionary<int, string[]> Cypher) GetGraph(string input)
     {
         Dictionary<int, Dictionary<int, int>> graph = [];
-        Dictionary<int, List<string>> cypher = [];
+        Dictionary<int, string[]> cypher = [];
         Dictionary<string, int> keysFound = [];
 
         var lines = input.Split(Environment.NewLine);
