@@ -28,6 +28,7 @@ internal class FibonacciIntegerHeap<TKey> where TKey : notnull
 
     private Node _minNode;
     private Node[] _degreeTable = [];
+    private Node[] _roots = [];
     private readonly Dictionary<TKey, Node> _nodes;
 
     public bool IsEmpty => _minNode is null;
@@ -161,7 +162,8 @@ internal class FibonacciIntegerHeap<TKey> where TKey : notnull
         }
         while (w != _minNode);
 
-        var roots = new Node[rootsCount];
+        if (_degreeTable.Length < rootsCount) Array.Resize(ref _roots, rootsCount);
+        var roots = _roots;
         w = _minNode;
 
         for (var i = 0; i < rootsCount; i++)
@@ -172,43 +174,44 @@ internal class FibonacciIntegerHeap<TKey> where TKey : notnull
 
         int maxDeg = BitOperations.Log2((uint)Count) + 2;
         if (_degreeTable.Length < maxDeg) Array.Resize(ref _degreeTable, maxDeg);
+        var degreeTable = _degreeTable;
 
         for (var i = 0; i < rootsCount; i++)
         {
             var x = roots[i];
             int d = x._degree;
 
-            while (_degreeTable[d] is Node y)
+            while (degreeTable[d] is Node y)
             {
                 if (x.Priority > y.Priority) (x, y) = (y, x);
 
                 Link(y, x);
-                _degreeTable[d++] = null!;
+                degreeTable[d++] = null!;
             }
 
-            _degreeTable[d] = x;
+            degreeTable[d] = x;
         }
 
         // rebuild root list, find new min
-
+        //RebuildRootListFrom(degreeTable, maxDeg);
         int aCount = 0;
 
-        for(int i = 0; i < maxDeg; i++)
+        for (int i = 0; i < maxDeg; i++)
         {
-            var n = _degreeTable[i];
+            var n = degreeTable[i];
             if (n is null) continue;
-            _degreeTable[i] = null!;
-            _degreeTable[aCount++] = n;
+            degreeTable[i] = null!;
+            degreeTable[aCount++] = n;
         }
 
-        _minNode = _degreeTable[0];
+        _minNode = degreeTable[0];
         _minNode._left = _minNode;
         _minNode._right = _minNode;
-        _degreeTable[0] = null!;
+        degreeTable[0] = null!;
 
         for (int i = 1; i < aCount; i++)
         {
-            var node = _degreeTable[i];
+            var node = degreeTable[i];
 
             node._left = _minNode;
             node._right = _minNode._right;
@@ -217,8 +220,37 @@ internal class FibonacciIntegerHeap<TKey> where TKey : notnull
 
             if (node.Priority < _minNode.Priority) _minNode = node;
 
-            _degreeTable[i] = null!;
+            degreeTable[i] = null!;
         }
+    }
+
+    private void RebuildRootListFrom(Node[] A, int maxDeg)
+    {
+        Node newMin = null;
+        for (int i = 0; i < maxDeg; i++)
+        {
+            Node n = A[i];
+            if (n == null) continue;
+            A[i] = null;            
+
+            if (newMin == null)
+            {
+                newMin = n;
+                n._left = n._right = n;
+            }
+            else
+            {
+                n._right = newMin._right;
+                n._left = newMin;
+                newMin._right._left = n;
+                newMin._right = n;
+
+                if (n.Priority < newMin.Priority)
+                    newMin = n;
+            }
+        }
+
+        _minNode = newMin;
     }
 
     private static void Link(Node child, Node parent)
