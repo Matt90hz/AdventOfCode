@@ -45,9 +45,8 @@ public static class SnowerloadOptimized
 
     private static (int S, int T) GetMinimumCutPhase(this Dictionary<int, Dictionary<int, int>> graph)
     {
-        var heap = CreateHeap(graph);
-
-        FibonacciHeap<int, int>.Node s;
+        FibonacciIntegerHeap<int> heap = new(graph.Keys, graph.Count);
+        FibonacciIntegerHeap<int>.Node s;
 
         do
         {
@@ -59,27 +58,13 @@ public static class SnowerloadOptimized
         return (s.Key, heap.MinimumKey);
     }
 
-    private static FibonacciHeap<int, int> UpdatePriorities(this FibonacciHeap<int, int> heap, Dictionary<int, int> items)
+    private static FibonacciIntegerHeap<int> UpdatePriorities(this FibonacciIntegerHeap<int> heap, Dictionary<int, int> edges)
     {
-        foreach (var (x, w) in items)
+        foreach (var (x, w) in edges)
         {
             if (heap.Nodes.TryGetValue(x, out var node) is false) continue;
 
-            heap.DecreaseKey(node, node.Priority + w);
-        }
-
-        return heap;
-    }
-
-    private static IComparer<int> Comparer { get; } = Comparer<int>.Create(static (x, y) => (-x).CompareTo(-y));
-
-    private static FibonacciHeap<int, int> CreateHeap(Dictionary<int, Dictionary<int, int>> graph)
-    {
-        FibonacciHeap<int, int> heap = new(Comparer);
-
-        foreach (var vertex in graph.Keys)
-        {
-            heap.Insert(vertex, 0);
+            heap.DecreaseKey(node, node.Priority - w);
         }
 
         return heap;
