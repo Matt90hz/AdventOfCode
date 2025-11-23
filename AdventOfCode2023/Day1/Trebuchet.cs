@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Z3;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,15 +10,14 @@ namespace AdventOfCode2023.Day1;
 internal static class Trebuchet
 {
     public static int Calibration(string input)
-    {
-        var lines = input.Split('\n');
-
-        var coordinates = lines.Select(line => CombineDigits(FirstDigit(line), LastDigit(line)));
-
-        var sum = coordinates.Sum();
-
-        return sum;
-    }
+        => input
+        .Split(Environment.NewLine)
+        .Sum(line =>
+        {
+            var firstDigit = line.First(char.IsDigit);
+            var lastDigit = line.Last(char.IsDigit);
+            return int.Parse($"{firstDigit}{lastDigit}");
+        });
 
     public static int Calibration2(string input) 
     {
@@ -34,13 +34,4 @@ internal static class Trebuchet
 
         return Calibration(input);
     }
-
-    static char FirstDigit(string line) => line.First(char.IsDigit);
-
-    static char LastDigit(string line) => line.Last(char.IsDigit);
-
-    static int CombineDigits(char first, char last) => int.Parse($"{first}{last}");
-
 }
-
-

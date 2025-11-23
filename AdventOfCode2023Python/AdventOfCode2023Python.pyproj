@@ -11,6 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>AdventOfCode2023Python</Name>
     <RootNamespace>AdventOfCode2023Python</RootNamespace>
+    <SuppressConfigureTestFrameworkPrompt>true</SuppressConfigureTestFrameworkPrompt>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

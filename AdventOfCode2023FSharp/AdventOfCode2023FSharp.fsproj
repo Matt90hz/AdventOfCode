@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <None Include="CubeGames.fsx" />
-    <Compile Include="01_Trebuchet.fs" />
+    <Compile Include="01_Trebuchet.fsx" />
     <Compile Include="02_CubeCunundrum.fs" />
     <Compile Include="03_GearRatios.fs" />
     <Compile Include="04_Scratchcards.fsx" />

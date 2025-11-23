@@ -50,4 +50,4 @@ let pileUp = // this is not finished
     cards
     |> Array.collect (fun card -> getWonCards card cards)
 
-printf "%i" calculatePoints //26914
+calculatePoints = 26914

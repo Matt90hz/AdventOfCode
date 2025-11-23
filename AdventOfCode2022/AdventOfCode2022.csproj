@@ -29,4 +29,8 @@
     <ProjectReference Include="..\IncaTechnologies.Collection.Extensions\IncaTechnologies.Collection.Extensions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Day15\" />
+  </ItemGroup>
+
 </Project>
