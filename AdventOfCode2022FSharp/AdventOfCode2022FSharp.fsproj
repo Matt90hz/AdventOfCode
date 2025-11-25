@@ -6,7 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="16_ProboscideaVolcanium.fsx" />
     <Compile Include="15_BeconExclusionZone.fsx" />
   </ItemGroup>
+
+  <ItemGroup />
 
 </Project>
