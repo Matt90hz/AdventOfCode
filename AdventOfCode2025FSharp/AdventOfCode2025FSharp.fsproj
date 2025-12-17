@@ -7,6 +7,9 @@
 
   <ItemGroup>
     <Compile Include="01_SecretEntrance.fsx" />
+    <None Include="02_GiftShop.fsx" />
   </ItemGroup>
+
+  <ItemGroup />
 
 </Project>
