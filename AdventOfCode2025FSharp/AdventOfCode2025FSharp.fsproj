@@ -8,8 +8,7 @@
   <ItemGroup>
     <Compile Include="01_SecretEntrance.fsx" />
     <None Include="02_GiftShop.fsx" />
+    <None Include="03_Lobby.fsx" />
   </ItemGroup>
-
-  <ItemGroup />
 
 </Project>
