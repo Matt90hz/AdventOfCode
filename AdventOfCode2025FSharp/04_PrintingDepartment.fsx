@@ -38,7 +38,7 @@ let markMovableRolls x y (dep: char[,]) =
 let accessible =
     department
     |> Array2D.mapi (fun x y _ -> markMovableRolls x y department)
-    |> Array2D.count 'x'
+    |> Array2D.count 'x' //13 1437
 
 let removableRolls =
     let rec remove dep =
