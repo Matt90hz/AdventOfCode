@@ -8,10 +8,10 @@ with open(path) as text:
         for y in range(len(department[x])):
             if department[x][y] != '@': continue
             ac = 0
-            for dx in [-1, 0, 1]:
+            for dx in (-1, 0, 1):
                 ax = x + dx
                 if ax < 0 or ax >= len(department): continue
-                for dy in [-1, 0, 1]:
+                for dy in (-1, 0, 1):
                     ay = y + dy
                     if ay < 0 or ay >= len(department): continue
                     if department[ax][ay] == '@' : ac += 1
@@ -29,10 +29,10 @@ with open(path) as text:
             for y in range(len(department[x])):
                 if department[x][y] != '@': continue
                 ac = 0
-                for dx in [-1, 0, 1]:
+                for dx in (-1, 0, 1):
                     ax = x + dx
                     if ax < 0 or ax >= len(department): continue
-                    for dy in [-1, 0, 1]:
+                    for dy in (-1, 0, 1):
                         ay = y + dy
                         if ay < 0 or ay >= len(department): continue
                         if department[ax][ay] == '@' : ac += 1
