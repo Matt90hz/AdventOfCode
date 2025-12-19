@@ -23,7 +23,7 @@ with open(path) as text:
     department = [[char for char in line.strip()] for line in text.readlines()]
     movable = 0
     keep_going = True
-    while(keep_going):
+    while keep_going:
         keep_going = False
         for x in range(len(department)):
             for y in range(len(department[x])):
