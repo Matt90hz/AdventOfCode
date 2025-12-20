@@ -10,6 +10,7 @@
     <None Include="02_GiftShop.fsx" />
     <None Include="03_Lobby.fsx" />
     <None Include="04_PrintingDepartment.fsx" />
+    <None Include="05_Caffeteria.fsx" />
   </ItemGroup>
 
 </Project>
