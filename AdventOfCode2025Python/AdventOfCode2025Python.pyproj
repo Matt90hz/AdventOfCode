@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>bc53b935-4f79-438c-8829-7382a90cfc48</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>04_PrintingDepartment.py</StartupFile>
+    <StartupFile>05_Caffetteria.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -25,6 +25,7 @@
     <Compile Include="02_GiftShop.py" />
     <Compile Include="03_Lobby.py" />
     <Compile Include="04_PrintingDepartment.py" />
+    <Compile Include="05_Caffetteria.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
