@@ -11,6 +11,7 @@
     <None Include="03_Lobby.fsx" />
     <None Include="04_PrintingDepartment.fsx" />
     <None Include="05_Caffeteria.fsx" />
+    <Compile Include="06_TrashCompactor.fsx" />
   </ItemGroup>
 
 </Project>
