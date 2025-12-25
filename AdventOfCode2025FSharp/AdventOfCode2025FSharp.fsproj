@@ -13,6 +13,7 @@
     <None Include="05_Caffeteria.fsx" />
     <Compile Include="06_TrashCompactor.fsx" />
     <None Include="07_Laboratories.fsx" />
+    <None Include="08_Playground.fsx" />
   </ItemGroup>
 
 </Project>
