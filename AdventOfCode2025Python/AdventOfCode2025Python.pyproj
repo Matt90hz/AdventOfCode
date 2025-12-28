@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>bc53b935-4f79-438c-8829-7382a90cfc48</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>08_Playground.py</StartupFile>
+    <StartupFile>09_MovieTheater.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -29,6 +29,7 @@
     <Compile Include="06_TrashCompactor.py" />
     <Compile Include="07_Laboratories.py" />
     <Compile Include="08_Playground.py" />
+    <Compile Include="09_MovieTheater.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
