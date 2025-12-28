@@ -36,3 +36,21 @@ with open(path) as file:
     circuits.sort(key=len, reverse=True)
 
     print(len(circuits[0]) * len(circuits[1]) * len(circuits[2]))  # 80446
+
+    circuits = [{coo} for coo in coordinates]
+    solution = 0
+
+    for a, b in coo_by_dist:
+        a_cir = next(cir for cir in circuits if a in cir)
+        b_cir = next(cir for cir in circuits if b in cir)
+
+        if a_cir != b_cir:
+            circuits.remove(a_cir)
+            circuits.remove(b_cir)
+            circuits.append(a_cir | b_cir)
+
+        if len(circuits) == 1:
+            solution = a[0] * b[0]
+            break
+
+    print(solution)  # 51294528
