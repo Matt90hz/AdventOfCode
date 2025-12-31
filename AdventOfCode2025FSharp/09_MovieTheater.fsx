@@ -22,61 +22,23 @@ let area (x, y) (x', y') =
 let largestRectangleArea =
     coordinates |> Seq.allPossiblePairs |> Seq.map ((<||) area) |> Seq.max // 50 4749672288
 
-#time
-let mutable i = 0
-
 let greenRectangleArea =
-    let connect (x, y) (x', y') =
-        if x = x' then
-            seq { min y y' .. max y y' } |> Seq.map (fun y -> x, y)
-        else
-            seq { min x x' .. max x x' } |> Seq.map (fun x -> x, y)
 
-    let perimeter coordinates =
+    let corners =
         coordinates
         |> Seq.pairwise
         |> Seq.append [ Seq.head coordinates, Seq.last coordinates ]
-        |> Seq.collect ((<||) connect)
-        |> Set.ofSeq
+        |> Seq.toList
 
-    let tilesPerimeter = perimeter coordinates
-
-    let verticalWalls =
-        coordinates
-        |> Seq.pairwise
-        |> Seq.append [ Seq.head coordinates, Seq.last coordinates ]
-        |> Seq.filter (fun ((x, _), (x', _)) -> x = x')
-        |> Seq.collect (fun (coo, coo') -> (coo, coo') ||> connect |> Seq.filter (fun c -> c <> coo && c <> coo'))
-        |> Set.ofSeq
-
-    let horizzontalWalls =
-        coordinates
-        |> Seq.pairwise
-        |> Seq.append [ Seq.head coordinates, Seq.last coordinates ]
-        |> Seq.filter (fun ((_, y), (_, y')) -> y = y')
-        |> Seq.collect (fun (coo, coo') -> (coo, coo') ||> connect |> Seq.filter (fun c -> c <> coo && c <> coo'))
-        |> Set.ofSeq
-
-    let xMin = (coordinates |> Seq.map (fun (x, _) -> x) |> Seq.min) - 1L
-    let yMin = (coordinates |> Seq.map (fun (_, y) -> y) |> Seq.min) - 1L
-    let xMax = (coordinates |> Seq.map (fun (x, _) -> x) |> Seq.max) + 1L
-    let yMax = (coordinates |> Seq.map (fun (_, y) -> y) |> Seq.max) + 1L
+    let verticalTiles =
+        corners |> Seq.filter (fun ((x, _), (x', _)) -> x = x') |> Seq.toList
 
     let isOutSide (x, y) (x', y') =
-        let ray, walls = 
-            let xToMin = (x - xMin, (xMin, y), verticalWalls)
-            let xToMax = (xMax - x, (xMax, y), verticalWalls)
-            let yToMin = (y - yMin, (x, yMin), horizzontalWalls)
-            let yToMax = (yMax - y, (x, yMax), horizzontalWalls)
+        let x, y = min x x' + 1L, min y y' + 1L
 
-            [xToMin; xToMax; yToMin; yToMax]
-            |> List.minBy (fun (dist, _, _) -> dist)
-            |> fun (_, border, wall) -> connect (x, y) border, wall
-
-        ray
-        |> Set.ofSeq
-        |> Set.intersect walls
-        |> Set.count
+        verticalTiles
+        |> Seq.filter (fun ((wx, wy), (_, wy')) -> x > wx && min wy wy' < y && max wy wy' > y)
+        |> Seq.length
         |> fun len -> len % 2 = 0
 
     let isCrossed (x, y) (x', y') =
@@ -84,34 +46,34 @@ let greenRectangleArea =
         let ymin = min y y' + 1L
         let xmax = max x x' - 1L
         let ymax = max y y' - 1L
-        let lb = xmin, ymin
-        let lr = xmax, ymin
-        let tr = xmax, ymax
-        let tl = xmin, ymax
 
-        perimeter [ lb; lr; tr; tl ]
-        |> Seq.exists (fun tile -> Set.contains tile tilesPerimeter)
+        let crossVertTiles ((wx, wy), (_, wy')) =
+            let wymin = min wy wy'
+            let wymax = max wy wy'
+
+            xmin < wx
+            && xmax > wx
+            && ((wymax >= ymax && wymin <= ymax) || (wymin <= ymin && wymax >= ymin))
+
+        let crossHoriTiles ((wx, wy), (wx', _)) =
+            let wxmin = min wx wx'
+            let wxmax = max wx wx'
+
+            ymin < wy
+            && ymax > wy
+            && ((wxmax >= xmax && wxmin <= xmax) || (wxmin <= xmin && wxmax >= xmin))
+
+        corners
+        |> Seq.exists (fun corner ->
+            match corner with
+            | (x, _),(x', _) when x = x' -> crossVertTiles corner
+            | _ -> crossHoriTiles corner)
 
     let isColored corners =
-        printfn "%s" $"{i} ==> {corners}"
-        i <- i + 1
         (corners ||> isOutSide || corners ||> isCrossed) |> not
 
     coordinates
     |> Seq.allPossiblePairs
     |> Seq.sortByDescending ((<||) area)
     |> Seq.find isColored
-    ||> area // 1479665889
-
-#time
-
-printfn "%A" greenRectangleArea
-
-//let grid =
-//    Array2D.init (int xMax + 1) (int yMax + 1) (fun x y ->
-//        if Set.contains (int64 x, int64 y) verticalWalls then
-//            'X'
-//        else
-//            '.')
-
-//printfn "%A" grid
+    ||> area // 24 1479665889
