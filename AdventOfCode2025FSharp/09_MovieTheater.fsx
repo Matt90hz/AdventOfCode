@@ -33,7 +33,7 @@ let greenRectangleArea =
     let verticalTiles =
         corners |> Seq.filter (fun ((x, _), (x', _)) -> x = x') |> Seq.toList
 
-    let isOutSide (x, y) (x', y') =
+    let isOutside (x, y) (x', y') =
         let x, y = min x x' + 1L, min y y' + 1L
 
         verticalTiles
@@ -70,7 +70,7 @@ let greenRectangleArea =
             | _ -> crossHoriTiles corner)
 
     let isColored corners =
-        (corners ||> isOutSide || corners ||> isCrossed) |> not
+        (corners ||> isOutside || corners ||> isCrossed) |> not
 
     coordinates
     |> Seq.allPossiblePairs
