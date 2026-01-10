@@ -15,6 +15,7 @@
     <None Include="07_Laboratories.fsx" />
     <None Include="08_Playground.fsx" />
     <None Include="09_MovieTheater.fsx" />
+    <None Include="10_Factory.fsx" />
   </ItemGroup>
 
 </Project>
