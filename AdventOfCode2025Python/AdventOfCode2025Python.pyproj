@@ -30,6 +30,7 @@
     <Compile Include="07_Laboratories.py" />
     <Compile Include="08_Playground.py" />
     <Compile Include="09_MovieTheater.py" />
+    <Compile Include="10_Factory.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
