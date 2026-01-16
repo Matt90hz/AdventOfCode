@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>bc53b935-4f79-438c-8829-7382a90cfc48</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>09_MovieTheater.py</StartupFile>
+    <StartupFile>10_Factory.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
