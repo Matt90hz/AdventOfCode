@@ -17,6 +17,7 @@
     <None Include="09_MovieTheater.fsx" />
     <None Include="10_Factory.fsx" />
     <None Include="11_Reactor.fsx" />
+    <None Include="12_ChristmasTreeFarm.fsx" />
   </ItemGroup>
 
 </Project>
