@@ -8,7 +8,7 @@ let inputPath =
 
 let presents, regions =
     let blob =
-        File.ReadAllLines(inputPath)
+        File.ReadAllLines inputPath
         |> Seq.fold
             (fun blob line ->
                 match blob, line with
@@ -17,17 +17,17 @@ let presents, regions =
                 | bag :: blob, line -> bag + line + "\n" :: blob)
             []
 
-    let presents = 
-        blob 
+    let presents =
+        blob
         |> List.tail
-        |> List.map (fun bag -> 
+        |> List.map (fun bag ->
             let split = bag.Split(':')
             let code = int split[0]
-            let gift = 
+
+            let gift =
                 split[1].Split('\n', StringSplitOptions.RemoveEmptyEntries)
                 |> Array.map _.ToCharArray()
-                |> fun jagged -> 
-                    Array2D.init jagged.Length jagged[0].Length (fun x y -> jagged[x][y])
+                |> fun jagged -> Array2D.init jagged.Length jagged[0].Length (fun x y -> jagged[x][y])
 
             code, gift)
 
@@ -36,14 +36,23 @@ let presents, regions =
         |> List.head
         |> _.Split('\n', StringSplitOptions.RemoveEmptyEntries)
         |> Array.map (fun line ->
-            let split = line.Split(':')
-            let size = split[0].Split('x')
+            let split = line.Split ':'
+            let size = split[0].Split 'x'
 
-            let nums =
+            let numbers =
                 split[1].Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.map int
 
-            int size[0], int size[1], nums)
+            int size[0], int size[1], numbers)
 
     presents, regions
 
-printfn "%A" (presents, regions)
+let regionsFitPresents =
+    let fitRegion (width, height, presentsToFit) =
+        let totPresent = presentsToFit |> Array.sum
+        let regionSize = width * height
+
+        regionSize >= totPresent * 9
+
+    regions |> Seq.where fitRegion |> Seq.length
+
+printfn "%A" regionsFitPresents // 505
