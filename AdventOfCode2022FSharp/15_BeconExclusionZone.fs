@@ -1,4 +1,6 @@
-﻿open System.IO
+﻿module Day15
+
+open System.IO
 
 let sensorsAndBeacons path =
     path

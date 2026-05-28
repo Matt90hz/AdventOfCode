@@ -1,15 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="16_ProboscideaVolcanium.fsx" />
-    <Compile Include="15_BeconExclusionZone.fsx" />
-  </ItemGroup>
-
-  <ItemGroup />
+	<ItemGroup>
+		<Compile Include="17_PyroclasticFlow.fs" />
+		<None Include="16_ProboscideaVolcanium.fs" />
+		<Compile Include="15_BeconExclusionZone.fs" />
+		<Compile Include="Program.fs" />
+	</ItemGroup>
 
 </Project>
