@@ -2,7 +2,7 @@ module Day17
 
 open System
 
-type Pos = { X: int; Y: int }
+type Position = { X: int; Y: int }
 
 type Rock =
     | Horiz
@@ -14,14 +14,60 @@ type Rock =
 type Dir =
     | Lx
     | Rx
+    | Up
+    | Dw
 
-let printTower (tower: Pos list) =
+let height = 
+    function 
+    | [] -> 0 
+    | tower -> 
+        tower 
+        |> Seq.map (fun { X = _; Y = y } -> y) 
+        |> Seq.max
+        |> (+) 1
+
+let rockPositions =
+    function
+    | Vert -> [
+        { X = 2; Y = 3 }
+        { X = 2; Y = 2 }
+        { X = 2; Y = 1 }
+        { X = 2; Y = 0 } ]
+    | Horiz -> [
+        { X = 2; Y = 0 }
+        { X = 3; Y = 0 }
+        { X = 4; Y = 0 }
+        { X = 5; Y = 0 } ]
+    | Cube -> [
+        { X = 2; Y = 0 }
+        { X = 2; Y = 1 }
+        { X = 3; Y = 0 }
+        { X = 3; Y = 1 } ]
+    | Cross -> [
+        { X = 2; Y = 1 }
+        { X = 3; Y = 1 }
+        { X = 4; Y = 1 }
+        { X = 3; Y = 0 }
+        { X = 3; Y = 2 } ]
+    | Leg -> [
+        { X = 2; Y = 0 }
+        { X = 3; Y = 0 }
+        { X = 4; Y = 0 }
+        { X = 4; Y = 1 }
+        { X = 4; Y = 2 } ]
+
+let shift (dir: Dir) (steps: int) (postion: Position)  = 
+    match dir with
+    | Lx -> { postion with X = postion.X - steps }
+    | Rx -> { postion with X = postion.X + steps }
+    | Up -> { postion with Y = postion.Y + steps }
+    | Dw -> { postion with Y = postion.Y - steps }
+
+let printTower (tower: Position list) =
     if tower |> List.isEmpty then () else
 
     let h = tower |> Seq.map (fun x -> x.Y) |> Seq.max
-    let w = tower |> Seq.map (fun x -> x.X) |> Seq.max
-
-    let array = Array.init (h + 1) (fun _ -> Array.create 7 '.')
+    let array = Array.init (height tower) (fun _ -> Array.create 7 '.')
 
     tower
     |> Seq.iter (
@@ -34,78 +80,48 @@ let printTower (tower: Pos list) =
 
 let rocksTowerHeight input = //3068 3206
     let rocks = [Horiz; Cross; Leg; Vert; Cube]
-    let moves = input |> Seq.map (function | '<' -> Lx | '>' -> Rx | _ -> Exception "What?" |> raise) |> List.ofSeq
-    let towerHeight = function | [] -> 0 | t -> t |> Seq.map (fun { X = _; Y = y } -> y) |> Seq.max |> (+) 1
+    let moves = input |> Seq.map (fun x -> if x ='<' then Lx else Rx) |> List.ofSeq
     let mutable jet = 0 
     
     let dropRocks (n: int) =
-        let rec dropRocks (dropped: int) (tower: Pos list) = 
-            let dropRock (r: Rock) (tower: Pos list) =
-                let mutable pos =
-                    let top = towerHeight tower
-                    match r with
-                    | Vert -> [
-                        { X = 2; Y = top + 6 }
-                        { X = 2; Y = top + 5 }
-                        { X = 2; Y = top + 4 }
-                        { X = 2; Y = top + 3 } ]
-                    | Horiz -> [
-                        { X = 2; Y = top + 3 }
-                        { X = 3; Y = top + 3 }
-                        { X = 4; Y = top + 3 }
-                        { X = 5; Y = top + 3 } ]
-                    | Cube -> [
-                        { X = 2; Y = top + 3 }
-                        { X = 2; Y = top + 4 }
-                        { X = 3; Y = top + 3 }
-                        { X = 3; Y = top + 4 } ]
-                    | Cross -> [
-                        { X = 2; Y = top + 4 }
-                        { X = 3; Y = top + 4 }
-                        { X = 4; Y = top + 4 }
-                        { X = 3; Y = top + 3 }
-                        { X = 3; Y = top + 5 } ]
-                    | Leg -> [
-                        { X = 2; Y = top + 3 }
-                        { X = 3; Y = top + 3 }
-                        { X = 4; Y = top + 3 }
-                        { X = 4; Y = top + 4 }
-                        { X = 4; Y = top + 5 } ]
-
-                let move (rockPos: Pos list) =
+        let rec dropRocks (dropped: int) (tower: Position list) = 
+            let dropRock (r: Rock) (tower: Position list) =
+                          
+                let move (rockPos: Position list) =
                     let jetDirection = moves[jet % moves.Length]
                     //printfn "%s" "Rock is about to move"
                     //printfn "%A" jetDirection
-                    //printTower (pos @ tower)
+                    //printTower (rockPos @ tower)
 
-                    let isNotAllowed (rockPos: Pos list) =
-                        rockPos |> List.exists ( fun x -> x.X = 7 || x.X = -1 || tower |> List.contains x)
+                    let isStuck (pos: Position) =
+                       pos.X = 7 
+                       || pos.X = -1 
+                       || tower |> List.contains pos
 
                     jet <- jet + 1
 
-                    match jetDirection with
-                    | Rx -> 
-                        let nextRockPos = rockPos |> List.map( fun x -> { x with X = x.X + 1 }) 
-                        if isNotAllowed nextRockPos then rockPos else nextRockPos
-                    | Lx -> 
-                        let nextRockPos = rockPos |> List.map( fun x -> { x with X = x.X - 1 })
-                        if isNotAllowed nextRockPos then rockPos else nextRockPos
+                    let next = rockPos |> List.map (shift jetDirection 1)
 
-                let drop (p: Pos list) =
-                    let nextRockPos = p |> List.map (fun pos -> {pos with Y = pos.Y - 1})
-                    if nextRockPos |> List.exists(fun pos -> pos.Y = -1 || tower |> List.contains pos) then None else Some nextRockPos
+                    if next |> List.exists isStuck then rockPos else next
 
-                Seq.initInfinite (fun i -> i)
-                |> Seq.tryFind (fun dir ->
-                    pos <- pos |> move
-                    //printfn "%s" "Rock has been moved"
-                    //printTower (pos @ tower)
-                    let next = pos |> drop
-                    pos <- next |> Option.defaultValue pos
-                    next.IsNone)
-                |> ignore
+                let drop (rockPositions: Position list) =
+                    let isDropped pos = pos.Y = -1 || tower |> List.contains pos
+                    let next = rockPositions |> List.map (shift Dir.Dw 1)
 
-                pos @ tower
+                    if next |> List.exists isDropped then None else Some next
+
+                let rec fall rockPositions =
+                    let moved = move rockPositions
+                    let dropped = drop moved
+
+                    match dropped with
+                    | Some x -> fall x
+                    | None -> moved
+
+                rockPositions r 
+                |> List.map (shift Dir.Up (height tower + 3))
+                |> fall
+                |> List.append tower
                 
             //printfn "%s" "ROCK LANDED"
             //printTower tower
@@ -117,4 +133,17 @@ let rocksTowerHeight input = //3068 3206
 
         dropRocks 0 []
     
-    dropRocks 2022 |> towerHeight
+    dropRocks 2022 |> height
+
+let rocksTowerInsaneHeight input =
+    let rocks = [
+            [0,0; 1,0; 2,0; 3,0];
+            [1,0; 0,1; 1,1; 1,2; 1,2];
+            [0,0; 1,0; 2,0; 2,1; 2, 2];
+            [0,0; 0,1; 0,2; 0,3];
+            [0,0; 0,1; 1,0; 1,1];
+        ]
+
+    let jets = input |> Seq.map(fun x -> if x = '<' then -1 else +1) |> List.ofSeq
+
+    0
