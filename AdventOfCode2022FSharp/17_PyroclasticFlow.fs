@@ -17,10 +17,10 @@ type Dir =
     | Up
     | Dw
     
-let height (tower: Position list) = 
+let height (tower: Position Set) = 
     match tower with
-    | [] -> 0 
-    | tower -> 
+    | _ when Set.isEmpty tower -> 0 
+    | _ -> 
         tower 
         |> Seq.map (fun { X = _; Y = y } -> y) 
         |> Seq.max
@@ -73,8 +73,8 @@ let next (items: 'a seq) =
         enumerator.MoveNext() |> ignore
         enumerator.Current
 
-let printTower (tower: Position list) =
-    if tower |> List.isEmpty then () else
+let printTower (tower: Position Set) =
+    if tower |> Set.isEmpty then () else
 
     let array = Array.init (height tower) (fun _ -> Array.create 7 '.')
 
@@ -94,13 +94,13 @@ let rocksTowerHeight input = //3068 3206
         |> cycle 
         |> next
 
-    let dropRock (tower: Position list) (Coordinates coordinates: Rock)  =
+    let dropRock (tower: Position Set) (Coordinates coordinates: Rock)  =
 
         let (|Settled|_|) (coordinates: Position list) =         
-            coordinates |> List.exists (fun c -> c.Y = -1 || tower |> List.contains c)
+            coordinates |> List.exists (fun c -> c.Y = -1 || tower |> Set.contains c)
 
         let (|Stuck|_|) (coordinates: Position list) =
-            coordinates|> List.exists (fun c -> c.X = 7 || c.X = -1 || tower |> List.contains c)
+            coordinates|> List.exists (fun c -> c.X = 7 || c.X = -1 || tower |> Set.contains c)
         
         let move (coordinates: Position list) =
             //let dir = jets[jet % jets.Length]
@@ -128,10 +128,10 @@ let rocksTowerHeight input = //3068 3206
         coordinates 
         |> List.map (shift Dir.Up (height tower + 3))
         |> fall
-        |> List.append tower
+        |> List.fold (fun t x -> Set.add x t) tower
 
     [|Horiz; Cross; Leg; Vert; Cube|]
     |> cycle
     |> Seq.take 2022
-    |> Seq.fold dropRock []
+    |> Seq.fold dropRock Set.empty
     |> height
