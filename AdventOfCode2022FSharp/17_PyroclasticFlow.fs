@@ -16,7 +16,7 @@ type Dir =
     | Rx
     | Up
     | Dw
-
+    
 let height (tower: Position list) = 
     match tower with
     | [] -> 0 
@@ -63,6 +63,16 @@ let shift (dir: Dir) (steps: int) (postion: Position)  =
     | Up -> { postion with Y = postion.Y + steps }
     | Dw -> { postion with Y = postion.Y - steps }
 
+let cycle (items: 'a array) =
+    Seq.initInfinite (fun i -> items[i % items.Length])
+
+let next (items: 'a seq) =
+    let enumerator = items.GetEnumerator()
+
+    fun () ->
+        enumerator.MoveNext() |> ignore
+        enumerator.Current
+
 let printTower (tower: Position list) =
     if tower |> List.isEmpty then () else
 
@@ -76,71 +86,52 @@ let printTower (tower: Position list) =
     |> Seq.iter (printfn "%s")
 
 let rocksTowerHeight input = //3068 3206
-    let rocks = [Horiz; Cross; Leg; Vert; Cube]
-    let moves = input |> Seq.map (fun x -> if x ='<' then Lx else Rx) |> List.ofSeq
-    let mutable jet = 0 
-    
-    let dropRocks (n: int) =
-        let rec dropRocks (dropped: int) (tower: Position list) = 
-            let dropRock (Coordinates coordinates: Rock) (tower: Position list) =
 
-                let (|Settled|_|) (coordinates: Position list) =         
-                    coordinates |> List.exists (fun c -> c.Y = -1 || tower |> List.contains c) 
+    let jets = 
+        input 
+        |> Seq.map (fun x -> if x ='<' then Lx else Rx) 
+        |> Seq.toArray 
+        |> cycle 
+        |> next
 
-                let (|Stuck|_|) (coordinates: Position list) =
-                    coordinates|> List.exists (fun c -> c.X = 7 || c.X = -1 || tower |> List.contains c)
-                
-                let move (coordinates: Position list) =
-                    let jetDirection = moves[jet % moves.Length]
-                    //printfn "%s" "Rock is about to move"
-                    //printfn "%A" jetDirection
-                    //printTower (coordinates @ tower)
+    let dropRock (tower: Position list) (Coordinates coordinates: Rock)  =
 
-                    jet <- jet + 1
+        let (|Settled|_|) (coordinates: Position list) =         
+            coordinates |> List.exists (fun c -> c.Y = -1 || tower |> List.contains c)
 
-                    match coordinates |> List.map (shift jetDirection 1) with
-                    | Stuck -> coordinates
-                    | next -> next
+        let (|Stuck|_|) (coordinates: Position list) =
+            coordinates|> List.exists (fun c -> c.X = 7 || c.X = -1 || tower |> List.contains c)
+        
+        let move (coordinates: Position list) =
+            //let dir = jets[jet % jets.Length]
+            //printfn "%s" "Rock is about to move"
+            //printfn "%A" jetDirection
+            //printTower (coordinates @ tower)
 
-                let drop (coordinates: Position list) =
-                    match coordinates |> List.map (shift Dir.Dw 1) with
-                    | Settled -> None
-                    | next -> Some next
+            match coordinates |> List.map (shift (jets()) 1) with
+            | Stuck -> coordinates
+            | next -> next
 
-                let rec fall (coordinates: Position list) =
-                    let moved = move coordinates
-                    let dropped = drop moved
+        let drop (coordinates: Position list) =
+            match coordinates |> List.map (shift Dir.Dw 1) with
+            | Settled -> None
+            | next -> Some next
 
-                    match dropped with
-                    | Some x -> fall x
-                    | None -> moved
-
-                coordinates 
-                |> List.map (shift Dir.Up (height tower + 3))
-                |> fall
-                |> List.append tower
-                
-            //printfn "%s" "ROCK LANDED"
-            //printTower tower
-            //printfn "%s" ""
+        let rec fall (coordinates: Position list) =
+            let moved = move coordinates
+            let dropped = drop moved
 
             match dropped with
-            | _ when dropped = n -> tower
-            | _ -> dropRocks (dropped + 1) (dropRock (rocks[dropped % rocks.Length]) tower)
+            | Some x -> fall x
+            | None -> moved
 
-        dropRocks 0 []
-    
-    dropRocks 2022 |> height
+        coordinates 
+        |> List.map (shift Dir.Up (height tower + 3))
+        |> fall
+        |> List.append tower
 
-let rocksTowerInsaneHeight input =
-    let rocks = [
-            [0,0; 1,0; 2,0; 3,0];
-            [1,0; 0,1; 1,1; 1,2; 1,2];
-            [0,0; 1,0; 2,0; 2,1; 2, 2];
-            [0,0; 0,1; 0,2; 0,3];
-            [0,0; 0,1; 1,0; 1,1];
-        ]
-
-    let jets = input |> Seq.map(fun x -> if x = '<' then -1 else +1) |> List.ofSeq
-
-    0
+    [|Horiz; Cross; Leg; Vert; Cube|]
+    |> cycle
+    |> Seq.take 2022
+    |> Seq.fold dropRock []
+    |> height
